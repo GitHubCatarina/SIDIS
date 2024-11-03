@@ -1,5 +1,6 @@
 package com.example.serviceReader.readerManagement.api;
 
+import com.example.serviceReader.readerManagement.services.EditReaderRequest;
 import org.mapstruct.Mapper;
 import com.example.serviceReader.readerManagement.model.Reader;
 
@@ -30,4 +31,5 @@ public class ReaderProfileViewMapper {
 
         return readerProfileView;
     }
+
 }

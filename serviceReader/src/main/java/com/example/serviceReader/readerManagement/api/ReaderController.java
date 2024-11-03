@@ -31,12 +31,15 @@ import com.example.serviceReader.readerManagement.model.ReaderPhoto;
 import com.example.serviceReader.readerManagement.services.EditReaderRequest;
 import com.example.serviceReader.readerManagement.services.ReaderServiceImpl;
 import com.example.serviceReader.readerManagement.sync.SyncRequest;
-
+import com.example.serviceReader.readerManagement.sync.SyncService;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collections;
 import java.util.Arrays;
+import java.util.Optional;
+import java.util.Base64;
+import java.io.IOException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -52,8 +55,6 @@ public class ReaderController {
 
     @Value("${server.port}")
     private String serverPort;
-    private static final String SYNC_URL_INSTANCE_1 = "http://localhost:8084/webhook/sync";
-    private static final String SYNC_URL_INSTANCE_2 = "http://localhost:8088/webhook/sync";
 
 
     private static final String IF_MATCH = "If-Match";
@@ -63,6 +64,7 @@ public class ReaderController {
     private final ReaderLentsViewMapper readerLentsViewMapper;
     private final LendingServiceClient lendingServiceClient;
     private final RestTemplate restTemplate;
+    private final SyncService syncService;
 
     private boolean hasPermission(List<String> roles, String... allowedRoles) {
         for (String role : allowedRoles) {
@@ -266,17 +268,22 @@ public class ReaderController {
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-
-
-
+        // 1. Executa a criação do Reader na base de dados local
         Reader reader = readerService.createReader(resource, photo);
+
+        // 2. Chama o SyncService para enviar o webhook para a outra instância
+        String photoBase64 = null;
+        try {
+            photoBase64 = (photo != null) ? Base64.getEncoder().encodeToString(photo.getBytes()) : null;
+        } catch (IOException e) {
+            e.printStackTrace(); // Log do erro
+        }
+
+        SyncRequest syncRequest = new SyncRequest(reader.getId(), "create", resource, photoBase64, reader.getVersion());
+        syncService.sendWebhookToOtherInstance(syncRequest);
 
         final var newbarUri = ServletUriComponentsBuilder.fromCurrentRequestUri().pathSegment(reader.getId().toString())
                 .build().toUri();
-
-        SyncRequest syncRequest = new SyncRequest(reader.getId(), "create");
-        sendSyncWebhook(syncRequest);
-
         return ResponseEntity.created(newbarUri).eTag(Long.toString(reader.getVersion()))
                 .body(readerViewMapper.toReaderView(reader));
     }
@@ -298,12 +305,32 @@ public class ReaderController {
         }
 
 
-
+        // 1. Executa a criação do Reader na base de dados local
         final UploadFileResponse up = readerService.doUploadFile(readerId, file);
 
         Long readerIdLong = Long.parseLong(readerId);
-        SyncRequest syncRequest = new SyncRequest(readerIdLong, "update");
-        sendSyncWebhook(syncRequest);
+
+        // 2. Reader atualizado para sincronização
+        Optional<Reader> optionalReader = readerService.getReaderByIdWithQuote(readerIdLong);
+        if (optionalReader.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Retorna 404 se o leitor não for encontrado
+        }
+        Reader reader = optionalReader.get();
+
+        // 3. Converte para ReaderProfileView para criar o SyncRequest
+        String photoBase64 = null;
+        try {
+            photoBase64 = (file != null) ? Base64.getEncoder().encodeToString(file.getBytes()) : null;
+        } catch (IOException e) {
+            e.printStackTrace(); // Log do erro
+        }
+
+        SyncRequest syncRequest = new SyncRequest(reader.getId(), "update", null, photoBase64, reader.getVersion());
+        // 4. Envia o webhook para a outra instância
+        syncService.sendWebhookToOtherInstance(syncRequest);
+
+        final var newbarUri = ServletUriComponentsBuilder.fromCurrentRequestUri().pathSegment(reader.getId().toString())
+                .build().toUri();
 
         return ResponseEntity.created(new URI(up.getFileDownloadUri())).body(up);
 
@@ -312,9 +339,9 @@ public class ReaderController {
     @Operation(summary = "Fully replaces an existing reader. If the specified id does not exist does nothing and returns 400.")
     @PutMapping(path = "{readerId}")
     public ResponseEntity<ReaderView> updateReader(final WebRequest request,
-                                               @PathVariable("readerId") Long id,
-                                               @Valid @RequestBody final EditReaderRequest resource, @RequestHeader("Authorization") String authorization) {
-
+                                                   @PathVariable("readerId") Long id,
+                                                   @Valid @RequestBody final EditReaderRequest resource,
+                                                   @RequestHeader("Authorization") String authorization) {
 
         String token = authorization.replace("Bearer ", ""); // Token from header
 
@@ -325,19 +352,24 @@ public class ReaderController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-
-
         final String ifMatchValue = request.getHeader(IF_MATCH);
         if (ifMatchValue == null || ifMatchValue.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
+
+        // 1. Executa a atualização do Reader na base de dados local
         Reader reader = readerService.updateReader(id, resource, getVersionFromIfMatchHeader(ifMatchValue));
 
-        SyncRequest syncRequest = new SyncRequest(reader.getId(), "update");
-        sendSyncWebhook(syncRequest);
+        // 2. Chama o SyncService para enviar o webhook para a outra instância
+        SyncRequest syncRequest = new SyncRequest(reader.getId(), "update", resource, null, reader.getVersion());
+        syncService.sendWebhookToOtherInstance(syncRequest);
+
+        final var newbarUri = ServletUriComponentsBuilder.fromCurrentRequestUri().pathSegment(reader.getId().toString())
+                .build().toUri();
 
         return ResponseEntity.ok().eTag(Long.toString(reader.getVersion())).body(readerViewMapper.toReaderView(reader));
     }
+
 
     @Operation(summary = "Partially updates an existing reader")
     @PatchMapping(path = "{readerId}")
@@ -363,8 +395,11 @@ public class ReaderController {
         }
         Reader reader = readerService.partialUpdateReader(id, resource, getVersionFromIfMatchHeader(ifMatchValue));
 
-        SyncRequest syncRequest = new SyncRequest(reader.getId(), "update");
-        sendSyncWebhook(syncRequest);
+        // 2. Chama o SyncService para enviar o webhook para a outra instância
+        SyncRequest syncRequest = new SyncRequest(reader.getId(), "update", resource, null, reader.getVersion());
+
+        // Envia o webhook de sincronização para a outra instância
+        syncService.sendWebhookToOtherInstance(syncRequest);
 
         return ResponseEntity.ok().eTag(Long.toString(reader.getVersion())).body(readerViewMapper.toReaderView(reader));
     }
@@ -374,26 +409,6 @@ public class ReaderController {
             return Long.parseLong(ifMatchHeader.substring(1, ifMatchHeader.length() - 1));
         }
         return Long.parseLong(ifMatchHeader);
-    }
-
-
-    private void sendSyncWebhook(SyncRequest syncRequest) {
-        try {
-            String targetSyncUrl = determineTargetSyncUrl(); // Obtenha a URL de sincronização correta
-            HttpEntity<SyncRequest> requestEntity = new HttpEntity<>(syncRequest);
-            restTemplate.exchange(targetSyncUrl, HttpMethod.POST, requestEntity, String.class);
-        } catch (HttpClientErrorException e) {
-            System.err.println("Erro ao enviar webhook de sincronização: " + e.getMessage());
-        }
-    }
-
-    private String determineTargetSyncUrl() {
-        // Determine a URL de sincronização com base na porta do servidor
-        if ("8084".equals(serverPort)) {
-            return SYNC_URL_INSTANCE_2; // Se for a instância 1, envia para a instância 2
-        } else {
-            return SYNC_URL_INSTANCE_1; // Se for a instância 2, envia para a instância 1
-        }
     }
 
     private List<String> getRolesFromToken(String token) {
