@@ -1,0 +1,3387 @@
+{
+	"info": {
+		"_postman_id": "1b9767c6-91c5-4725-b992-ce4e64eef043",
+		"name": "Library API Copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29809506",
+		"_collection_link": "https://sidis6.postman.co/workspace/SIDIS-Workspace~0278ab01-b81e-4cde-8bc8-4d6349c0fa8e/collection/29809506-1b9767c6-91c5-4725-b992-ce4e64eef043?action=share&source=collection_link&creator=29809506"
+	},
+	"item": [
+		{
+			"name": "BookManagement",
+			"item": [
+				{
+					"name": "Book By ISBN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.id).to.exist;",
+									"    pm.expect(responseData.isbn).to.exist;",
+									"    pm.expect(responseData.title).to.exist;",
+									"    pm.expect(responseData.genre).to.exist;",
+									"    pm.expect(responseData.description).to.exist;",
+									"    pm.expect(responseData.bookAuthors).to.exist;",
+									"});",
+									"",
+									"",
+									"pm.test(\"Genre object contains the required field 'name'\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData).to.be.an('object');",
+									"  pm.expect(responseData.genre).to.exist;",
+									"  pm.expect(responseData.genre.name).to.exist;",
+									"});",
+									"",
+									"",
+									"pm.test(\"BookAuthors array should contain 'author' and 'shortBio'\", function () {",
+									"    const responseData = pm.response.json();",
+									"",
+									"    pm.expect(responseData.bookAuthors).to.be.an('array');",
+									"    responseData.bookAuthors.forEach(function(author){",
+									"        pm.expect(author).to.have.property('author');",
+									"        pm.expect(author).to.have.property('shortBio');",
+									"    });",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8082/api/books/9780062316110",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"books",
+								"9780062316110"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Book By Genre, Title and Author",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('array');",
+									"    ",
+									"    responseData.forEach(function(book) {",
+									"        pm.expect(book).to.have.property('id');",
+									"        pm.expect(book).to.have.property('isbn');",
+									"        pm.expect(book).to.have.property('title');",
+									"        pm.expect(book).to.have.property('genre');",
+									"        pm.expect(book).to.have.property('description');",
+									"        pm.expect(book).to.have.property('bookAuthors');",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Genre object contains a non-empty name field\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('array');",
+									"    ",
+									"    responseData.forEach(function(book) {",
+									"        pm.expect(book.genre.name).to.exist.and.to.have.lengthOf.at.least(1, \"Name field should not be empty\");",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Book authors array contains non-empty author and shortBio fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('array');",
+									"    responseData.forEach(function(book) {",
+									"        pm.expect(book.bookAuthors).to.be.an('array');",
+									"        book.bookAuthors.forEach(function(author) {",
+									"            pm.expect(author.author).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Author field should not be empty\");",
+									"            pm.expect(author.shortBio).to.be.a('string').and.to.have.lengthOf.at.least(1, \"ShortBio field should not be empty\");",
+									"        });",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8082/api/books",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"books"
+							],
+							"query": [
+								{
+									"key": "genre",
+									"value": "Self-Improvement",
+									"disabled": true
+								},
+								{
+									"key": "title",
+									"value": "atomic",
+									"disabled": true
+								},
+								{
+									"key": "author",
+									"value": "Dale Carnegie",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Top Genres",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the required fields - id, name, and bookCount\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('array');\r",
+									"    responseData.forEach(function(item) {\r",
+									"        pm.expect(item).to.have.property('id');\r",
+									"        pm.expect(item).to.have.property('name');\r",
+									"        pm.expect(item).to.have.property('bookCount');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Name is a non-empty string\", function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"  \r",
+									"  responseData.forEach(function(item) {\r",
+									"    pm.expect(item.name).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Name should not be empty\");\r",
+									"  });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Validate the response content type is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8082/api/books/top-genres",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"books",
+								"top-genres"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Top Books",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the required fields\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('array');\r",
+									"    responseData.forEach(function(book) {\r",
+									"        pm.expect(book).to.have.property('lentCount');\r",
+									"        pm.expect(book).to.have.property('id');\r",
+									"        pm.expect(book).to.have.property('isbn');\r",
+									"        pm.expect(book).to.have.property('title');\r",
+									"        pm.expect(book).to.have.property('genre');\r",
+									"        pm.expect(book).to.have.property('description');\r",
+									"        pm.expect(book).to.have.property('bookAuthors');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Genre name is a non-empty string\", function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"\r",
+									"  pm.expect(responseData).to.be.an('array');\r",
+									"  responseData.forEach(function(book) {\r",
+									"    pm.expect(book.genre.name).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Genre name should not be empty\");\r",
+									"  });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"BookAuthors array should have non-empty Author and shortBio\", function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"  \r",
+									"  pm.expect(responseData).to.be.an('array');\r",
+									"  \r",
+									"  responseData.forEach(function(book) {\r",
+									"    pm.expect(book.bookAuthors).to.be.an('array');\r",
+									"    \r",
+									"    book.bookAuthors.forEach(function(author) {\r",
+									"      pm.expect(author.author).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Author should not be empty\");\r",
+									"      pm.expect(author.shortBio).to.be.a('string').and.to.have.lengthOf.at.least(1, \"ShortBio should not be empty\");\r",
+									"    });\r",
+									"  });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8082/api/books/top-books",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"books",
+								"top-books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Book Cover by Book Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type header is 'image/png'\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.equal(\"image/png\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8082/api/books/5/cover",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"books",
+								"5",
+								"cover"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set Cover To Book",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 201\", function () {\r",
+									"  pm.expect(pm.response.code).to.equal(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    pm.expect(responseData.fileName).to.exist;\r",
+									"    pm.expect(responseData.fileDownloadUri).to.exist;\r",
+									"    pm.expect(responseData.fileType).to.exist;\r",
+									"    pm.expect(responseData.size).to.exist;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"File type is in a valid format\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    pm.expect(responseData.fileType).to.exist.and.to.be.a('string');\r",
+									"    // Add additional validation for specific file type format if required\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 500ms\", function () {\r",
+									"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "postman-cloud:///1ef2fd82-10bd-4640-95fd-639f3e7c01c5"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8082/api/books/5/cover",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"books",
+								"5",
+								"cover"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Book With Optional Cover",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 201\", function () {",
+									"    pm.expect(pm.response.code).to.equal(201);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Validate the response schema for the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.id).to.exist;",
+									"    pm.expect(responseData.isbn).to.exist;",
+									"    pm.expect(responseData.title).to.exist;",
+									"    pm.expect(responseData.genre).to.exist;",
+									"    pm.expect(responseData.description).to.exist;",
+									"    pm.expect(responseData.bookAuthors).to.exist;",
+									"});",
+									"",
+									"",
+									"pm.test(\"Ensure that the genre name is a non-empty string\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.genre.name).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Genre name should not be empty\");",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "book",
+									"value": "{\n    \"isbn\": \"9798666830864\",\n    \"title\": \"Sample Book\",\n    \"genre\": {\n        \"id\": 3,\n        \"name\": \"Mystery\"\n    },\n    \"description\": \"A sample book description\",\n    \"bookAuthors\": [\n        {\n            \"author\": {\n                \"name\": \"James Clear\",\n                \"shortBio\": \"An author and speaker focused on habits, decision-making, and continuous improvement.\"\n            }\n        },\n        {\n            \"author\": {\n                \"name\": \"Stephen R. Covey\",\n                \"shortBio\": \"An American educator, author, businessman, and keynote speaker.\"\n            }\n        }\n    ]\n}",
+									"contentType": "application/json",
+									"type": "text"
+								},
+								{
+									"key": "cover",
+									"type": "file",
+									"src": "postman-cloud:///1ef227e9-07dc-4540-b53c-be9fc9eea1d3"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8082/api/books",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Complete Book Edit",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response Content-Type header is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Validate the response schema\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.id).to.exist.and.to.be.a('number');",
+									"    pm.expect(responseData.isbn).to.exist.and.to.be.a('string');",
+									"    pm.expect(responseData.title).to.exist.and.to.be.a('string');",
+									"    pm.expect(responseData.genre).to.exist.and.to.be.an('object');",
+									"    pm.expect(responseData.description).to.exist.and.to.be.a('string');",
+									"    pm.expect(responseData.bookAuthors).to.exist.and.to.be.an('array');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "If-Match",
+								"value": "0"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "    {\n        \"isbn\": \"9780735211293\",\n        \"title\": \"Atokmic Habits\",\n        \"genre\": {\n            \"id\": 3,\n            \"name\": \"Mystery\"\n         },\n        \"description\": \"122231\",\n        \"bookAuthors\": [\n            {\n                \"author\": {\n                    \"id\": 2,\n                    \"name\": \"James Clear\",\n                    \"shortBio\": \"An author and speaker focused on habits, decision-making, and continuous improvement.\"\n                }\n            }\n        ]\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/api/books/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"books",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Partial Book Edit",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"ISBN is a non-empty string\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.isbn).to.be.a('string').and.to.have.lengthOf.at.least(1, \"ISBN should not be empty\");",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "If-Match",
+								"value": "0"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "    {\n        \"id\": 2,\n        \"title\": \"joao o cavaleiro\",\n        \"isbn\": \"9781982137274\"\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/api/books/4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"books",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ReaderManagement",
+			"item": [
+				{
+					"name": "Reader By Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData).to.have.property('id');",
+									"    pm.expect(responseData).to.have.property('readerCode');",
+									"    pm.expect(responseData).to.have.property('name');",
+									"    pm.expect(responseData).to.have.property('email');",
+									"    pm.expect(responseData).to.have.property('age');",
+									"    pm.expect(responseData).to.have.property('phoneNumber');",
+									"    pm.expect(responseData).to.have.property('interests');",
+									"    pm.expect(responseData).to.have.property('funnyQuote');",
+									"    pm.expect(responseData).to.have.property('gdbrconsent');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Email is in a valid format\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData.email).to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/, \"Email format is not valid\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Phone number is a non-negative integer\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData.phoneNumber).to.be.a('number');",
+									"    pm.expect(responseData.phoneNumber).to.be.at.least(0, \"Phone number should be non-negative\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8084/api/readers/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"readers",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All Readers Or Filter By Email Or Phone Number",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"",
+									"    pm.expect(responseData).to.be.an('array').that.is.not.empty;",
+									"",
+									"    responseData.forEach(function (reader) {",
+									"        pm.expect(reader).to.have.property('id');",
+									"        pm.expect(reader).to.have.property('readerCode');",
+									"        pm.expect(reader).to.have.property('name');",
+									"        pm.expect(reader).to.have.property('email');",
+									"        pm.expect(reader).to.have.property('age');",
+									"        pm.expect(reader).to.have.property('phoneNumber');",
+									"        pm.expect(reader).to.have.property('interests');",
+									"        pm.expect(reader).to.have.property('gdbrconsent');",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Email is in a valid format\", function () {",
+									"    const responseData = pm.response.json();",
+									"",
+									"    pm.expect(responseData).to.be.an('array');",
+									"    responseData.forEach(function (reader) {",
+									"        pm.expect(reader.email).to.be.a('string').and.to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/, \"Email should be in a valid format\");",
+									"    });",
+									"});",
+									"",
+									"",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "phoneNumber",
+									"value": "99",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "outlook.com",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "Guilherme",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8084/api/readers",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"readers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reader Montlhy Lendings",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the required fields\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.be.an('array').that.is.not.empty;\r",
+									"\r",
+									"    responseData.forEach(reader => {\r",
+									"        pm.expect(reader).to.have.property('id');\r",
+									"        pm.expect(reader).to.have.property('readerCode');\r",
+									"        pm.expect(reader).to.have.property('name');\r",
+									"        pm.expect(reader).to.have.property('email');\r",
+									"        pm.expect(reader).to.have.property('age');\r",
+									"        pm.expect(reader).to.have.property('phoneNumber');\r",
+									"        pm.expect(reader).to.have.property('interests');\r",
+									"        pm.expect(reader).to.have.property('lents');\r",
+									"        pm.expect(reader).to.have.property('gdbrconsent');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Email is in a valid format\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    responseData.forEach(function (reader) {\r",
+									"        pm.expect(reader.email).to.be.a('string').and.to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/);\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "startDate",
+									"value": "2024-05-17",
+									"type": "text"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-05-17",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8084/api/readers/monthly-lending",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"readers",
+								"monthly-lending"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Top Readers Per Genre Of a Certain Period",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the required fields\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.be.an('array');\r",
+									"    responseData.forEach(function (reader) {\r",
+									"        pm.expect(reader).to.have.property('id');\r",
+									"        pm.expect(reader).to.have.property('readerCode');\r",
+									"        pm.expect(reader).to.have.property('name');\r",
+									"        pm.expect(reader).to.have.property('email');\r",
+									"        pm.expect(reader).to.have.property('age');\r",
+									"        pm.expect(reader).to.have.property('phoneNumber');\r",
+									"        pm.expect(reader).to.have.property('interests');\r",
+									"        pm.expect(reader).to.have.property('gdbrconsent');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Email is in a valid format\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    responseData.forEach(function (reader) {\r",
+									"        pm.expect(reader.email).to.be.a('string').and.to.match(/^.+@.+\\..+$/, \"Email should be in a valid format\");\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Phone number is a non-negative integer\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    responseData.forEach(function (reader) {\r",
+									"        pm.expect(reader.phoneNumber).to.be.a('number').and.to.satisfy((num) => num >= 0, \"Phone number must be a non-negative integer\");\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "startDate",
+									"value": "2024-05-15",
+									"type": "text"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-05-19",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8084/api/readers/top-readers/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"readers",
+								"top-readers",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Top Readers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is within an acceptable range\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"",
+									"    pm.expect(responseData).to.be.an('array');",
+									"",
+									"    responseData.forEach(function (item) {",
+									"        pm.expect(item).to.have.property('id');",
+									"        pm.expect(item).to.have.property('readerCode');",
+									"        pm.expect(item).to.have.property('name');",
+									"        pm.expect(item).to.have.property('email');",
+									"        pm.expect(item).to.have.property('age');",
+									"        pm.expect(item).to.have.property('phoneNumber');",
+									"        pm.expect(item).to.have.property('interests');",
+									"        pm.expect(item).to.have.property('gdbrconsent');",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Email is in a valid format\", function () {",
+									"    const responseData = pm.response.json();",
+									"",
+									"    pm.expect(responseData).to.be.an('array');",
+									"    responseData.forEach(function (reader) {",
+									"        pm.expect(reader.email).to.be.a('string').and.to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/);",
+									"    });",
+									"});",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "If-Match",
+								"value": "1"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8084/api/readers/top-readers",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"readers",
+								"top-readers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reader Photo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 405\", function () {\r",
+									"    pm.expect(pm.response.code).to.equal(405);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the required fields - type, title, status, detail, and instance\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    pm.expect(responseData).to.have.property('type');\r",
+									"    pm.expect(responseData).to.have.property('title');\r",
+									"    pm.expect(responseData).to.have.property('status');\r",
+									"    pm.expect(responseData).to.have.property('detail');\r",
+									"    pm.expect(responseData).to.have.property('instance');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Content type is application/problem+json\", function () {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8084/api/readers/21/photo",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"readers",
+								"21",
+								"photo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reader With Optional Photo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "reader",
+									"value": "{\n    \"name\": \"Daniel Ribeiro\",\n    \"email\": \"danielribeiro@gmail.com\",\n    \"dateOfBirth\": \"2000-09-20\",\n    \"phoneNumber\": 987654321,\n    \"gdbrconsent\": true\n}",
+									"contentType": "application/json",
+									"type": "text"
+								},
+								{
+									"key": "photo",
+									"type": "file",
+									"src": "postman-cloud:///1ef2fd82-10bd-4640-95fd-639f3e7c01c5"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8084/api/readers",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"readers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Photo To Reader",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 500\", function () {\r",
+									"    pm.expect(pm.response.code).to.equal(500);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response time is within an acceptable range\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Presence of timestamp, status, error, and path fields in the response schema\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    pm.expect(responseData.timestamp).to.exist;\r",
+									"    pm.expect(responseData.status).to.exist;\r",
+									"    pm.expect(responseData.error).to.exist;\r",
+									"    pm.expect(responseData.path).to.exist;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"contentType": "",
+									"type": "file",
+									"src": "postman-cloud:///1ef2fd82-10bd-4640-95fd-639f3e7c01c5"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8084/api/readers/5/photo",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"readers",
+								"5",
+								"photo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Complete Reader Edit",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "If-Match",
+								"value": "0"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "    {\n        \"name\": \"Francisco Goncalves\",\n        \"email\": \"franciscogoncalves@gmail.com\",\n        \"dateOfBirth\": \"2001-10-14\",\n        \"phoneNumber\": 987654639,\n        \"gdbrconsent\": true\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8084/api/readers/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"readers",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Partial Reader Edit",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "If-Match",
+								"value": "0"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "    {\n        \"name\": \"Antonio Mendes\",\n        \"email\": \"antoniomendes@gmail.com\"\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8084/api/readers/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"readers",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "AuthorManagement",
+			"item": [
+				{
+					"name": "Authors By Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields - id, name, and shortBio\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('array').that.is.not.empty;",
+									"    ",
+									"    responseData.forEach(function(author) {",
+									"        pm.expect(author).to.have.property('id').that.is.a('number');",
+									"        pm.expect(author).to.have.property('name').that.is.a('string');",
+									"        pm.expect(author).to.have.property('shortBio').that.is.a('string');",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content type is application/json\", function () {",
+									"  pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is within an acceptable range\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "James Clear",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8082/api/authors/name",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"authors",
+								"name"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All Authors",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields - id, name, and shortBio\", function () {",
+									"    const responseData = pm.response.json();",
+									"",
+									"    pm.expect(responseData).to.be.an('array');",
+									"    responseData.forEach(function(author) {",
+									"        pm.expect(author).to.have.property('id');",
+									"        pm.expect(author).to.have.property('name');",
+									"        pm.expect(author).to.have.property('shortBio');",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type header is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Id is a non-negative integer\", function () {",
+									"    const responseData = pm.response.json();",
+									"    responseData.forEach(function(author) {",
+									"        pm.expect(author.id).to.be.a('number').and.to.satisfy((val) => val >= 0, \"Id should be a non-negative integer\");",
+									"    });",
+									"});",
+									"",
+									"pm.test(\"Name is a non-empty string\", function () {",
+									"    const responseData = pm.response.json();",
+									"    responseData.forEach(function(author) {",
+									"        pm.expect(author.name).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Name should not be empty\");",
+									"    });",
+									"});",
+									"",
+									"pm.test(\"ShortBio is a non-empty string\", function () {",
+									"    const responseData = pm.response.json();",
+									"    responseData.forEach(function(author) {",
+									"        pm.expect(author.shortBio).to.be.a('string').and.to.have.lengthOf.at.least(1, \"ShortBio should not be empty\");",
+									"    });",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8082/api/authors",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"authors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Top Authors",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Content-Type header is application/json\", function () {\r",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Validate the schema for the response - id, name, shortBio, and lents\", function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"  \r",
+									"  pm.expect(responseData).to.be.an('array');\r",
+									"  responseData.forEach(function(author) {\r",
+									"    pm.expect(author).to.be.an('object');\r",
+									"    pm.expect(author).to.have.property('id');\r",
+									"    pm.expect(author).to.have.property('name');\r",
+									"    pm.expect(author).to.have.property('shortBio');\r",
+									"    pm.expect(author).to.have.property('lents');\r",
+									"  });\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8082/api/authors/top-authors",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"authors",
+								"top-authors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Author Co-Authors",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response has the required fields - id, isbn, title, genre, description, and bookAuthors\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('array');\r",
+									"    \r",
+									"    responseData.forEach(function(book) {\r",
+									"        pm.expect(book).to.have.property('id');\r",
+									"        pm.expect(book).to.have.property('isbn');\r",
+									"        pm.expect(book).to.have.property('title');\r",
+									"        pm.expect(book).to.have.property('genre');\r",
+									"        pm.expect(book).to.have.property('description');\r",
+									"        pm.expect(book).to.have.property('bookAuthors');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Validate the genre object\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('array');\r",
+									"    responseData.forEach(function(book) {\r",
+									"        pm.expect(book.genre).to.exist.and.to.be.an('object');\r",
+									"        pm.expect(book.genre.id).to.exist.and.to.be.a('number');\r",
+									"        pm.expect(book.genre.name).to.exist.and.to.be.a('string');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Validate the bookAuthors array and its nested objects\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    \r",
+									"    pm.expect(responseData).to.be.an('array');\r",
+									"    responseData.forEach(function(book) {\r",
+									"        pm.expect(book).to.have.property('id').that.is.a('number');\r",
+									"        pm.expect(book).to.have.property('isbn').that.is.a('string');\r",
+									"        pm.expect(book).to.have.property('title').that.is.a('string');\r",
+									"        pm.expect(book).to.have.property('genre').that.is.an('object');\r",
+									"        pm.expect(book.genre).to.have.property('id').that.is.a('number');\r",
+									"        pm.expect(book.genre).to.have.property('name').that.is.a('string');\r",
+									"        pm.expect(book).to.have.property('description').that.is.a('string');\r",
+									"        \r",
+									"        pm.expect(book).to.have.property('bookAuthors').that.is.an('array');\r",
+									"        book.bookAuthors.forEach(function(bookAuthor) {\r",
+									"            pm.expect(bookAuthor).to.have.property('id').that.is.a('number');\r",
+									"            pm.expect(bookAuthor).to.have.property('author').that.is.an('object');\r",
+									"            pm.expect(bookAuthor.author).to.have.property('id').that.is.a('number');\r",
+									"            pm.expect(bookAuthor.author).to.have.property('version').that.is.a('number');\r",
+									"            pm.expect(bookAuthor.author).to.have.property('name').that.is.a('string');\r",
+									"            pm.expect(bookAuthor.author).to.have.property('shortBio').that.is.a('string');\r",
+									"            pm.expect(bookAuthor.author).to.have.property('lents').that.is.a('number');\r",
+									"            pm.expect(bookAuthor.author).to.have.property('authorPhoto');\r",
+									"        });\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8082/api/authors/1/co-authors",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"authors",
+								"1",
+								"co-authors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Author Books",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response Content-Type header is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Validate the book object schema\", function () {",
+									"    const responseData = pm.response.json();",
+									"",
+									"    pm.expect(responseData).to.be.an('array');",
+									"    responseData.forEach(function(book) {",
+									"        pm.expect(book).to.be.an('object');",
+									"        pm.expect(book.id).to.exist.and.to.be.a('number');",
+									"        pm.expect(book.isbn).to.exist.and.to.be.a('string');",
+									"        pm.expect(book.title).to.exist.and.to.be.a('string');",
+									"        ",
+									"        pm.expect(book.genre).to.exist.and.to.be.an('object');",
+									"        pm.expect(book.genre.id).to.exist.and.to.be.a('number');",
+									"        pm.expect(book.genre.name).to.exist.and.to.be.a('string');",
+									"        ",
+									"        pm.expect(book.description).to.exist.and.to.be.a('string');",
+									"        ",
+									"        pm.expect(book.bookAuthors).to.exist.and.to.be.an('array');",
+									"        book.bookAuthors.forEach(function(bookAuthor) {",
+									"            pm.expect(bookAuthor).to.be.an('object');",
+									"            pm.expect(bookAuthor.id).to.exist.and.to.be.a('number');",
+									"            ",
+									"            pm.expect(bookAuthor.author).to.exist.and.to.be.an('object');",
+									"            pm.expect(bookAuthor.author.id).to.exist.and.to.be.a('number');",
+									"            pm.expect(bookAuthor.author.version).to.exist.and.to.be.a('number');",
+									"            pm.expect(bookAuthor.author.name).to.exist.and.to.be.a('string');",
+									"            pm.expect(bookAuthor.author.shortBio).to.exist.and.to.be.a('string');",
+									"            pm.expect(bookAuthor.author.lents).to.exist.and.to.be.a('number');",
+									"            pm.expect(bookAuthor.author.authorPhoto).to.be.null;",
+									"        });",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is within an acceptable range\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(300);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8082/api/authors/2/books",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"authors",
+								"2",
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Author By id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields - id, name, and shortBio\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData).to.have.property('id');",
+									"    pm.expect(responseData).to.have.property('name');",
+									"    pm.expect(responseData).to.have.property('shortBio');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Name and shortBio should be non-empty strings\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData).to.be.an('object');",
+									"  pm.expect(responseData.name).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Name should not be empty\");",
+									"  pm.expect(responseData.shortBio).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Short Bio should not be empty\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type header is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8082/api/authors/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"authors",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Author Photo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type header is image/jpeg\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"image/jpeg\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response body is not empty\", function () {",
+									"    pm.expect(pm.response.text()).to.not.be.empty;",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Validate that the response is in the expected image format (JPEG)\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"image/jpeg\");",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8082/api/authors/10/photo",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"authors",
+								"10",
+								"photo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Author With Optional Photo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Response status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData).to.have.property('id');",
+									"    pm.expect(responseData).to.have.property('name');",
+									"    pm.expect(responseData).to.have.property('shortBio');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Name is a non-empty string\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.name).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Name should not be empty\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"ShortBio is a non-empty string\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData).to.be.an('object');",
+									"  pm.expect(responseData.shortBio).to.be.a('string').and.to.have.lengthOf.at.least(1, \"ShortBio should not be empty\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "author",
+									"value": "{\n    \"name\" : \"Author Name 1\",\n    \"shortBio\" : \"Author Short Bio 1\"\n}",
+									"contentType": "application/json",
+									"type": "text"
+								},
+								{
+									"key": "authorPhoto",
+									"type": "file",
+									"src": "postman-cloud:///1ef2386b-3a48-4c30-8561-ca88ca72ac5d"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8082/api/authors",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"authors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Photo To Author",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Response status code is 201\", function () {",
+									"  pm.expect(pm.response.code).to.equal(201);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.have.property('fileName');",
+									"    pm.expect(responseData).to.have.property('fileDownloadUri');",
+									"    pm.expect(responseData).to.have.property('fileType');",
+									"    pm.expect(responseData).to.have.property('size');",
+									"});",
+									"",
+									"",
+									"pm.test(\"FileName is a non-empty string\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData.fileName).to.be.a('string').and.to.have.lengthOf.at.least(1, \"FileName should be a non-empty string\");",
+									"});",
+									"",
+									"pm.test(\"Size is a non-negative integer\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.size).to.be.a('number');",
+									"    pm.expect(responseData.size).to.be.at.least(0);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "postman-cloud:///1ef2386b-95fa-4e20-a1e7-261a532e18e6"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8082/api/authors/10/photo",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"authors",
+								"10",
+								"photo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Complete Author Edit",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Id, name, and shortBio fields exist in the response\", function () {",
+									"    const responseData = pm.response.json();",
+									"",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData).to.have.property('id');",
+									"    pm.expect(responseData).to.have.property('name');",
+									"    pm.expect(responseData).to.have.property('shortBio');",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "If-Match",
+								"value": "0"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\" : \"New Author Name 1\",\r\n    \"shortBio\" : \"New Author Short Bio 1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/api/authors/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"authors",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Partial Author Edit",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields - id, name, and shortBio\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData).to.have.property('id');",
+									"    pm.expect(responseData).to.have.property('name');",
+									"    pm.expect(responseData).to.have.property('shortBio');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Id is a non-negative integer\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData.id).to.be.a('number');",
+									"    pm.expect(responseData.id).to.be.at.least(0);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Name and shortBio should be non-empty strings\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData).to.be.an('object');",
+									"  pm.expect(responseData.name).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Name should not be empty\");",
+									"  pm.expect(responseData.shortBio).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Short Bio should not be empty\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is within an acceptable range\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "If-Match",
+								"value": "0"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"shortBio\" : \"New Author Short Bio 1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/api/authors/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"api",
+								"authors",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "LendingManagement",
+			"item": [
+				{
+					"name": "All Lendings",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('array').that.is.not.empty;",
+									"    ",
+									"    responseData.forEach(function(item) {",
+									"        pm.expect(item).to.include.all.keys(",
+									"            'id', 'lendingCode', 'readerId', 'bookId', 'bookTitle', 'lendDate', ",
+									"            'limitDate', 'returnedDate', 'daysTillReturn', 'daysOverdue', 'fine', ",
+									"            'returned', 'comment'",
+									"        );",
+									"    });",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"pm.test(\"Returned field is a boolean value\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    responseData.forEach(function(item) {",
+									"        pm.expect(item.returned).to.be.a('boolean');",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8083/api/lendings",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"api",
+								"lendings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lendings Average",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required Content-Type header of application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8083/api/lendings/average",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"api",
+								"lendings",
+								"average"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lending By Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData).to.have.property('id');",
+									"    pm.expect(responseData).to.have.property('lendingCode');",
+									"    pm.expect(responseData).to.have.property('readerId');",
+									"    pm.expect(responseData).to.have.property('bookId');",
+									"    pm.expect(responseData).to.have.property('bookTitle');",
+									"    pm.expect(responseData).to.have.property('lendDate');",
+									"    pm.expect(responseData).to.have.property('limitDate');",
+									"    pm.expect(responseData).to.have.property('returnedDate');",
+									"    pm.expect(responseData).to.have.property('daysTillReturn');",
+									"    pm.expect(responseData).to.have.property('daysOverdue');",
+									"    pm.expect(responseData).to.have.property('fine');",
+									"    pm.expect(responseData).to.have.property('returned');",
+									"    pm.expect(responseData).to.have.property('comment');",
+									"});",
+									"",
+									"pm.test(\"Returned date is either null or in a valid date format\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.returnedDate).to.satisfy((date) => {",
+									"        return date === null || !isNaN(Date.parse(date));",
+									"    }, \"Returned date should be null or in a valid date format\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{readerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8083/api/lendings/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"api",
+								"lendings",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Average Lending Per Genre Of Certain Month",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"pm.test(\"Response has a content type of application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"pm.test(\"Response schema is valid JSON\", function () {",
+									"  pm.response.to.be.json;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8083/api/lendings/average-per-genre/2024-05-01",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"api",
+								"lendings",
+								"average-per-genre",
+								"2024-05-01"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Overdue Lendings",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has the required fields\", function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"\r",
+									"  pm.expect(responseData).to.be.an('array');\r",
+									"  responseData.forEach(function(entry) {\r",
+									"    pm.expect(entry).to.have.property('id');\r",
+									"    pm.expect(entry).to.have.property('lendingCode');\r",
+									"    pm.expect(entry).to.have.property('readerId');\r",
+									"    pm.expect(entry).to.have.property('bookId');\r",
+									"    pm.expect(entry).to.have.property('bookTitle');\r",
+									"    pm.expect(entry).to.have.property('lendDate');\r",
+									"    pm.expect(entry).to.have.property('limitDate');\r",
+									"    pm.expect(entry).to.have.property('returnedDate');\r",
+									"    pm.expect(entry).to.have.property('daysTillReturn');\r",
+									"    pm.expect(entry).to.have.property('daysOverdue');\r",
+									"    pm.expect(entry).to.have.property('fine');\r",
+									"    pm.expect(entry).to.have.property('returned');\r",
+									"    pm.expect(entry).to.have.property('comment');\r",
+									"  });\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8083/api/lendings/overdue",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"api",
+								"lendings",
+								"overdue"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Average Lending Duration Per Book",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has the required fields - bookId and averageDuration\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('array');",
+									"    responseData.forEach(function(item) {",
+									"        pm.expect(item).to.have.property('bookId');",
+									"        pm.expect(item).to.have.property('averageDuration');",
+									"    });",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8083/api/lendings/average-per-book",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"api",
+								"lendings",
+								"average-per-book"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lending",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 201\", function () {",
+									"  pm.expect(pm.response.code).to.equal(201);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"pm.test(\"Validate the response schema\", function () {",
+									"    const responseData = pm.response.json();",
+									"",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.id).to.exist.and.to.be.a('number');",
+									"    pm.expect(responseData.lendingCode).to.exist.and.to.be.a('string');",
+									"    pm.expect(responseData.readerId).to.exist.and.to.be.a('number');",
+									"    pm.expect(responseData.bookId).to.exist.and.to.be.a('number');",
+									"    pm.expect(responseData.bookTitle).to.exist.and.to.be.a('string');",
+									"    pm.expect(responseData.lendDate).to.exist.and.to.be.a('string');",
+									"    pm.expect(responseData.limitDate).to.exist.and.to.be.a('string');",
+									"    pm.expect(responseData.returned).to.exist.and.to.be.a('boolean');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"readerId\": 2,\n  \"bookId\": 6\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8083/api/lendings",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"api",
+								"lendings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Return A Book",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 201\", function () {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has the required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.id).to.exist;",
+									"    pm.expect(responseData.lendingCode).to.exist;",
+									"    pm.expect(responseData.readerId).to.exist;",
+									"    pm.expect(responseData.bookId).to.exist;",
+									"    pm.expect(responseData.bookTitle).to.exist;",
+									"    pm.expect(responseData.lendDate).to.exist;",
+									"    pm.expect(responseData.limitDate).to.exist;",
+									"    pm.expect(responseData.returnedDate).to.exist;",
+									"    pm.expect(responseData.daysTillReturn).to.exist;",
+									"    pm.expect(responseData.daysOverdue).to.exist;",
+									"    pm.expect(responseData.fine).to.exist;",
+									"    pm.expect(responseData.returned).to.exist;",
+									"    pm.expect(responseData.comment).to.exist;",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"pm.test(\"ReaderId and bookId are non-negative integers\", function () {",
+									"  const responseData = pm.response.json();",
+									"",
+									"  pm.expect(responseData).to.be.an('object');",
+									"  pm.expect(responseData.readerId).to.be.a('number').and.to.be.at.least(0);",
+									"  pm.expect(responseData.bookId).to.be.a('number').and.to.be.at.least(0);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": 39,\n  \"comment\": \"liked it\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8083/api/lendings/return",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"api",
+								"lendings",
+								"return"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Create user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"John Doe\",\r\n  \"email\": \"johndoe@example.com\",\r\n  \"password\": \"yourPassword123\",\r\n  \"roles\": [\"USER\"] //[\"LIBRARIAN\", \"READER\", \"ADMIN\"]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/admin/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"admin",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Jane Doe\",\r\n  \"email\": \"janedoe@example.com\",\r\n  \"password\": \"newPassword123\",\r\n  \"roles\": [\"USER\"] //[\"LIBRARIAN\", \"READER\", \"ADMIN\"]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/admin/user/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"admin",
+								"user",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/admin/user/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"admin",
+								"user",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/admin/user/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"admin",
+								"user",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"newuser@example.com\",\r\n  \"password\": \"newPassword\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"newuser@example.com\",\r\n  \"fullName\": \"New User\",\r\n  \"password\": \"newPassword\",\r\n  \"rePassword\": \"newPassword\",\r\n  \"authorities\": [\r\n    \"ADMIN\"\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get roles",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJleGFtcGxlLmlvIiwic3ViIjoiMTMsbmV3dXNlckBleGFtcGxlLmNvbSIsImV4cCI6MTczMjM2NTM3MiwiaWF0IjoxNzI5NzczMzcyLCJyb2xlcyI6IkFETUlOIn0.hd9uee2uUhjLSnwNIJZak1Cf6JI_ZOuf7iWegt2N-5C3z5jP3cr4-Bpp9YP8bb6Bs7pDWGL-MS71nhaEqaMMs_hWYPBewkoff2eTsUJFxdmoxiWhMdXgb2L6YyuIAw2pfpUyYD33boWUMR5pjeF7AwkjejqqsUoMo2Uj8_XCKJ64Gbu5quzyAK8QDCRqVlnM6QOQ8nGw1bknLSWHissKana-T002U7mgPPOT1-mBbVoyYMVgpUE7yxhKr5cRAo5ery1nF8tQiirDPnWGd4bJb763khJHfCy8JDpy-9rqIdHeQ4GkWU7r-7KXAFlmgQjKo70UAMDp0Ppm8gjxvJlNprWNQY7bepYggFC8Kf-3ZeeyWj7eyJ2o5wR1sef9mfJSYZp0XhfMtMIJauGdM8Ce-azSmfc0UJaCUhBVjrxq4ayonPaEZ-B95silFSbZ-lv2VHdId-0vfNGtB8flJubEUb1rtZ1_vsn3hTyxJDzO_TmwKGk9ZFeCayYhkTIqEQH9r4aQrU43ovhoworC0CQ7N-HOqJNXayDSiwUqJHdfqVwghnEGoydO-ljqscP39k4OKy6u4oDLZBrflFQVmisj_CS_bSQJ7oYfhYw9knxYFR_9jeS_6hOqE39j0zBAwM1QFYvJqzZeRnVdDbU0GA3Ri1ZZ58hHn2rZB25xGxIw5U0",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/auth/roles",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"auth",
+								"roles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get roles Copy",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJleGFtcGxlLmlvIiwic3ViIjoiMTMsbmV3dXNlckBleGFtcGxlLmNvbSIsImV4cCI6MTczMjM2NTM3MiwiaWF0IjoxNzI5NzczMzcyLCJyb2xlcyI6IkFETUlOIn0.hd9uee2uUhjLSnwNIJZak1Cf6JI_ZOuf7iWegt2N-5C3z5jP3cr4-Bpp9YP8bb6Bs7pDWGL-MS71nhaEqaMMs_hWYPBewkoff2eTsUJFxdmoxiWhMdXgb2L6YyuIAw2pfpUyYD33boWUMR5pjeF7AwkjejqqsUoMo2Uj8_XCKJ64Gbu5quzyAK8QDCRqVlnM6QOQ8nGw1bknLSWHissKana-T002U7mgPPOT1-mBbVoyYMVgpUE7yxhKr5cRAo5ery1nF8tQiirDPnWGd4bJb763khJHfCy8JDpy-9rqIdHeQ4GkWU7r-7KXAFlmgQjKo70UAMDp0Ppm8gjxvJlNprWNQY7bepYggFC8Kf-3ZeeyWj7eyJ2o5wR1sef9mfJSYZp0XhfMtMIJauGdM8Ce-azSmfc0UJaCUhBVjrxq4ayonPaEZ-B95silFSbZ-lv2VHdId-0vfNGtB8flJubEUb1rtZ1_vsn3hTyxJDzO_TmwKGk9ZFeCayYhkTIqEQH9r4aQrU43ovhoworC0CQ7N-HOqJNXayDSiwUqJHdfqVwghnEGoydO-ljqscP39k4OKy6u4oDLZBrflFQVmisj_CS_bSQJ7oYfhYw9knxYFR_9jeS_6hOqE39j0zBAwM1QFYvJqzZeRnVdDbU0GA3Ri1ZZ58hHn2rZB25xGxIw5U0",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/auth/roles",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"auth",
+								"roles"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "bearerToken",
+			"value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJleGFtcGxlLmlvIiwic3ViIjoiMSxhZG1pbkBtYWlsLmNvbSIsImV4cCI6MTcxNzU3Mzk2NiwiaWF0IjoxNzE0OTgxOTY2LCJyb2xlcyI6IkFETUlOIn0.T0ot3Y2bw8FXMQZGOO6OYwucBlFqBFlzAsQJTfphP-HgMdIFGgVCYuf6he14WabFAbmNZbyF8ELJqsgSLSpcRIjIt7_IU64_akV9j8ZQ94SHKMBD79QqRtSDEUdoF5xMYffKlizC7p5dDH9U8kFFGac27FuHdO_Ih49XrxQqqlGdxgq82Ueqnb9iuPTnIVwKWfQEiVWDgIp3HEKNO_uCbrIsOS3cl3rhyJQqhe6laPDZfKy06bqNDa9F5_-lhr1SWYX8DJh1wgtskGmDvn5cm1cNPanHzBwCPFp6C0aN0LUizlo1l8yu0hgTWZRsahkph5v_pBWvkkUpO4C0YoqlAac33Fd42KudZsHdN4wAhAEjF9UG7sJt2_UpmkdwyJUUEnsi1S0R6NW41GkHMx_50Cdi3LSKMD6iXivZNtKFprtgsxQ6p4NYkOV3t33fZFTGw6QmtH8qTp_Z6DzM9ayayYGms6AT2JXjMwCOM63mn5nfeHluupRKr8QNa1dmq_FpPNhCA0a6LK9Gr9B2Dz9l9fSxk2nCXu_r0b80BclSlFfpbBTALNNuGP2QnS3GAX4Tf0kDzbTvyJU58MWPr5eqkNyHPdSKoQxoqFiXaoFekc85gE393DBwPDoFbzj0A2hedWkN_sJk8GtZhSqEFoguypTqRw-SQOhWtieoKWYxkss"
+		}
+	]
+}

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,11 +33,12 @@ import com.example.serviceBook.bookManagement.model.BookAuthor;
 import com.example.serviceBook.bookManagement.services.BookServiceImpl;
 import com.example.serviceBook.exceptions.NotFoundException;
 import com.example.serviceBook.fileStorage.UploadFileResponse;
-import com.example.serviceBook.client.AuthServiceClient;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Tag(name = "Authors", description = "Endpoints for managing Authors")
@@ -42,6 +46,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping(path = "api/authors")
 public class AuthorController {
+    @Autowired
+    private JwtDecoder jwtDecoder;
 
     private static final String IF_MATCH = "If-Match";
     private final AuthorServiceImpl authorService;
@@ -50,7 +56,6 @@ public class AuthorController {
     //private final LendingServiceImpl lendingService;
     private final BookViewMapper bookViewMapper;
     private final AuthorLentsViewMapper authorLentsViewMapper;
-    private final AuthServiceClient authServiceClient;
 
     private boolean hasPermission(List<String> roles, String... allowedRoles) {
         for (String role : allowedRoles) {
@@ -72,7 +77,7 @@ public class AuthorController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Check permissions
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
@@ -91,7 +96,7 @@ public class AuthorController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -110,7 +115,7 @@ public class AuthorController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
@@ -133,7 +138,7 @@ public class AuthorController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
@@ -198,7 +203,7 @@ public class AuthorController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
@@ -230,7 +235,7 @@ public class AuthorController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -257,7 +262,7 @@ public class AuthorController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -280,7 +285,7 @@ public class AuthorController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -303,7 +308,7 @@ public class AuthorController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -331,7 +336,7 @@ public class AuthorController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -353,5 +358,17 @@ public class AuthorController {
             return Long.parseLong(ifMatchHeader.substring(1, ifMatchHeader.length() - 1));
         }
         return Long.parseLong(ifMatchHeader);
+    }
+    private List<String> getRolesFromToken(String token) {
+        Jwt jwt = jwtDecoder.decode(token);
+
+        // Obter o claim que contém as roles como uma string
+        String rolesClaim = jwt.getClaimAsString("roles");
+
+        if (rolesClaim == null || rolesClaim.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.asList(rolesClaim.split(","));
     }
 }

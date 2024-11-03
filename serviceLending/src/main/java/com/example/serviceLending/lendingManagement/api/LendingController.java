@@ -6,9 +6,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,29 +17,31 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import com.example.serviceLending.client.AuthServiceClient;
 import com.example.serviceLending.lendingManagement.model.Lending;
-import com.example.serviceLending.lendingManagement.services.CreateLendingRequest;
 import com.example.serviceLending.lendingManagement.services.EditLendingRequest;
 import com.example.serviceLending.lendingManagement.services.LendingServiceImpl;
 import com.example.serviceLending.exceptions.NotFoundException;
 import com.example.serviceLending.lendingManagement.sync.SyncRequest;
 
 
-import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Tag(name = "Lendings", description = "Endpoints for managing Lendings")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "api/lendings")
 public class LendingController {
+    @Autowired
+    private JwtDecoder jwtDecoder;
 
     private final RestTemplate restTemplate;
     @Value("${server.port}")
@@ -51,7 +53,6 @@ public class LendingController {
     private static final String IF_MATCH = "If-Match";
     private final LendingServiceImpl lendingService;
     private final LendingViewMapper lendingViewMapper;
-    private final AuthServiceClient authServiceClient;
 
     private boolean hasPermission(List<String> roles, String... allowedRoles) {
         for (String role : allowedRoles) {
@@ -73,7 +74,7 @@ public class LendingController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Check permissions
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
@@ -90,7 +91,7 @@ public class LendingController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Check permissions
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
@@ -108,7 +109,7 @@ public class LendingController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Check permissions
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
@@ -124,7 +125,7 @@ public class LendingController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Check permissions
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
@@ -154,7 +155,7 @@ public class LendingController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Check permissions
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
@@ -197,7 +198,7 @@ public class LendingController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Check permissions
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
@@ -259,6 +260,19 @@ public class LendingController {
             return SYNC_URL_INSTANCE_1; // Se for a instância 2, envia para a instância 1
         }
     }
+    private List<String> getRolesFromToken(String token) {
+        Jwt jwt = jwtDecoder.decode(token);
+
+        // Obter o claim que contém as roles como uma string
+        String rolesClaim = jwt.getClaimAsString("roles");
+
+        if (rolesClaim == null || rolesClaim.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.asList(rolesClaim.split(","));
+    }
+
 }
 
 

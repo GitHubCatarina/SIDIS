@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,10 +33,11 @@ import com.example.serviceBook.bookManagement.model.Book;
 import com.example.serviceBook.bookManagement.services.CreateBookRequest;
 import com.example.serviceBook.bookManagement.services.EditBookRequest;
 import com.example.serviceBook.fileStorage.UploadFileResponse;
-import com.example.serviceBook.client.AuthServiceClient;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Tag(name = "Books", description = "Endpoints for managing Books")
@@ -41,7 +45,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping(path = "api/books")
 public class BookController {
-
+    @Autowired
+    private JwtDecoder jwtDecoder;
     private static final String IF_MATCH = "If-Match";
     private final BookServiceImpl bookService;
     //private final LendingServiceImpl lendingService;
@@ -49,7 +54,6 @@ public class BookController {
     private final GenreViewMapper genreViewMapper;
     //private final LentBookViewMapper lentBookViewMapper;
     private final BookRepository bookRepository;
-    private final AuthServiceClient authServiceClient;
 
 
     private boolean hasPermission(List<String> roles, String... allowedRoles) {
@@ -68,7 +72,7 @@ public class BookController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -92,7 +96,7 @@ public class BookController {
 
         String token = authorization.replace("Bearer ", ""); // Token from header
 
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             throw new RuntimeException("Unauthorized access");
         }
@@ -121,7 +125,7 @@ public class BookController {
     public Iterable<GenreView> getTopGenres(@RequestHeader("Authorization") String authorization) {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             throw new RuntimeException("Unauthorized access");
         }
@@ -144,7 +148,7 @@ public class BookController {
     public ResponseEntity<Resource> getBookCover(@PathVariable("bookId") final String bookId, final HttpServletRequest request, @RequestHeader("Authorization") String authorization) {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             throw new RuntimeException("Unauthorized access");
         }
@@ -166,7 +170,7 @@ public class BookController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Check permissions
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -184,7 +188,7 @@ public class BookController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Check permissions
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -204,7 +208,7 @@ public class BookController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Check permissions
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -225,7 +229,7 @@ public class BookController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Check permissions
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -244,5 +248,18 @@ public class BookController {
             return Long.parseLong(ifMatchHeader.substring(1, ifMatchHeader.length() - 1));
         }
         return Long.parseLong(ifMatchHeader);
+    }
+
+    private List<String> getRolesFromToken(String token) {
+        Jwt jwt = jwtDecoder.decode(token);
+
+        // Obter o claim que contém as roles como uma string
+        String rolesClaim = jwt.getClaimAsString("roles");
+
+        if (rolesClaim == null || rolesClaim.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.asList(rolesClaim.split(","));
     }
 }

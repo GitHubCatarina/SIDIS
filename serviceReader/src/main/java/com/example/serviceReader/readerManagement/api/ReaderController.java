@@ -23,7 +23,6 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import com.example.serviceReader.client.AuthServiceClient;
 import com.example.serviceReader.client.LendingServiceClient;
 import com.example.serviceReader.exceptions.NotFoundException;
 import com.example.serviceReader.fileStorage.UploadFileResponse;
@@ -32,6 +31,12 @@ import com.example.serviceReader.readerManagement.model.ReaderPhoto;
 import com.example.serviceReader.readerManagement.services.EditReaderRequest;
 import com.example.serviceReader.readerManagement.services.ReaderServiceImpl;
 import com.example.serviceReader.readerManagement.sync.SyncRequest;
+
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Collections;
+import java.util.Arrays;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,6 +47,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping(path = "api/readers")
 public class ReaderController {
+    @Autowired
+    private JwtDecoder jwtDecoder;
 
     @Value("${server.port}")
     private String serverPort;
@@ -54,7 +61,6 @@ public class ReaderController {
     private final ReaderViewMapper readerViewMapper;
     private final ReaderProfileViewMapper readerProfileViewMapper ;
     private final ReaderLentsViewMapper readerLentsViewMapper;
-    private final AuthServiceClient authServiceClient;
     private final LendingServiceClient lendingServiceClient;
     private final RestTemplate restTemplate;
 
@@ -77,7 +83,7 @@ public class ReaderController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -104,7 +110,7 @@ public class ReaderController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
@@ -139,7 +145,7 @@ public class ReaderController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -161,7 +167,7 @@ public class ReaderController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -182,7 +188,7 @@ public class ReaderController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -203,7 +209,7 @@ public class ReaderController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -227,7 +233,7 @@ public class ReaderController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -255,7 +261,7 @@ public class ReaderController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -285,7 +291,7 @@ public class ReaderController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -313,7 +319,7 @@ public class ReaderController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -343,7 +349,7 @@ public class ReaderController {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Roles from AuthService
-        List<String> roles = authServiceClient.getUserRoles(token);
+        List<String> roles = getRolesFromToken(token);
 
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -389,4 +395,19 @@ public class ReaderController {
             return SYNC_URL_INSTANCE_1; // Se for a instância 2, envia para a instância 1
         }
     }
+
+    private List<String> getRolesFromToken(String token) {
+        Jwt jwt = jwtDecoder.decode(token);
+
+        // Obter o claim que contém as roles como uma string
+        String rolesClaim = jwt.getClaimAsString("roles");
+
+        if (rolesClaim == null || rolesClaim.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.asList(rolesClaim.split(","));
+    }
+
+
 }
