@@ -20,6 +20,7 @@
         </processorPath>
         <module name="serviceLending" />
         <module name="serviceReader" />
+        <module name="serviceBook" />
         <module name="serviceAuth" />
       </profile>
     </annotationProcessing>
