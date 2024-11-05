@@ -1,0 +1,19 @@
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+title Vista de processo nível 1
+
+participant ":HTTP Client" as Client
+participant ":LMS" as System
+
+
+' Consulta de leitor
+Client -> System: GET /readers/{id}
+alt success
+    System --> Client: 3.1: 200 OK (Dados do leitor)
+else error
+    System --> Client: 3.2: 404 Not Found (Leitor não encontrado)
+end
+
+
+@enduml
