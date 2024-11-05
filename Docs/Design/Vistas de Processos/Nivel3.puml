@@ -1,0 +1,151 @@
+@startuml
+ 'https://plantuml.com/class-diagram
+
+hide circle
+skinparam classAttributeIconSize 0
+title Vista de processos nível 3
+
+participant " " as Anonymous
+participant ":User and Reader Service" as URS
+participant ":Book Service" as BS
+participant ":Lending Service" as LS
+participant ":User Database" as UDB
+participant ":Book Database" as BDB
+participant ":Lending Database" as LDB
+
+Anonymous o-> URS: POST/readers(data)
+URS --> UDB: save
+URS -->o Anonymous: 201
+
+Anonymous o-> URS: PUT/readers(data)
+URS --> UDB: save
+URS -->o Anonymous: 200
+
+Anonymous o-> URS: GET/readers/{id}
+URS --> UDB: get
+URS <-- UDB: readers details
+URS -->o Anonymous: 200 and readers details
+
+Anonymous o-> URS: GET/readers/name/{name}
+URS --> UDB: get
+URS <-- UDB: readers list by name
+URS -->o Anonymous: 200 and readers list by name
+
+Anonymous o-> URS: GET/top-readers
+URS --> UDB: get
+URS <-- UDB: top readers list
+URS -->o Anonymous: 200 and top readers list
+
+Anonymous o-> URS: GET /{readerId}/suggestions
+URS --> UDB: get
+URS <-- UDB: sugestions list
+URS -->o Anonymous: 200 and suggestions list
+
+
+Anonymous o-> BS: POST/authors(data)
+BS --> BDB: save
+BS -->o Anonymous: 201
+
+Anonymous o-> BS: PUT/authors(data)
+BS --> BDB: save
+BS -->o  Anonymous: 200
+
+Anonymous o-> BS: GET/authors/{id}
+BS --> BDB: get
+BS <-- BDB: author data by id
+BS -->o  Anonymous: 200 and shows author data by id
+
+Anonymous o-> BS: GET/authors/name/{name}
+BS --> BDB: get
+BS <-- BDB: author data by name
+BS -->o  Anonymous: 200 and shows author data by name
+
+Anonymous o-> BS: POST/books(data)
+BS --> BDB: save
+BS -->o  Anonymous: 201
+
+Anonymous o-> BS: PUT/books(data)
+BS --> BDB: save
+BS -->o  Anonymous: 200
+
+Anonymous o-> BS: GET/Books/{isbn}
+BS --> BDB: get
+BS <-- BDB: book details
+BS -->o  Anonymous: 200 and book details
+
+Anonymous o-> BS: GET/books/genre/{genre}
+BS --> BDB: get
+BS <-- BDB: book list by genre
+BS -->o Anonymous: 200 and books list by genre
+
+Anonymous o-> BS: POST /api/authors
+BS --> BDB: save
+BS -->o  Anonymous: 201
+
+Anonymous o-> BS: GET api/authors/{authorid}/books
+BS --> BDB: get
+BS <-- BDB: book list
+BS -->o Anonymous: 200 and book list
+
+Anonymous o-> BS: GET /{authorId}/co-authors
+BS --> BDB: get
+BS <-- BDB: co-authors list
+BS -->o  Anonymous: 200 and co-authors list
+
+Anonymous o-> BS: GET /authors/top-5
+BS --> BDB: get
+BS <-- BDB: top-5 authors list
+BS -->o  Anonymous: 200 and top-5 authors list
+
+Anonymous o-> BS: PUT /books (data)
+BS --> BDB: save
+BS -->o  Anonymous: 200
+
+Anonymous o-> BS: GET /books?title=(title)
+BS --> BDB: get
+BS <-- BDB: books list by title
+BS -->o  Anonymous: 200 and books list by title
+
+Anonymous o-> BS: GET api/books/top-books
+BS --> BDB: get
+BS <-- BDB: top-5 books list
+BS -->o  Anonymous: 200 and top-5 books list
+
+Anonymous o-> BS: GET /books/top-genres
+BS --> BDB: get
+BS <-- BDB: top genres list
+BS -->o  Anonymous: 200 and top genres list
+
+
+
+
+
+Anonymous o-> LS: POST /lend(data)
+LS --> LDB: save
+LS -->o Anonymous: 201 and return date
+
+Anonymous o-> LS: POST /return(data)
+LS --> LDB: save
+LS -->o Anonymous: 201
+
+Anonymous o-> LS: GET /lend/{lendingId}
+LS --> LDB: get
+LS <-- LDB: lending information
+LS -->o Anonymous: 200 and lending information
+
+Anonymous o-> LS: GET /api/lendings/average-per-genre/{date}
+LS --> LDB: get
+LS <-- LDB: average lendings per genre by date list
+LS -->o Anonymous: 200 and average lendings per genre by date list
+
+Anonymous o-> LS: GET /api/lendings/average
+LS --> LDB: get
+LS <-- LDB: average lending duration
+LS -->o Anonymous: 200 and average lending duration
+
+Anonymous o-> LS: GET /api/lendings/overdue
+LS --> LDB: get
+LS <-- LDB: overdue lendings list by tardiness
+LS -->o Anonymous: 200 and overdue lendings list by tardiness
+
+@enduml

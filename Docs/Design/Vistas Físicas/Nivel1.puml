@@ -1,0 +1,13 @@
+@startuml
+ 'https://plantuml.com/class-diagram
+
+title Vista fisica nível 1
+
+ hide circle
+ skinparam classAttributeIconSize 0
+
+node {
+    component LMS
+}
+
+@enduml

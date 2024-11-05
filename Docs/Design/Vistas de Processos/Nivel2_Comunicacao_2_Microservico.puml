@@ -1,0 +1,42 @@
+@startuml
+' Definindo os participantes
+participant "HTTP Client" as client
+participant "reader[0] : Reader" as reader0
+participant "reader[1] : Reader" as reader1
+participant "auth[0] : Auth" as auth0
+participant "auth[1] : Auth" as auth1
+
+' O cliente faz uma requisição para criar um novo leitor
+client -> reader0: POST /readers {readerData, photo}
+activate reader0
+
+' O Reader Service faz uma chamada ao Auth Service (primeira instância) para verificar permissões
+reader0 -> auth0: GET /auth/roles {token}
+activate auth0
+auth0 --> reader0: 200 OK {roles}
+deactivate auth0
+
+' Se a primeira instância falhar, tenta a segunda
+alt auth[0] falha
+  reader0 -> auth1: GET /auth/roles {token}
+  activate auth1
+  auth1 --> reader0: 200 OK {roles}
+  deactivate auth1
+end
+
+' Verifica se o utilizador tem permissões
+  reader0 -> reader0: save(readerData, photo)
+  reader0 -[#gray,dashed]-> client: 201 Created
+
+  ' Replicando dados para a outra instância (espelhamento)
+  reader0 -> reader1: POST /readers {readerData, photo}
+  activate reader1
+  reader1 -> reader1: save(readerData, photo)
+  deactivate reader1
+
+  ' Responder ao cliente com sucesso final após a replicação
+  reader1 --> client: 201 Created
+
+
+deactivate reader0
+@enduml
