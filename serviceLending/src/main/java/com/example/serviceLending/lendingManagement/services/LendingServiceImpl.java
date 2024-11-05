@@ -67,9 +67,10 @@ public class LendingServiceImpl implements LendingService {
             totalDuration += duration;
         }
 
+        // Calcula a média diretamente como double sem formatação adicional
         double averageDuration = lendingCount > 0 ? (double) totalDuration / lendingCount : 0;
 
-        return Double.parseDouble(String.format("%.1f", averageDuration));
+        return averageDuration;
     }
 /*
     public double AveragePerGenreInMonth(LocalDate date, int numberOfGenres){

@@ -66,6 +66,21 @@ public class AuthorController {
         return false;
     }
 
+    @Operation(summary = "Gets the Top 5 Authors by Book Count")
+    @GetMapping("/top-authors")
+    public ResponseEntity<List<AuthorView>> getTopAuthors(@RequestHeader("Authorization") String authorization) {
+        String token = authorization.replace("Bearer ", ""); // Token from header
+
+        // Roles from AuthService
+        List<String> roles = getRolesFromToken(token);
+        if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<AuthorView> topAuthors = authorService.getTopAuthors();
+        return ResponseEntity.ok(topAuthors);
+    }
+
     @Operation(summary = "Gets all Authors")
     @GetMapping
     public List<AuthorView> getAuthors(

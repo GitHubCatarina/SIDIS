@@ -1,0 +1,27 @@
+@startuml
+' Definindo os participantes
+participant "HTTP Client" as client
+participant "auth[0] : Auth" as auth0
+participant "auth[1] : Auth" as auth1
+
+' O cliente faz uma requisição para registrar um novo usuário
+client o-> auth0: POST /auth/register {userData}
+activate auth0
+
+' Auth0 salva os dados do usuário
+auth0 -> auth0: save(userData)
+
+' Responder ao cliente que o registro foi recebido, mas ainda não replicado
+auth0 -[#gray,dashed]->o client: 201 Created (in progress)
+
+' Replicando dados para a outra instância (espelhamento)
+auth0 -> auth1: POST /auth/register {userData}
+activate auth1
+auth1 -> auth1: save(userData)
+deactivate auth1
+
+' Responder ao cliente com sucesso final após a replicação
+auth0 -->o client: 201 Created
+deactivate auth0
+
+@enduml

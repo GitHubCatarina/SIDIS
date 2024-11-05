@@ -1,0 +1,41 @@
+@startuml
+' Definindo os participantes
+participant "HTTP Client" as client
+participant "lending[0] : Lending" as lending0
+participant "lending[1] : Lending" as lending1
+participant "book : Book" as book
+participant "reader : Reader" as reader
+
+' O cliente faz uma requisição para criar um novo empréstimo
+client -> lending0: POST /lendings {lendingData}
+activate lending0
+
+' Lending faz uma requisição para verificar disponibilidade do livro
+lending0 -> book: GET /books/{bookId} (Verificar disponibilidade do livro)
+activate book
+book --> lending0: 200 OK (Livro disponível)
+deactivate book
+
+' Lending faz uma requisição para verificar informações do leitor
+lending0 -> reader: GET /readers/{readerId} (Verificar status do leitor)
+activate reader
+reader --> lending0: 200 OK (Leitor apto)
+deactivate reader
+
+' Lending salva os dados do empréstimo
+lending0 -> lending0: save(lendingData)
+
+' Responder ao cliente que o empréstimo foi registrado, mas ainda não replicado
+lending0 -[#gray,dashed]-> client: 201 Created (em progresso)
+
+' Replicando dados para a outra instância (espelhamento)
+lending0 -> lending1: POST /lendings {lendingData}
+activate lending1
+lending1 -> lending1: save(lendingData)
+deactivate lending1
+
+' Responder ao cliente com sucesso final após a replicação
+lending0 --> client: 201 Created
+
+deactivate lending0
+@enduml
