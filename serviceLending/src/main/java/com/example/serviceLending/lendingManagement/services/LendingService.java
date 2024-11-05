@@ -25,7 +25,7 @@ public interface LendingService {
     Iterable<LendingAvgPerBookView> getAverageLendingDurationPerBook();
     //Iterable<LendingAvgPerGenrePerMonthView> getAverageLendingDurationPerGenrePerMonth(LocalDate startDate, LocalDate endDate);
     //Lending createLending(CreateLendingRequest resource);
-    Lending returnBook(EditLendingRequest resource);
+    Lending returnBook(EditLendingRequest resource, Long version);
 
     List<LentBookView> getTopBooks();
     List<LendingReaderView> getTopReaders();

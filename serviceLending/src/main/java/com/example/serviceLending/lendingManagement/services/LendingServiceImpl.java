@@ -94,11 +94,12 @@ public class LendingServiceImpl implements LendingService {
         return lendingAvgPerBookViewMapper.toLendingAvgPerBookViewList(results);
     }
 
-/*
+    /*
     public Iterable<LendingAvgPerGenrePerMonthView> getAverageLendingDurationPerGenrePerMonth(LocalDate startDate, LocalDate endDate) {
         List<Object[]> results = lendingRepository.findAverageLendingDurationPerGenrePerMonth(startDate, endDate);
         return lendingAvgPerGenrePerMonthViewMapper.toLendingAvgPerGenrePerMonthViewList(results);
     }
+
 
     public Lending createLending(final CreateLendingRequest resource) {
         Optional<Book> book = bookRepository.findById(resource.getBookId());
@@ -143,10 +144,11 @@ public class LendingServiceImpl implements LendingService {
 
  */
 
-    public Lending returnBook(final EditLendingRequest resource) {
+    public Lending returnBook(final EditLendingRequest resource, Long version) {
         Optional<Lending> lending = Optional.empty();
         Lending returnedLending;
 
+        // Procurar pelo código do empréstimo ou pelo ID
         if (resource.getLendingCode() != null) {
             lending = lendingRepository.findByLendingCode(resource.getLendingCode());
         } else if (resource.getId() != null) {
@@ -159,10 +161,17 @@ public class LendingServiceImpl implements LendingService {
 
         returnedLending = lending.get();
 
+        // Verificação da versão para evitar conflitos de concorrência
+        if (version != null && !Long.valueOf(returnedLending.getVersion()).equals(version)) {
+            throw new RuntimeException("[ERROR] Version mismatch. Expected version: " + version + ", but found: " + returnedLending.getVersion());
+        }
+
+        // Verificar se o livro já foi devolvido
         if (returnedLending.isReturned()) {
             throw new IllegalArgumentException("[ERROR] Book with lending number: " + resource.getId() + " is already returned.");
         }
 
+        // Atualizar as informações do empréstimo para refletir a devolução
         returnedLending.setReturnedDate(LocalDate.now());
 
         int daysOverdue = (int) ChronoUnit.DAYS.between(returnedLending.getLimitDate(), LocalDate.now());
@@ -180,8 +189,12 @@ public class LendingServiceImpl implements LendingService {
         returnedLending.setFine(fine);
         returnedLending.setComment(resource.getComment());
 
+        //Repo save I1
+        // Salvar o empréstimo atualizado no repositório
         return lendingRepository.save(returnedLending);
     }
+
+
 
     @Override
     public List<LentBookView> getTopBooks() {

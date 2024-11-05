@@ -13,10 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +27,9 @@ import com.example.serviceLending.lendingManagement.services.EditLendingRequest;
 import com.example.serviceLending.lendingManagement.services.LendingServiceImpl;
 import com.example.serviceLending.exceptions.NotFoundException;
 import com.example.serviceLending.lendingManagement.sync.SyncRequest;
-
+import com.example.serviceLending.configuration.RetryConfig;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.annotation.Backoff;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,9 +46,9 @@ public class LendingController {
     private final RestTemplate restTemplate;
     @Value("${server.port}")
     private String serverPort;
-    private static final String SYNC_URL_INSTANCE_1 = "http://localhost:8083/webhook/sync";
-    private static final String SYNC_URL_INSTANCE_2 = "http://localhost:8087/webhook/sync";
 
+    @Value("${webhook.url}")
+    private String webhookUrl;
 
     private static final String IF_MATCH = "If-Match";
     private final LendingServiceImpl lendingService;
@@ -193,8 +193,11 @@ public class LendingController {
     @Operation(summary = "Return a Book")
     @PostMapping("/return")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<LendingView> returnBook(@Valid @RequestBody final EditLendingRequest resource,
-                                                  @RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<LendingView> returnBook(
+            @Valid @RequestBody final EditLendingRequest resource,
+            @RequestHeader("Authorization") String authorization,
+            @RequestHeader(value = "If-Match", required = false) String ifMatchHeader) {
+
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Check permissions
@@ -202,27 +205,43 @@ public class LendingController {
         if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
-        Lending lending = lendingService.returnBook(resource);
 
-        final var newbarUri = ServletUriComponentsBuilder.fromCurrentRequestUri().pathSegment(lending.getId().toString())
-                .build().toUri();
+        // Extract version from If-Match header
+        Long version = getVersionFromIfMatchHeader(ifMatchHeader);
 
-        //sync
-        SyncRequest syncRequest = new SyncRequest(lending.getId(), "return");
-        sendSyncWebhook(syncRequest);
-        //.
+        // Service I1
+        Lending lending = lendingService.returnBook(resource, version);
+        if (lending.getId() == null) {
+            throw new IllegalStateException("Lending ID must not be null for synchronization.");
+        }
+
+
+        // Manda para I2
+        sincronizarComOutraInstancia(authorization, lending);
+
+        // Prepare the URI for the response
+        final var newbarUri = ServletUriComponentsBuilder.fromCurrentRequestUri()
+                .pathSegment(lending.getId().toString())
+                .build()
+                .toUri();
+
 
         return ResponseEntity.created(newbarUri).eTag(Long.toString(lending.getVersion()))
                 .body(lendingViewMapper.toLendingView(lending));
     }
-    
+
     private Long getVersionFromIfMatchHeader(final String ifMatchHeader) {
+        if (ifMatchHeader == null || ifMatchHeader.isEmpty()) {
+            // Retorna 0 quando o cabeçalho não for fornecido
+            return 0L;
+        }
 
         if (ifMatchHeader.startsWith("\"")) {
             return Long.parseLong(ifMatchHeader.substring(1, ifMatchHeader.length() - 1));
         }
         return Long.parseLong(ifMatchHeader);
     }
+
 
 
     //Backend Endpoints
@@ -240,26 +259,7 @@ public class LendingController {
         return ResponseEntity.ok(topReaders);
     }
 
-    //sync
-    private void sendSyncWebhook(SyncRequest syncRequest) {
-        try {
-            String targetSyncUrl = determineTargetSyncUrl(); // Obtenha a URL de sincronização correta
-            HttpEntity<SyncRequest> requestEntity = new HttpEntity<>(syncRequest);
-            restTemplate.exchange(targetSyncUrl, HttpMethod.POST, requestEntity, String.class);
-        } catch (HttpClientErrorException e) {
-            System.err.println("Erro ao enviar webhook de sincronização: " + e.getMessage());
-        }
-    }
-
-    // Método que determina para qual instância a sincronização deve ser enviada
-    private String determineTargetSyncUrl() {
-        // Determine a URL de sincronização com base na porta do servidor
-        if ("8083".equals(serverPort)) {
-            return SYNC_URL_INSTANCE_2; // Se for a instância 1, envia para a instância 2
-        } else {
-            return SYNC_URL_INSTANCE_1; // Se for a instância 2, envia para a instância 1
-        }
-    }
+    //Auth
     private List<String> getRolesFromToken(String token) {
         Jwt jwt = jwtDecoder.decode(token);
 
@@ -273,6 +273,43 @@ public class LendingController {
         return Arrays.asList(rolesClaim.split(","));
     }
 
+
+    @Retryable(
+            value = { Exception.class },
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 2000) // Intervalo de 2 segundos entre tentativas
+    )
+    public void sincronizarComOutraInstancia(String authorization, Lending lending) {
+        if (lending.getId() == null) {
+            throw new IllegalArgumentException("Lending ID não deve ser nulo");
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", authorization);
+        headers.set("Content-Type", "application/json");
+
+        // Criar o SyncRequest com os dados do Lending
+        SyncRequest syncRequest = new SyncRequest();
+        syncRequest.setLendingId(lending.getId());
+        syncRequest.setResource(lending); // Aqui agora passa o Lending diretamente
+
+        // Enviar o SyncRequest
+        HttpEntity<SyncRequest> requestEntity = new HttpEntity<>(syncRequest, headers);
+
+        try {
+            restTemplate.exchange(
+                    webhookUrl + "/webhook/sync",
+                    HttpMethod.PUT,
+                    requestEntity,
+                    Void.class
+            );
+            System.out.println("Sincronização (criação ou atualização) bem-sucedida com a outra instância.");
+
+        } catch (Exception e) {
+            System.out.println("Erro na sincronização. Tentando novamente... " + e.getMessage());
+            throw e; // Relança a exceção para ativar nova tentativa
+        }
+    }
 }
 
 

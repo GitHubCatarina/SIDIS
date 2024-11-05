@@ -1,14 +1,33 @@
 package com.example.serviceLending.lendingManagement.sync;
 
-public class SyncRequest {
-    private Long lendingId;
-    private String action;
+import com.example.serviceLending.lendingManagement.model.Lending; // Importe a classe Lending
 
-    public SyncRequest(Long lendingId, String action) {
-        this.lendingId = lendingId;
-        this.action = action;
+public class SyncRequest {
+    private Long lendingId; // Id do Lending
+    private Lending resource; // Dados para criar ou atualizar Lending
+    private long desiredVersion; // Para controlar a versão
+    private String instanceId; // Para identificar a instância
+
+    @Override
+    public String toString() {
+        return "SyncRequest{" +
+                "lendingId=" + lendingId +
+                ", resource=" + resource +
+                '}';
     }
 
+    // Construtor padrão
+    public SyncRequest() {}
+
+    // Construtor com parâmetros
+    public SyncRequest(Long lendingId, Lending resource, long desiredVersion, String instanceId) {
+        this.lendingId = lendingId;
+        this.resource = resource;
+        this.desiredVersion = desiredVersion;
+        this.instanceId = instanceId;
+    }
+
+    // Getters e Setters
     public Long getLendingId() {
         return lendingId;
     }
@@ -17,11 +36,27 @@ public class SyncRequest {
         this.lendingId = lendingId;
     }
 
-    public String getAction() {
-        return action;
+    public Lending getResource() {
+        return resource;
     }
 
-    public void setAction(String action) {
-        this.action = action;
+    public void setResource(Lending resource) {
+        this.resource = resource;
+    }
+
+    public long getDesiredVersion() {
+        return desiredVersion;
+    }
+
+    public void setDesiredVersion(long desiredVersion) {
+        this.desiredVersion = desiredVersion;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 }
