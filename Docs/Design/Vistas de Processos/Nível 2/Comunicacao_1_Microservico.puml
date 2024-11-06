@@ -1,0 +1,28 @@
+@startuml
+' Definindo os participantes
+participant "HTTP Client" as client
+participant "reader[0] : Reader" as reader0
+participant "reader[1] : Reader" as reader1
+
+' O cliente faz uma requisição para criar um novo leitor
+client o-> reader0: POST /readers {readerData, photo}
+activate reader0
+
+' O Reader Service valida o token e permissões localmente
+reader0 -> reader0: Validar token JWT e permissões
+
+' Verifica as permissões e cria o leitor
+reader0 -> reader0: save(readerData, photo)
+
+' Replicando dados para a outra instância (espelhamento)
+reader0 -> reader1: POST /readers {readerData, photo}
+activate reader1
+reader1 -> reader1: save(readerData, photo)
+deactivate reader1
+
+' Responder ao cliente com sucesso final após a replicação
+reader1 --> reader0: 201 Created
+reader0 -->o client: 201 Created
+
+deactivate reader0
+@enduml
