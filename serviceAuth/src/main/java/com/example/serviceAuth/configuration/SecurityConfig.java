@@ -126,8 +126,18 @@ public class SecurityConfig implements InitializingBean{
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		//Allow H2 in browser
+		http = http.csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable())
+				.headers(httpSecurityHeadersConfigurer -> {
+					httpSecurityHeadersConfigurer.frameOptions(frameOptionsConfig -> {
+						frameOptionsConfig.disable();
+					});
+				});
+		http.headers().frameOptions().disable();
+
 		// Enable CORS and disable CSRF
 		http = http.cors(Customizer.withDefaults()).csrf(csrf -> csrf.disable());
+
 
 		// Set session management to stateless
 		http = http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
