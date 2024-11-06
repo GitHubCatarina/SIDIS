@@ -24,7 +24,6 @@ public class SyncRequest {
 
         this.desiredVersion = desiredVersion;
     }
-
     // Getters e Setters
     public Long getReaderId() {
         return readerId;
