@@ -1,5 +1,6 @@
 package com.example.serviceBook.bookManagement.api;
 
+import com.example.serviceBook.bookManagement.dto.BookDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,18 +11,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -33,12 +34,18 @@ import com.example.serviceBook.bookManagement.model.Book;
 import com.example.serviceBook.bookManagement.services.CreateBookRequest;
 import com.example.serviceBook.bookManagement.services.EditBookRequest;
 import com.example.serviceBook.fileStorage.UploadFileResponse;
-
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.annotation.Backoff;
+import com.example.serviceBook.bookManagement.sync.SyncRequest;
+import org.springframework.web.client.RestTemplate;
+import com.example.serviceBook.bookManagement.model.BookAuthor;
+import java.util.Base64;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Tag(name = "Books", description = "Endpoints for managing Books")
 @RestController
@@ -54,6 +61,10 @@ public class BookController {
     private final GenreViewMapper genreViewMapper;
     //private final LentBookViewMapper lentBookViewMapper;
     private final BookRepository bookRepository;
+
+    private final RestTemplate restTemplate;
+    @Value("${webhook.url}")
+    private String webhookUrl;
 
 
     private boolean hasPermission(List<String> roles, String... allowedRoles) {
@@ -239,7 +250,12 @@ public class BookController {
             return ResponseEntity.badRequest().build();
         }
 
+        // Service I1
         Book book = bookService.partialUpdateBook(id, resource, getVersionFromIfMatchHeader(ifMatchValue));
+
+        // Manda para I2
+        sincronizarComOutraInstancia(book);
+
         return ResponseEntity.ok().eTag(Long.toString(book.getVersion())).body(bookViewMapper.toBookView(book));
     }
 
@@ -262,4 +278,70 @@ public class BookController {
 
         return Arrays.asList(rolesClaim.split(","));
     }
+
+    @Retryable(
+            value = { Exception.class },
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 2000) // Intervalo de 2 segundos entre tentativas
+    )
+    public void sincronizarComOutraInstancia(Book book) {
+
+        BookDTO bookDTO = toBookDTO(book);
+        if (book.getId() == null) {
+            throw new IllegalArgumentException("O bookname do book não deve ser nulo");
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+
+        // Criar o SyncRequest com os dados do Book
+        SyncRequest syncRequest = new SyncRequest();
+        syncRequest.setId(book.getId());
+        syncRequest.setResource(bookDTO);
+        syncRequest.setDesiredVersion(0);
+
+        // Enviar o SyncRequest
+        HttpEntity<SyncRequest> requestEntity = new HttpEntity<>(syncRequest, headers);
+
+        try {
+            restTemplate.exchange(
+                    webhookUrl + "/webhook/sync",
+                    HttpMethod.PUT,
+                    requestEntity,
+                    Void.class
+            );
+            System.out.println("Sincronização (criação ou atualização) bem-sucedida com a outra instância.");
+        } catch (Exception e) {
+            System.out.println("Erro na sincronização. Tentando novamente... " + e.getMessage());
+            throw e; // Relança a exceção para ativar nova tentativa
+        }
+    }
+    private BookDTO toBookDTO(Book book) {
+        // Converte o objeto Genre para seu nome (ou outro identificador relevante)
+        String genreName = book.getGenre() != null ? book.getGenre().getName() : null;
+
+        // Converte a lista de BookAuthor para uma lista de Strings com os nomes dos autores
+        List<String> authorNames = book.getBookAuthors() != null ?
+                book.getBookAuthors().stream()
+                        .map(bookAuthor -> bookAuthor.getAuthor().getName())
+                        .collect(Collectors.toList())
+                : Collections.emptyList();
+
+
+
+        String coverUrl = book.getCover() != null && book.getCover().getImage() != null ?
+                Base64.getEncoder().encodeToString(book.getCover().getImage()) : null;
+
+        return new BookDTO(
+                book.getId(),
+                book.getIsbn(),
+                book.getTitle(),
+                book.getGenre(),
+                book.getDescription(),
+                authorNames,
+                coverUrl
+        );
+    }
+
+
 }

@@ -1,7 +1,7 @@
 package com.example.serviceBook.bookManagement.model;
 
 import jakarta.persistence.*;
-
+import java.util.Base64;
 import java.util.Arrays;
 
 @Entity
@@ -12,6 +12,7 @@ public class BookCover {
 
     @OneToOne
     private Book book;
+    private String coverUrl;
 
     @Lob
     private byte[] image;
@@ -59,6 +60,13 @@ public class BookCover {
                 ", contentType='" + contentType + '\'' +
                 '}';
     }
+
+    public BookCover() {
+    }
+
+    public BookCover(String coverUrl, byte[] image) {
+        this.coverUrl = coverUrl;
+        this.image = image;  // You can handle the image as needed
+    }
+
 }
-
-

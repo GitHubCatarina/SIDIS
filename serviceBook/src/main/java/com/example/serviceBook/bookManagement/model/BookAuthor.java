@@ -1,6 +1,5 @@
 package com.example.serviceBook.bookManagement.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import com.example.serviceBook.authorManagement.model.Author;
@@ -14,7 +13,6 @@ public class BookAuthor {
 
     @ManyToOne
     @JoinColumn(name = "bookId")
-    @JsonIgnore
     @NotNull
     private Book book;
 
