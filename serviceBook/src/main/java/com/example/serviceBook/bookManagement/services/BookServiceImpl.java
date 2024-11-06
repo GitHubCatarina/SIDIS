@@ -233,6 +233,7 @@ public class BookServiceImpl implements BookService{
         }
     }
 
+    @Transactional
     public void updateBookAuthors(final Book book, final List<BookAuthor> bookAuthorsList) {
         //delete das entradas antigas da tabela para depois podermos introduzir os novos bookAuthors
         bookAuthorRepository.deleteByBookId(book.getId());
@@ -245,13 +246,17 @@ public class BookServiceImpl implements BookService{
             for (BookAuthor bookAuthor : bookAuthorsList) {
                 Author author = bookAuthor.getAuthor();
                 if (author != null && author.getName() != null && author.getShortBio() != null) {
+                    // Try to find the existing author by name
                     Author existingAuthor = authorRepository.findAuthorByName(author.getName())
-                            .orElseThrow(() -> new IllegalArgumentException("[ERROR] Author not found"));
+                            .orElseThrow(() -> new IllegalArgumentException("[ERROR] Author with name '" + author.getName() + "' not found"));
+
+                    // Add new BookAuthor association
                     listBookAuthors.add(new BookAuthor(book, existingAuthor));
                 } else {
-                    throw new IllegalArgumentException("[ERROR] Author information is incomplete. Please provide valid author details.");
+                    throw new IllegalArgumentException("[ERROR] Author information is incomplete for author: " + author.getName());
                 }
             }
+            // Save all new associations
             bookAuthorRepository.saveAll(listBookAuthors);
         }
     }

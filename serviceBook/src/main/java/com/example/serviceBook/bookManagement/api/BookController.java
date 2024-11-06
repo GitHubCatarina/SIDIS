@@ -187,8 +187,15 @@ public class BookController {
         }
 
 
-
+        // Service I1
         final UploadFileResponse up = bookService.doUploadFile(bookId, file);
+
+
+        // Manda para I2
+        Book book = bookRepository.findById(Long.parseLong(bookId))
+                .orElseThrow(() -> new NotFoundException(Book.class, bookId));
+        sincronizarComOutraInstancia(book);
+
         return ResponseEntity.created(new URI(up.getFileDownloadUri())).body(up);
     }
 
@@ -204,10 +211,13 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-
+        // Service I1
         final var book = bookService.createBook(resource, coverPhoto);
         final var newbarUri = ServletUriComponentsBuilder.fromCurrentRequestUri().pathSegment(book.getId().toString())
                 .build().toUri();
+
+        // Manda para I2
+        sincronizarComOutraInstancia(book);
 
         return ResponseEntity.created(newbarUri).eTag(Long.toString(book.getVersion()))
                 .body(bookViewMapper.toCreateBookView(book));
@@ -229,8 +239,12 @@ public class BookController {
         if (ifMatchValue == null || ifMatchValue.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-
+        // Service I1
         Book book = bookService.updateBook(id, resource, getVersionFromIfMatchHeader(ifMatchValue));
+
+        // Manda para I2
+        sincronizarComOutraInstancia(book);
+
         return ResponseEntity.ok().eTag(Long.toString(book.getVersion())).body(bookViewMapper.toBookView(book));
     }
 
@@ -323,10 +337,10 @@ public class BookController {
         // Converte a lista de BookAuthor para uma lista de Strings com os nomes dos autores
         List<String> authorNames = book.getBookAuthors() != null ?
                 book.getBookAuthors().stream()
+                        .filter(bookAuthor -> bookAuthor.getAuthor() != null)  // Verifica se o autor não é nulo
                         .map(bookAuthor -> bookAuthor.getAuthor().getName())
                         .collect(Collectors.toList())
                 : Collections.emptyList();
-
 
 
         String coverUrl = book.getCover() != null && book.getCover().getImage() != null ?

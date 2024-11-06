@@ -37,7 +37,8 @@ public class Book {
     @OneToMany(mappedBy = "book", orphanRemoval = true)
     private List<BookAuthor> bookAuthors;
 
-    @OneToOne
+
+    @OneToOne(cascade = CascadeType.PERSIST)
     private BookCover cover;
 
     public Book() {

@@ -21,7 +21,7 @@ public class BookDTO {
         this.id = id;
         this.isbn = isbn;
         this.title = title;
-        this.genreId = genreId;
+        this.genreId = genre != null ? genre.getId() : 3;
         this.description = description;
         this.bookAuthors = bookAuthors;
         this.coverUrl = coverUrl;
