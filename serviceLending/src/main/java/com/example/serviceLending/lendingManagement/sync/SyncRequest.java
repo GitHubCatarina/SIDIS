@@ -2,6 +2,7 @@ package com.example.serviceLending.lendingManagement.sync;
 
 import com.example.serviceLending.lendingManagement.model.Lending; // Importe a classe Lending
 
+
 public class SyncRequest {
     private Long lendingId; // Id do Lending
     private Lending resource; // Dados para criar ou atualizar Lending
@@ -15,6 +16,8 @@ public class SyncRequest {
                 ", resource=" + resource +
                 '}';
     }
+
+
 
     // Construtor padrão
     public SyncRequest() {}

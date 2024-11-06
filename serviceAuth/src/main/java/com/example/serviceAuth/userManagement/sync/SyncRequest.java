@@ -1,12 +1,20 @@
 package com.example.serviceAuth.userManagement.sync;
 
+import com.example.serviceAuth.userManagement.dto.UserDTO;
 import com.example.serviceAuth.userManagement.model.User;
 import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SyncRequest {
+    @JsonProperty
     private Long id; // Id do User
-    private User resource; // Dados para criar ou atualizar User
+    @JsonProperty
+    private UserDTO resource; // Dados para criar ou atualizar User
+    @JsonProperty
     private long desiredVersion; // Para controlar a versão
+    @JsonProperty
     private String instanceId; // Para identificar a instância
 
     @Override
@@ -23,7 +31,7 @@ public class SyncRequest {
     public SyncRequest() {}
 
     // Construtor com parâmetros
-    public SyncRequest(Long id, User resource, long desiredVersion, String instanceId) {
+    public SyncRequest(Long id, UserDTO resource, long desiredVersion, String instanceId) {
         this.id = id;
         this.resource = resource;
         this.desiredVersion = desiredVersion;
@@ -39,11 +47,11 @@ public class SyncRequest {
         this.id = id;
     }
 
-    public User getResource() {
+    public UserDTO getResource() {
         return resource;
     }
 
-    public void setResource(User resource) {
+    public void setResource(UserDTO resource) {
         this.resource = resource;
     }
 

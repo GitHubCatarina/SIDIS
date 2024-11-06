@@ -12,6 +12,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.userdetails.UserDetails;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -21,6 +23,7 @@ import java.util.Set;
 @Entity
 @Table(name = "T_USER")
 @EntityListeners(AuditingEntityListener.class)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User implements UserDetails {
 
 	private static final long serialVersionUID = 1L;
@@ -28,9 +31,11 @@ public class User implements UserDetails {
 	@Id
 	@GeneratedValue
 	@Getter
+	@Setter
 	private Long id;
 
 	@Version
+	@Getter
 	private Long version;
 
 	@CreatedDate
@@ -50,6 +55,7 @@ public class User implements UserDetails {
 
 	@LastModifiedBy
 	@Column(nullable = false)
+	@Getter
 	private String modifiedBy;
 
 	@Setter
@@ -77,9 +83,7 @@ public class User implements UserDetails {
 	@Getter
 	private final Set<Role> authorities = new HashSet<>();
 
-	public User() {
-
-	}
+	public User() {}
 
 	public User(final String username, final String password) {
 		this.username = username;
