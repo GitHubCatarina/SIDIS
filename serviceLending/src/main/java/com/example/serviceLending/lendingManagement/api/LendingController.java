@@ -179,7 +179,7 @@ public class LendingController {
         final var newbarUri = ServletUriComponentsBuilder.fromCurrentRequestUri().pathSegment(lending.getId().toString())
                 .build().toUri();
 
-        //sync
+        //syncAuthor
         SyncRequest syncRequest = new SyncRequest(lending.getId(), "return");
         sendSyncWebhook(syncRequest);
         //.

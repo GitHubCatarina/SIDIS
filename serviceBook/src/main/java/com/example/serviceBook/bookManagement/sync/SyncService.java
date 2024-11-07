@@ -6,6 +6,7 @@ import com.example.serviceBook.bookManagement.model.BookCover;
 import com.example.serviceBook.bookManagement.model.BookAuthor;
 import com.example.serviceBook.authorManagement.model.Author;
 import com.example.serviceBook.bookManagement.repositories.BookRepository;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.serviceBook.bookManagement.model.Genre;
