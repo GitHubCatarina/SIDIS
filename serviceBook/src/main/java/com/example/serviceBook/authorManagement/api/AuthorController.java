@@ -1,23 +1,26 @@
 package com.example.serviceBook.authorManagement.api;
 
+import com.example.serviceBook.authorManagement.dto.AuthorDTO;
+import com.example.serviceBook.authorManagement.syncAuthor.AuthorSyncRequest;
+import com.example.serviceBook.bookManagement.dto.BookDTO;
+import com.example.serviceBook.bookManagement.sync.SyncRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -56,6 +59,10 @@ public class AuthorController {
     //private final LendingServiceImpl lendingService;
     private final BookViewMapper bookViewMapper;
     private final AuthorLentsViewMapper authorLentsViewMapper;
+
+    private final RestTemplate restTemplate;
+    @Value("${webhook.url}")
+    private String webhookUrl;
 
     private boolean hasPermission(List<String> roles, String... allowedRoles) {
         for (String role : allowedRoles) {
@@ -386,4 +393,54 @@ public class AuthorController {
 
         return Arrays.asList(rolesClaim.split(","));
     }
+
+
+
+    public void sincronizarComOutraInstancia(Author author) {
+
+        AuthorDTO authorDTO = toAuthorDTO(author);
+        if (author.getId() == null) {
+            throw new IllegalArgumentException("O bookname do book não deve ser nulo");
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+
+        // Criar o SyncRequest com os dados do Author
+        AuthorSyncRequest syncRequest = new AuthorSyncRequest();
+        syncRequest.setId(author.getId());
+        syncRequest.setResource(authorDTO);
+        syncRequest.setDesiredVersion(0);
+
+        // Enviar o SyncRequest
+        HttpEntity<AuthorSyncRequest> requestEntity = new HttpEntity<>(syncRequest, headers);
+
+        try {
+            restTemplate.exchange(
+                    webhookUrl + "/webhook/sync",
+                    HttpMethod.PUT,
+                    requestEntity,
+                    Void.class
+            );
+            System.out.println("Sincronização (criação ou atualização) bem-sucedida com a outra instância.");
+        } catch (Exception e) {
+            System.out.println("Erro na sincronização. Tentando novamente... " + e.getMessage());
+            throw e; // Relança a exceção para ativar nova tentativa
+        }
+    }
+
+
+    private AuthorDTO toAuthorDTO(Author author) {
+        // Converte a foto do autor para um ID ou base64 (se necessário)
+        Long authorPhotoId = author.getAuthorPhoto() != null ? author.getAuthorPhoto().getId() : null;
+
+        return new AuthorDTO(
+                author.getId(),
+                author.getName(),
+                author.getShortBio(),
+                author.getLents(),
+                authorPhotoId
+        );
+    }
+
 }
