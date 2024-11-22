@@ -1,0 +1,52 @@
+@startuml
+participant "HTTP Client" as client
+participant "lending[0] : Lending" as lending0
+participant "lending[1] : Lending" as lending1
+participant "reader[0] : Reader" as reader0
+participant "reader[1] : Reader" as reader1
+participant "book[0] : Book" as book0
+participant "book[1] : Book" as book1
+
+' O cliente faz uma requisição para criar um novo empréstimo
+client o-> lending0: POST /lendings {lendingData}
+activate lending0
+
+' Lending Service consulta a primeira instância do Reader Service
+lending0 -> reader0: GET /readers/{readerId}
+activate reader0
+reader0 --> lending0: 200 OK {readerData, activeLendingsCount}
+deactivate reader0
+
+' Lending Service consulta a segunda instância do Reader Service
+lending0 -> reader1: GET /readers/{readerId}/internal
+activate reader1
+reader1 --> lending0: 200 OK {readerData, activeLendingsCount}
+deactivate reader1
+
+' Lending Service consulta a primeira instância do Book Service
+lending0 -> book0: GET /books/{bookId}
+activate book0
+book0 --> lending0: 200 OK {bookData, availability}
+deactivate book0
+
+' Lending Service consulta a segunda instância do Book Service
+lending0 -> book1: GET /books/{bookId}/internal
+activate book1
+book1 --> lending0: 200 OK {bookData, availability}
+deactivate book1
+
+' Lending Service cria o empréstimo após todas as verificações
+lending0 -> lending0: save(lendingData)
+
+' Replicação do empréstimo para a segunda instância do Lending Service
+lending0 -> lending1: POST /lendings/internal {lendingData}
+activate lending1
+lending1 -> lending1: save(lendingData)
+lending1 --> lending0: 201 Created
+lending0 -->o client: 201 Created
+
+
+deactivate lending1
+
+deactivate lending0
+@enduml

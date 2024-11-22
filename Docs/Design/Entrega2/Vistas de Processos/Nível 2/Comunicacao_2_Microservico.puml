@@ -1,0 +1,37 @@
+@startuml
+participant "HTTP Client" as client
+participant "lending[0] : Lending" as lending0
+participant "lending[1] : Lending" as lending1
+participant "reader[0] : Reader" as reader0
+participant "reader[1] : Reader" as reader1
+
+' O cliente faz uma solicitação para o serviço Lending
+client -> lending0: GET /lendings/top-readers
+activate lending0
+
+' lending[0] busca os top readers localmente
+lending0 -> lending0: call getTopReaders()
+
+' lending[0] consulta a primeira instância de Reader para detalhes dos leitores
+lending0 -> reader0: GET /readers/{readerId} (detalhes)
+activate reader0
+reader0 --> lending0: 200 OK {readerDetails}
+deactivate reader0
+
+' lending[0] também consulta a segunda instância de Reader para consistência
+lending0 -> reader1: GET /readers/{readerId}/internal (detalhes)
+activate reader1
+reader1 --> lending0: 200 OK {readerDetails}
+deactivate reader1
+
+' Replicação para a segunda instância do Lending
+lending0 -> lending1: POST /lendings/internal/top-readers {replicatedData}
+activate lending1
+lending1 -> lending1: save replicated data
+lending1 --> lending0: 201 Created
+deactivate lending1
+
+' Resposta final ao cliente
+lending0 --> client: 200 OK [Lista de Top Readers]
+deactivate lending0
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+title Vista de processo nível 1
+
+participant ":HTTP Client" as Client
+participant ":LMS" as System
+
+
+' Atualização de livro
+Client -> System: PUT /books/{isbn}
+alt success
+    System --> Client: 2.1: 200 OK (Livro atualizado)
+else error
+    System --> Client: 2.2: 404 Not Found (Livro não encontrado)
+end
+
+@enduml

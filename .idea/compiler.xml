@@ -17,29 +17,40 @@
           <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.5.5.Final/mapstruct-processor-1.5.5.Final.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct/1.5.5.Final/mapstruct-1.5.5.Final.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.5.5.Final/mapstruct-processor-1.5.5.Final.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct/1.5.5.Final/mapstruct-1.5.5.Final.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
         </processorPath>
-        <module name="serviceLending" />
         <module name="serviceReader" />
+        <module name="serviceLendingQuery" />
+        <module name="serviceLending" />
         <module name="serviceBook" />
+        <module name="serviceBookCom" />
         <module name="serviceAuth" />
+        <module name="serviceLendingCom" />
+        <module name="serviceBookQuery" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="serviceAuthCom" target="17" />
+      <module name="serviceAuthCommand" target="1.5" />
       <module name="serviceBook (1)" target="17" />
       <module name="serviceBook (2)" target="17" />
+      <module name="serviceBookCom (1)" target="17" />
+      <module name="serviceLendingCom (1)" target="17" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="serviceAuth" options="-parameters" />
+      <module name="serviceAuthCom" options="-parameters" />
       <module name="serviceBook" options="-parameters" />
       <module name="serviceBook (1)" options="-parameters" />
       <module name="serviceBook (2)" options="-parameters" />
+      <module name="serviceBookCom" options="-parameters" />
+      <module name="serviceBookCom (1)" options="-parameters" />
+      <module name="serviceBookQuery" options="-parameters" />
       <module name="serviceLending" options="-parameters" />
+      <module name="serviceLendingCom" options="-parameters" />
+      <module name="serviceLendingCom (1)" options="-parameters" />
+      <module name="serviceLendingQuery" options="-parameters" />
       <module name="serviceReader" options="-parameters" />
     </option>
   </component>

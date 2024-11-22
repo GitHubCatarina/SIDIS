@@ -1,0 +1,30 @@
+@startuml
+ 'https://plantuml.com/class-diagram
+
+ hide circle
+ skinparam classAttributeIconSize 0
+
+title Vista lógica nível 3
+
+component "BE" {
+    [Router]
+    [Controler]
+    [Service]
+    [Domain]
+    [Repository]
+    [JPA]
+}
+boundary " "
+[Router] ~up~ boundary :REST API
+[Router] -down(0- [Controler]
+[Controler] -down(0- [Service]
+[Service] -down(0- [Domain]
+[Repository] -left(0- [Domain]
+[Service] -left(0- [Repository]
+[Repository] -up(0- [JPA]
+[JPA] -up(0- " ":SQL
+
+
+
+
+@enduml
