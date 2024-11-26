@@ -20,7 +20,6 @@ import org.springframework.security.oauth2.jwt.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.retry.annotation.Backoff;
-import com.example.serviceAuth.userManagement.sync.SyncRequest;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -47,8 +46,6 @@ public class AuthApi {
 
 	private final UserService userService;
 	private final RestTemplate restTemplate;
-	@Value("${webhook.url}")
-	private String webhookUrl;
 
 	@PostMapping("login")
 	public ResponseEntity<UserView> login(@RequestBody @Valid final AuthRequest request) {
@@ -140,22 +137,16 @@ public class AuthApi {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Content-Type", "application/json");
 
-		// Criar o SyncRequest com os dados do User
-		SyncRequest syncRequest = new SyncRequest();
-		syncRequest.setId(user.getId());
-		syncRequest.setResource(userDTO);
-		syncRequest.setDesiredVersion(0);
-
-		// Enviar o SyncRequest
-		HttpEntity<SyncRequest> requestEntity = new HttpEntity<>(syncRequest, headers);
 
 		try {
+			/*
 			restTemplate.exchange(
-					webhookUrl + "/webhook/sync",
 					HttpMethod.PUT,
 					requestEntity,
 					Void.class
-			);
+				);
+			 */
+
 			System.out.println("Sincronização (criação ou atualização) bem-sucedida com a outra instância.");
 		} catch (Exception e) {
 			System.out.println("Erro na sincronização. Tentando novamente... " + e.getMessage());

@@ -1,6 +1,6 @@
 package com.example.serviceBookCom.exceptions;
 
-import com.example.serviceBook.exceptions.NotFoundException;
+import com.example.serviceBookCom.exceptions.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ValidationException;
 import lombok.AllArgsConstructor;

@@ -51,11 +51,9 @@ public interface LendingRepository extends JpaRepository<Lending, Long> {
     List<Object[]> numberOfLendingsPerMonthByGenre(@Param("genre") Genre genre);
      */
 
-    @Query("SELECT l.bookId, AVG(DATEDIFF(l.returnedDate, l.lendDate)) AS averageDuration " +
-            "FROM Lending l " +
-            "WHERE l.returned = TRUE " +
-            "GROUP BY l.bookId")
+    @Query(value = "SELECT l.bookId, AVG(DATEDIFF(l.returnedDate, l.lendDate)) AS averageDuration FROM Lending l WHERE l.returned = TRUE GROUP BY l.bookId", nativeQuery = true)
     List<Object[]> findAverageLendingDurationPerBook();
+
 
 
     @Query("SELECT l.bookId, COUNT(l.bookId) as lendCount " +

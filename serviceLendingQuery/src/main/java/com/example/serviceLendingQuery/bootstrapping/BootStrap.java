@@ -1,11 +1,11 @@
 package com.example.serviceLendingQuery.bootstrapping;
 
-import com.example.serviceLendingQuery.lendingManagementQuery.model.Lending;
-import com.example.serviceLendingQuery.lendingManagementQuery.repositories.LendingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import com.example.serviceLendingQuery.lendingManagement.model.Lending;
+import com.example.serviceLendingQuery.lendingManagement.repositories.LendingRepository;
 
 import java.time.LocalDate;
 import java.time.Month;

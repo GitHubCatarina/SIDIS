@@ -1,13 +1,13 @@
 package com.example.serviceBookCom.bootstrapping;
 
-import com.example.serviceBookCom.authorManagementCom.model.Author;
-import com.example.serviceBookCom.authorManagementCom.repository.AuthorRepository;
-import com.example.serviceBookCom.bookManagementCom.model.Book;
-import com.example.serviceBookCom.bookManagementCom.model.BookAuthor;
-import com.example.serviceBookCom.bookManagementCom.model.Genre;
-import com.example.serviceBookCom.bookManagementCom.repositories.BookAuthorRepository;
-import com.example.serviceBookCom.bookManagementCom.repositories.BookRepository;
-import com.example.serviceBookCom.bookManagementCom.repositories.GenreRepository;
+import com.example.serviceBookCom.authorManagement.model.Author;
+import com.example.serviceBookCom.authorManagement.repository.AuthorRepository;
+import com.example.serviceBookCom.bookManagement.model.Book;
+import com.example.serviceBookCom.bookManagement.model.BookAuthor;
+import com.example.serviceBookCom.bookManagement.model.Genre;
+import com.example.serviceBookCom.bookManagement.repositories.BookAuthorRepository;
+import com.example.serviceBookCom.bookManagement.repositories.BookRepository;
+import com.example.serviceBookCom.bookManagement.repositories.GenreRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;

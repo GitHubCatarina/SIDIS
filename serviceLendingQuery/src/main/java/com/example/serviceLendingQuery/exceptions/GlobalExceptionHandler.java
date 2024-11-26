@@ -1,7 +1,5 @@
 package com.example.serviceLendingQuery.exceptions;
 
-import com.example.serviceLendingQuery.exceptions.ConflictException;
-import com.example.serviceLendingQuery.exceptions.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ValidationException;
 import lombok.AllArgsConstructor;

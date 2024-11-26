@@ -167,10 +167,6 @@ public class LendingController {
         final var newbarUri = ServletUriComponentsBuilder.fromCurrentRequestUri().pathSegment(lending.getId().toString())
                 .build().toUri();
 
-        //syncAuthor
-        SyncRequest syncRequest = new SyncRequest(lending.getId(), "return");
-        sendSyncWebhook(syncRequest);
-        //.
 
         return ResponseEntity.created(newbarUri).eTag(Long.toString(lending.getVersion()))
                 .body(lendingViewMapper.toLendingView(lending));

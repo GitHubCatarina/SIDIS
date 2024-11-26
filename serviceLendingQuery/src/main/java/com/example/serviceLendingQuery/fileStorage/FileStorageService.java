@@ -1,13 +1,12 @@
 package com.example.serviceLendingQuery.fileStorage;
 
-import com.example.serviceLendingQuery.exceptions.FileStorageException;
-import com.example.serviceLendingQuery.exceptions.NotFoundException;
-import com.example.serviceLendingQuery.fileStorage.FileStorageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import com.example.serviceLendingQuery.exceptions.FileStorageException;
+import  com.example.serviceLendingQuery.exceptions.NotFoundException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

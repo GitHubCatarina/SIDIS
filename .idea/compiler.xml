@@ -8,7 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
       </profile>
-      <profile name="Annotation profile for serviceReader" enabled="true">
+      <profile name="Annotation profile for serviceReaderQuery" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -18,10 +18,10 @@
           <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct/1.5.5.Final/mapstruct-1.5.5.Final.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
         </processorPath>
-        <module name="serviceReader" />
         <module name="serviceLendingQuery" />
-        <module name="serviceLending" />
-        <module name="serviceBook" />
+        <module name="serviceReaderQuery" />
+        <module name="serviceReaderCom" />
+        <module name="serviceTopsQuery" />
         <module name="serviceBookCom" />
         <module name="serviceAuth" />
         <module name="serviceLendingCom" />
@@ -31,10 +31,13 @@
     <bytecodeTargetLevel>
       <module name="serviceAuthCom" target="17" />
       <module name="serviceAuthCommand" target="1.5" />
+      <module name="serviceBook" target="17" />
       <module name="serviceBook (1)" target="17" />
       <module name="serviceBook (2)" target="17" />
       <module name="serviceBookCom (1)" target="17" />
+      <module name="serviceLending" target="17" />
       <module name="serviceLendingCom (1)" target="17" />
+      <module name="serviceReader" target="17" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
@@ -52,6 +55,9 @@
       <module name="serviceLendingCom (1)" options="-parameters" />
       <module name="serviceLendingQuery" options="-parameters" />
       <module name="serviceReader" options="-parameters" />
+      <module name="serviceReaderCom" options="-parameters" />
+      <module name="serviceReaderQuery" options="-parameters" />
+      <module name="serviceTopsQuery" options="-parameters" />
     </option>
   </component>
 </project>
