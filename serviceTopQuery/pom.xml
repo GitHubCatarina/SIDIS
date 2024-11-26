@@ -11,7 +11,7 @@
     </parent>
 
     <groupId>org.library</groupId>
-    <artifactId>serviceTopsQuery</artifactId>
+    <artifactId>serviceTopQuery</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -111,6 +111,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
         </dependency>
     </dependencies>
 

@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,6 +38,7 @@ import java.security.interfaces.RSAPublicKey;
 @EnableWebSecurity
 @Configuration
 @EnableMethodSecurity
+@RequiredArgsConstructor
 @EnableConfigurationProperties
 public class SecurityConfig {
 
@@ -47,39 +50,24 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		//Allow H2 in browser
-		http = http.csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable())
-				.headers(httpSecurityHeadersConfigurer -> {
-					httpSecurityHeadersConfigurer.frameOptions(frameOptionsConfig -> {
-						frameOptionsConfig.disable();
-					});
-				});
-		http.headers().frameOptions().disable();
 		// Enable CORS and disable CSRF
-		http = http.cors(Customizer.withDefaults()).csrf(csrf -> csrf.disable());
+		http.cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable);
+
+		// Allow H2 in browser
+		http.headers(headers -> headers.frameOptions(Customizer.withDefaults()).disable());
 
 		// Set session management to stateless
-		http = http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+		http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		// Set unauthorized requests exception handler
-		http = http.exceptionHandling(
-				exceptions -> exceptions.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
-						.accessDeniedHandler(new BearerTokenAccessDeniedHandler()));
+		http.exceptionHandling(exceptions -> exceptions
+				.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
+				.accessDeniedHandler(new BearerTokenAccessDeniedHandler()));
 
 		// Set permissions on endpoints
-		http.authorizeHttpRequests()
-				/*.requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
-				.requestMatchers(HttpMethod.POST, "/api/books/**").permitAll()
-				.requestMatchers(HttpMethod.PUT, "/api/books/**").permitAll()
-				.requestMatchers(HttpMethod.PATCH, "/api/books/**").permitAll()
-				.requestMatchers(HttpMethod.GET, "/api/authors/**").permitAll()
-				.requestMatchers(HttpMethod.POST, "/api/authors/**").permitAll()
-				.requestMatchers(HttpMethod.PUT, "/api/authors/**").permitAll()
-				.requestMatchers(HttpMethod.PATCH, "/api/authors/**").permitAll()
-				.anyRequest().authenticated()
-				 */
-				.anyRequest().permitAll()
-				.and().httpBasic(Customizer.withDefaults()).oauth2ResourceServer().jwt();
+		http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
+				.httpBasic(Customizer.withDefaults())
+				.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
 		return http.build();
 	}

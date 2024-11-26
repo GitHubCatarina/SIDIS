@@ -1,4 +1,4 @@
-package com.example.serviceBookQuery.configuration;
+package com.example.serviceTopQuery.configuration;
 
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;

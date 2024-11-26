@@ -16,6 +16,6 @@
     <file url="file://$PROJECT_DIR$/serviceLendingQuery/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/serviceReaderCom/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/serviceReaderQuery/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/serviceTopsQuery/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/serviceTopQuery/src/main/java" charset="UTF-8" />
   </component>
 </project>

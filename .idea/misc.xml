@@ -11,10 +11,11 @@
         <option value="$PROJECT_DIR$/serviceBookCom/pom.xml" />
         <option value="$PROJECT_DIR$/serviceLendingCom/pom.xml" />
         <option value="$PROJECT_DIR$/serviceReaderCom/pom.xml" />
-        <option value="$PROJECT_DIR$/serviceTopsQuery/pom.xml" />
         <option value="$PROJECT_DIR$/serviceBookQuery/pom.xml" />
         <option value="$PROJECT_DIR$/serviceReaderQuery/pom.xml" />
         <option value="$PROJECT_DIR$/serviceLendingQuery/pom.xml" />
+        <option value="$PROJECT_DIR$/serviceTopsQuery/pom.xml" />
+        <option value="$PROJECT_DIR$/serviceTopQuery/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">
