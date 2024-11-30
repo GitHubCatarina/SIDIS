@@ -18,12 +18,12 @@
         <java.version>22</java.version>
     </properties>
     <dependencies>
-        <!-- RabbitMQ dependencies -->
+        <!--RabbitMQ-->
         <dependency>
-            <groupId>com.rabbitmq</groupId>
-            <artifactId>amqp-client</artifactId>
-            <version>5.13.1</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
+
         <!-- Jackson dependencies -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

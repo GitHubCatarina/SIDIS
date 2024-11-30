@@ -19,10 +19,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-@Tag(name = "Tops", description = "Endpoints for managing Tops")
+@Tag(name = "Top", description = "Endpoints for managing Top")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "api/tops")
+@RequestMapping(path = "api/top")
 public class TopController {
     @Autowired
     private JwtDecoder jwtDecoder;

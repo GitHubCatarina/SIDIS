@@ -1,6 +1,7 @@
 package com.example.serviceAuth.userManagement.services;
 
 import com.example.serviceAuth.exceptions.ConflictException;
+import com.example.serviceAuth.userManagement.dto.UserDTO;
 import com.example.serviceAuth.userManagement.model.User;
 import com.example.serviceAuth.userManagement.repositories.UserRepository;
 import jakarta.validation.ValidationException;
@@ -96,4 +97,23 @@ public class UserService implements UserDetailsService {
 		}
 		return userRepo.searchUsers(page, query);
 	}
+
+
+
+	public User createFromDTO(UserDTO userDTO) {
+		User user = new User();
+		user.setId(userDTO.getId());
+		user.setUsername(userDTO.getUsername());
+		user.setFullName(userDTO.getFullName());
+		user.setEnabled(userDTO.isEnabled());
+		return userRepo.save(user);
+	}
+
+	public User updateFromDTO(User user, UserDTO userDTO) {
+		user.setUsername(userDTO.getUsername());
+		user.setFullName(userDTO.getFullName());
+		user.setEnabled(userDTO.isEnabled());
+		return userRepo.save(user);
+	}
+
 }

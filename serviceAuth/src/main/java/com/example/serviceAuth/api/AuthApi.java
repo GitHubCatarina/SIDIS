@@ -4,8 +4,10 @@ import com.example.serviceAuth.userManagement.api.UserView;
 import com.example.serviceAuth.userManagement.api.UserViewMapper;
 import com.example.serviceAuth.userManagement.dto.UserDTO;
 import com.example.serviceAuth.userManagement.model.User;
+import com.example.serviceAuth.userManagement.services.AuthEventConsumer;
 import com.example.serviceAuth.userManagement.services.CreateUserRequest;
 import com.example.serviceAuth.userManagement.services.UserService;
+import com.example.serviceAuth.userManagement.services.AuthEventProducer;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,8 @@ public class AuthApi {
 
 	private final UserService userService;
 	private final RestTemplate restTemplate;
+	private final AuthEventProducer authEventProducer;
+	private final AuthEventConsumer authEventConsumer;
 
 	@PostMapping("login")
 	public ResponseEntity<UserView> login(@RequestBody @Valid final AuthRequest request) {
@@ -83,11 +87,13 @@ public class AuthApi {
 			throw new IllegalStateException("User ID não pode ser nulo para sincronização.");
 		}
 
-		System.out.println("feito userService.create: " + request);
-		System.out.println("Usuário criado, iniciando sincronização com outra instância...");
+		System.out.println("User criado, enviando evento para sincronização...");
+
+		// Converte User para UserDTO
+		UserDTO userDTO = new UserDTO().toUserDTO(user);
 
 		// Manda para I2
-		sincronizarComOutraInstancia(user);
+		authEventProducer.sendUserCreatedEvent(userDTO);
 
 		return userViewMapper.toUserView(user);
 	}
@@ -121,51 +127,4 @@ public class AuthApi {
 		return ResponseEntity.ok(roles);
 	}
 
-
-	@Retryable(
-			value = { Exception.class },
-			maxAttempts = 5,
-			backoff = @Backoff(delay = 2000) // Intervalo de 2 segundos entre tentativas
-	)
-	public void sincronizarComOutraInstancia(User user) {
-
-		UserDTO userDTO = toUserDTO(user);
-		if (user.getUsername() == null) {
-			throw new IllegalArgumentException("O username do user não deve ser nulo");
-		}
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Content-Type", "application/json");
-
-
-		try {
-			/*
-			restTemplate.exchange(
-					HttpMethod.PUT,
-					requestEntity,
-					Void.class
-				);
-			 */
-
-			System.out.println("Sincronização (criação ou atualização) bem-sucedida com a outra instância.");
-		} catch (Exception e) {
-			System.out.println("Erro na sincronização. Tentando novamente... " + e.getMessage());
-			throw e; // Relança a exceção para ativar nova tentativa
-		}
-	}
-	private UserDTO toUserDTO(User user) {
-		return new UserDTO(
-				user.getId(),
-				user.getVersion(),
-				user.getCreatedAt(),
-				user.getModifiedAt(),
-				user.getCreatedBy(),
-				user.getModifiedBy(),
-				user.isEnabled(),
-				user.getUsername(),
-				user.getPassword(),  // Incluir apenas se necessário
-				user.getFullName(),
-				user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet())  // Corrigido para usar getAuthority()
-		);
-	}
 }

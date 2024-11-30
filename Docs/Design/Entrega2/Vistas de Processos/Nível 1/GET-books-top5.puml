@@ -8,7 +8,7 @@ participant ":LMS" as System
 
 
 ' Consulta dos top 5 livros
-Client -> System: GET /books/top-books
+Client -> System: GET /top/top-books
 alt success
     System --> Client: 4.1: 200 OK (Lista dos top 5 livros)
 else error
