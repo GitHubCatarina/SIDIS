@@ -20,7 +20,6 @@ public class TopServiceImpl implements TopService {
     @Autowired
     public TopServiceImpl(LendingRepository LendingRepository) {
         this.LendingRepository = LendingRepository;
-
     }
 
 
@@ -41,6 +40,11 @@ public class TopServiceImpl implements TopService {
         return topReaders.stream()
                 .map(record -> new LendingReaderView((Long) record[0], (Long) record[1]))
                 .collect(Collectors.toList());
+    }
+
+    public boolean lendingExists(String lendingCode) {
+        // Verifica se já existe um empréstimo com o lendingCode
+        return LendingRepository.findByLendingCode(lendingCode).isPresent();
     }
 
 }
