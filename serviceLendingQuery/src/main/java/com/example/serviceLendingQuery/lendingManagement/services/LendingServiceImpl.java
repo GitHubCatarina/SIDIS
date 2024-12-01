@@ -218,4 +218,9 @@ public class LendingServiceImpl implements LendingService {
     private float calculateFine(long daysOverdue) {
         return daysOverdue * lateFee;
     }
+
+    public boolean lendingExists(String lendingCode) {
+        // Verifica se já existe um empréstimo com o lendingCode
+        return lendingRepository.findByLendingCode(lendingCode).isPresent();
+    }
 }
