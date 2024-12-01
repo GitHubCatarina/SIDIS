@@ -1,6 +1,8 @@
 package com.example.serviceLendingCom.lendingManagementCom.api;
 
+import com.example.serviceLendingCom.lendingManagementCom.dto.LendingDTO;
 import com.example.serviceLendingCom.lendingManagementCom.services.CreateLendingRequest;
+import com.example.serviceLendingCom.lendingManagementCom.services.LendingEventProducer;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -42,6 +44,8 @@ public class LendingController {
 
     private final LendingServiceImpl lendingService;
     private final LendingViewMapper lendingViewMapper;
+    @Autowired
+    private LendingEventProducer lendingEventProducer;
 
     private boolean hasPermission(List<String> roles, String... allowedRoles) {
         for (String role : allowedRoles) {
@@ -62,9 +66,20 @@ public class LendingController {
                 .build().toUri();
 
 
+        System.out.println("User criado, enviando evento para sincronização...");
+
+        // Converte User para UserDTO
+        LendingDTO lendingDTO = new LendingDTO().toDTO(lending);
+
+        // Manda para I2
+        lendingEventProducer.sendLendingCreatedEvent(lendingDTO);
+
+
         return ResponseEntity.created(newbarUri).eTag(Long.toString(lending.getVersion()))
                 .body(lendingViewMapper.toLendingView(lending));
     }
+
+
 
     @Operation(summary = "Return a Book")
     @PostMapping("/return")
