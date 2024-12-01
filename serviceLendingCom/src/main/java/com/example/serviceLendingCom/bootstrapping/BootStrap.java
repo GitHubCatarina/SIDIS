@@ -108,10 +108,10 @@ public class BootStrap implements CommandLineRunner {
              ));
 
              //Books Mock Data
-             Book book1 = new Book("9781982137274", "The 7 Habits of Highly Effective People", genre1, null, "Powerful lessons in personal change.");
-             Book book2 = new Book("9780735211292", "Atomic Habits", genre1, null, "Tiny Changes, Remarkable Results");
-             Book book3 = new Book("9780671027032", "How to Win Friends and Influence People", genre1, null, "Timeless advice on building successful relationships.");
-             Book book4 = new Book("9780345472328", "Mindset: The New Psychology of Success", genre2, null, "Discover the power of our mindset.");
+             Book book1 = new Book("9781982137274", "Orgulho e Preconceito", genre1, null, "Powerful lessons in personal change.");
+             Book book2 = new Book("9780735211292", "Senhor das Moscas", genre1, null, "Tiny Changes, Remarkable Results");
+             Book book3 = new Book("9780671027032", "Moby Dick", genre1, null, "Timeless advice on building successful relationships.");
+             Book book4 = new Book("9780345472328", "O Senhor dos Anéis", genre2, null, "Discover the power of our mindset.");
              Book book5 = new Book("9781577314806", "The Power of Now", genre3, null, "A guide to spiritual enlightenment.");
              Book book6 = new Book("9781612681139", "Rich Dad Poor Dad", genre1, null, "What the Rich Teach Their Kids About Money That the Poor and Middle Class Do Not!");
              Book book7 = new Book("9780743273565", "The Great Gatsby", genre5, null, "A novel of the Jazz Age.");

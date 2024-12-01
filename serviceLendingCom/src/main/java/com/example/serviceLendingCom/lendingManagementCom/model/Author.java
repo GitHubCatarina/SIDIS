@@ -19,20 +19,11 @@ public class Author {
 
     private int lents;
 
-    @OneToOne
-    private AuthorPhoto authorPhoto;
-
     public Author() {}
 
     public Author(String name, String shortBio) {
         setName(name);
         setShortBio(shortBio);
-    }
-
-    public Author(String name, String shortBio, AuthorPhoto authorPhoto) {
-        setName(name);
-        setShortBio(shortBio);
-        setAuthorPhoto(authorPhoto);
     }
 
     public Long getId() {
@@ -91,14 +82,6 @@ public class Author {
             throw new IllegalArgumentException("Short Bio exceeds the limit of 4096 characters");
         }
         this.shortBio = shortBio;
-    }
-
-    public AuthorPhoto getAuthorPhoto() {
-        return authorPhoto;
-    }
-
-    public void setAuthorPhoto(AuthorPhoto authorPhoto) {
-        this.authorPhoto = authorPhoto;
     }
 
     public void applyPatch(final long desiredVersion, final String name, final String shortBio) {

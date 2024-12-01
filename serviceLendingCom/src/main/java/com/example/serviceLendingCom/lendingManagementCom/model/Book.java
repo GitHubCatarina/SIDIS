@@ -39,20 +39,9 @@ public class Book {
     private List<BookAuthor> bookAuthors;
 
 
-    @OneToOne(cascade = CascadeType.PERSIST)
-    private BookCover cover;
-
     public Book() {
     }
 
-    public Book(String isbn, String title, Genre genre, String description, List<BookAuthor> bookAuthors, BookCover cover) {
-        this.isbn = isbn;
-        this.title = title;
-        this.genre = genre;
-        this.description = description;
-        this.bookAuthors = bookAuthors;
-        this.cover = cover;
-    }
 
     public Book(String isbn, String title, Genre genre, List<BookAuthor> bookAuthors, String description) {
         this.isbn = isbn;
@@ -138,13 +127,6 @@ public class Book {
         this.bookAuthors = bookAuthors;
     }
 
-    public BookCover getCover() {
-        return cover;
-    }
-
-    public void setCover(BookCover cover) {
-        this.cover = cover;
-    }
 
     public void updateData(final long desiredVersion, final String title, final Genre genre, final String description) {
         if (this.version != desiredVersion) {
