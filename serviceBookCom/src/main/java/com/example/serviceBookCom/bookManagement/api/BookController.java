@@ -1,9 +1,11 @@
 package com.example.serviceBookCom.bookManagement.api;
 
 import com.example.serviceBookCom.bookManagement.dto.BookDTO;
+import com.example.serviceBookCom.bookManagement.dto.SyncBookDTO;
 import com.example.serviceBookCom.bookManagement.model.Book;
 import com.example.serviceBookCom.bookManagement.model.BookCover;
 import com.example.serviceBookCom.bookManagement.repositories.BookRepository;
+import com.example.serviceBookCom.bookManagement.services.BookEventProducer;
 import com.example.serviceBookCom.bookManagement.services.BookServiceImpl;
 import com.example.serviceBookCom.bookManagement.services.CreateBookRequest;
 import com.example.serviceBookCom.bookManagement.services.EditBookRequest;
@@ -60,6 +62,8 @@ public class BookController {
     private final BookRepository bookRepository;
 
     private final RestTemplate restTemplate;
+    @Autowired
+    private BookEventProducer bookEventProducer;
 
 
     private boolean hasPermission(List<String> roles, String... allowedRoles) {
@@ -70,106 +74,6 @@ public class BookController {
         }
         return false;
     }
-
-    @Operation(summary = "Gets book by isbn")
-    @GetMapping("/{bookIsbn}")
-    public ResponseEntity<BookView> getBook(@PathVariable("bookIsbn") String isbn, @RequestHeader("Authorization") String authorization) {
-
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        // Roles from AuthService
-        List<String> roles = getRolesFromToken(token);
-
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-
-        final var book = bookService.getBook(isbn).orElseThrow(() -> new NotFoundException(Book.class, isbn));
-        return ResponseEntity.ok().eTag(Long.toString(book.getVersion())).body(bookViewMapper.toBookView(book));
-    }
-
-
-    @Operation(summary = "Gets all Books")
-    @GetMapping
-    public List<BookView> getBooks(
-            @RequestParam(value = "genre", required = false) String genre,
-            @RequestParam(value = "title", required = false) String title,
-            @RequestParam(value = "author", required = false) String author,
-            @RequestParam(defaultValue = "0", required = false) int page,
-            @RequestParam(defaultValue = "100", required = false) int size,
-            @RequestHeader("Authorization") String authorization) {
-
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        List<String> roles = getRolesFromToken(token);
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
-            throw new RuntimeException("Unauthorized access");
-        }
-
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Book> booksPage;
-
-        if (genre != null && title != null && author != null) {
-            booksPage = bookService.getBooksByTitleAndGenreAndAuthor(genre, title, author, pageable);
-        } else if (genre != null && title == null && author == null) {
-            booksPage = bookService.getBooksByGenre(genre, pageable);
-        } else if (genre == null && title != null && author == null) {
-            booksPage = bookService.getBooksByTitle(title, pageable);
-        } else if (genre == null && title == null && author != null) {
-            booksPage = bookService.getBooksByAuthor(author, pageable);
-        } else {
-            booksPage = bookService.getBooks(pageable);
-        }
-
-        return booksPage.map(bookViewMapper::toBookView).getContent();
-    }
-
-
-    @Operation(summary = "Gets top 5 Genres by book number")
-    @GetMapping("/top-genres")
-    public Iterable<GenreView> getTopGenres(@RequestHeader("Authorization") String authorization) {
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        List<String> roles = getRolesFromToken(token);
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
-            throw new RuntimeException("Unauthorized access");
-        }
-
-
-        return genreViewMapper.toGenreView(bookService.getTopGenres(), bookService.getAllBooks());
-    }
-
-    /*
-    @Operation(summary = "Gets top 5 Books lent")
-    @GetMapping("/top-books")
-    @ApiResponse(description = "Success", responseCode = "200", content = { @Content(mediaType = "application/json",
-            array = @ArraySchema(schema = @Schema(implementation = LentBookView.class))) })
-    public ResponseEntity<List<LentBookView>> getTopBooks() {
-        List<LentBookView> topBooks = bookService.getTopBooks();
-        return ResponseEntity.ok(topBooks);
-    }
-
-     */
-
-    @Operation(summary = "Downloads a cover of a book by id")
-    @GetMapping("/{bookId}/cover")
-    public ResponseEntity<Resource> getBookCover(@PathVariable("bookId") final String bookId, final HttpServletRequest request, @RequestHeader("Authorization") String authorization) {
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        List<String> roles = getRolesFromToken(token);
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
-            throw new RuntimeException("Unauthorized access");
-        }
-
-        BookCover bookCover = bookService.getBookCover(bookId);
-        final Resource resource = new ByteArrayResource(bookCover.getImage());
-        String contentType = bookCover.getContentType();
-        return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
-    }
-
 
     @Operation(summary = "Uploads a cover of a Book")
     @PostMapping("/{bookId}/cover")
@@ -190,10 +94,6 @@ public class BookController {
 
 
         // Manda para I2
-        Book book = bookRepository.findById(Long.parseLong(bookId))
-                .orElseThrow(() -> new NotFoundException(Book.class, bookId));
-        sincronizarComOutraInstancia(book);
-
         return ResponseEntity.created(new URI(up.getFileDownloadUri())).body(up);
     }
 
@@ -215,7 +115,14 @@ public class BookController {
                 .build().toUri();
 
         // Manda para I2
-        sincronizarComOutraInstancia(book);
+
+        System.out.println("User criado, enviando evento para sincronização...");
+
+        // Converte User para UserDTO
+        SyncBookDTO syncBookDTO = SyncBookDTO.toDTO(book);
+
+        // Manda para I2
+        bookEventProducer.sendBookCreatedEvent(syncBookDTO);
 
         return ResponseEntity.created(newbarUri).eTag(Long.toString(book.getVersion()))
                 .body(bookViewMapper.toCreateBookView(book));
@@ -241,7 +148,6 @@ public class BookController {
         Book book = bookService.updateBook(id, resource, getVersionFromIfMatchHeader(ifMatchValue));
 
         // Manda para I2
-        sincronizarComOutraInstancia(book);
 
         return ResponseEntity.ok().eTag(Long.toString(book.getVersion())).body(bookViewMapper.toBookView(book));
     }
@@ -266,7 +172,6 @@ public class BookController {
         Book book = bookService.partialUpdateBook(id, resource, getVersionFromIfMatchHeader(ifMatchValue));
 
         // Manda para I2
-        sincronizarComOutraInstancia(book);
 
         return ResponseEntity.ok().eTag(Long.toString(book.getVersion())).body(bookViewMapper.toBookView(book));
     }
@@ -291,22 +196,7 @@ public class BookController {
         return Arrays.asList(rolesClaim.split(","));
     }
 
-    @Retryable(
-            value = { Exception.class },
-            maxAttempts = 5,
-            backoff = @Backoff(delay = 2000) // Intervalo de 2 segundos entre tentativas
-    )
-    public void sincronizarComOutraInstancia(Book book) {
 
-        BookDTO bookDTO = toBookDTO(book);
-        if (book.getId() == null) {
-            throw new IllegalArgumentException("O bookname do book não deve ser nulo");
-        }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
-
-    }
     private BookDTO toBookDTO(Book book) {
         // Converte o objeto Genre para seu nome (ou outro identificador relevante)
         String genreName = book.getGenre() != null ? book.getGenre().getName() : null;

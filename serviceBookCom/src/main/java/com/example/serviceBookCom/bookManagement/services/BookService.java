@@ -28,4 +28,5 @@ public interface BookService {
     Book updateBook(Long id, EditBookRequest resource, long desiredVersion);
     Book partialUpdateBook(Long id, EditBookRequest resource, long desiredVersion);
     UploadFileResponse doUploadFile(String id, MultipartFile file);
+    boolean bookExists(Long bookId);
 }

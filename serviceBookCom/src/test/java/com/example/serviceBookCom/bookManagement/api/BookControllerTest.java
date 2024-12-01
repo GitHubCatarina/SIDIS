@@ -28,41 +28,6 @@ class BookControllerTest {
     }
 
     @Test
-    void getBook() {
-        when(bookService.getBook("123")).thenReturn(java.util.Optional.of(new Book()));
-        assertDoesNotThrow(() -> bookController.getBook("123", "Bearer token"));
-        verify(bookService, times(1)).getBook("123");
-    }
-
-    @Test
-    void getBooks() {
-        assertDoesNotThrow(() -> bookController.getBooks(null, null, null, 0, 100, "Bearer token"));
-        verify(bookService, times(1)).getBooks(any());
-    }
-
-    @Test
-    void getTopGenres() {
-        assertDoesNotThrow(() -> bookController.getTopGenres("Bearer token"));
-        verify(bookService, times(1)).getTopGenres();
-    }
-
-    /*
-    @Test
-    void getTopBooks() {
-        assertDoesNotThrow(() -> bookController.getTopBooks());
-        verify(bookService, times(1)).getTopBooks();
-    }
-
-     */
-
-    @Test
-    void getBookCover() {
-        when(bookService.getBookCover("123")).thenReturn(new BookCover());
-        assertDoesNotThrow(() -> bookController.getBookCover("123", null, "Bearer token"));
-        verify(bookService, times(1)).getBookCover("123");
-    }
-
-    @Test
     void uploadFile() {
         assertDoesNotThrow(() -> bookController.uploadFile("123", null, "Bearer token"));
         verify(bookService, times(1)).doUploadFile(eq("123"), any());

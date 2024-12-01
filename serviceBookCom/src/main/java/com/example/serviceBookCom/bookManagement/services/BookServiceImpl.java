@@ -37,7 +37,6 @@ import static com.example.serviceBookCom.bookManagement.util.BookUtil.*;
 public class BookServiceImpl implements BookService {
     private final RestTemplate restTemplate;
     private final BookRepository bookRepository;
-    //private final LendingRepository lendingRepository;
     private final BookCoverRepository bookCoverRepository;
     private final AuthorRepository authorRepository;
     private final BookAuthorRepository bookAuthorRepository;
@@ -291,5 +290,7 @@ public class BookServiceImpl implements BookService {
         return new PageImpl<>(sublist, pageable, books.size());
     }
 
-
+    public boolean bookExists(Long bookId) {
+        return bookRepository.findById(bookId).isPresent();
+    }
 }

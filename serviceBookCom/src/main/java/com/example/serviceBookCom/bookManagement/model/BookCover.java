@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 @Entity
 public class BookCover {
+
     @Id
     @GeneratedValue
     private Long id;
@@ -51,6 +52,14 @@ public class BookCover {
         this.contentType = contentType;
     }
 
+    public String getCoverUrl() {
+        return coverUrl;  // This method is required to fetch the cover URL
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
+    }
+
     @Override
     public String toString() {
         return "BookCover{" +
@@ -66,7 +75,6 @@ public class BookCover {
 
     public BookCover(String coverUrl, byte[] image) {
         this.coverUrl = coverUrl;
-        this.image = image;  // You can handle the image as needed
+        this.image = image;
     }
-
 }
