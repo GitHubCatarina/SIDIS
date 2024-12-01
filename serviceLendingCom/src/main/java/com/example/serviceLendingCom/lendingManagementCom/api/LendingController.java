@@ -1,5 +1,6 @@
 package com.example.serviceLendingCom.lendingManagementCom.api;
 
+import com.example.serviceLendingCom.lendingManagementCom.services.CreateLendingRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -51,113 +52,6 @@ public class LendingController {
         return false;
     }
 
-    @Operation(summary = "Gets all Lendings")
-    @GetMapping
-    @ApiResponse(description = "Success", responseCode = "200", content = {
-            @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = LendingView.class)))})
-    public List<LendingView> getLendingsPage(
-            @RequestParam(defaultValue = "0", required = false) int page,
-            @RequestParam(defaultValue = "100", required = false) int size,
-            @RequestHeader("Authorization") String authorization) {
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        // Check permissions
-        List<String> roles = getRolesFromToken(token);
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Lending> lendingsPage = lendingService.getLendings(pageable);
-        return lendingsPage.map(lendingViewMapper::toLendingView).getContent();
-    }
-
-    @Operation(summary = "Gets a specific Lending")
-    @GetMapping("/{lendingId}")
-    public ResponseEntity<LendingView> getLending(@PathVariable("lendingId") Long id,
-                                                  @RequestHeader("Authorization") String authorization) {
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        // Check permissions
-        List<String> roles = getRolesFromToken(token);
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-        final var lending = lendingService.getLending(id).orElseThrow(() -> new NotFoundException(Lending.class, id));
-
-        return ResponseEntity.ok().eTag(Long.toString(lending.getVersion())).body(lendingViewMapper.toLendingView(lending));
-    }
-
-    @Operation(summary = "Gets a list of overdue lending sorted by their tardiness")
-    @GetMapping("/overdue")
-    public List<LendingView> getOverdue(
-            @RequestParam(defaultValue = "0", required = false) int page,
-            @RequestParam(defaultValue = "100", required = false) int size,
-            @RequestHeader("Authorization") String authorization) {
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        // Check permissions
-        List<String> roles = getRolesFromToken(token);
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Lending> overdueLendingsPage = lendingService.getOverdueLendings(pageable);
-        return overdueLendingsPage.map(lendingViewMapper::toLendingView).getContent();
-    }
-
-    @Operation(summary = "Gets average lending duration")
-    @GetMapping("/average")
-    public double getAverageLendingDuration(@RequestHeader("Authorization") String authorization) {
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        // Check permissions
-        List<String> roles = getRolesFromToken(token);
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-        return lendingService.getAverageLendingDuration();
-    }
-
-    /*
-    @Operation(summary = "Gets the number of lendings per month for the last 12 months, broken down by genre")
-    @GetMapping("/lending-genre/{genreId}")
-    public Map<Integer, Long> getAveragePerGenreInMonth(@PathVariable("genreId") Long genreId) {
-        final var genre = genreService.getGenreById(genreId).orElseThrow(() -> new NotFoundException(Author.class, genreId));
-        return lendingService.numberOfLendingsPerMonthByGenre(genre);
-    }
-
-    @Operation(summary = "Gets the average number of lending per genre of a certain month\n")
-    @GetMapping("/average-per-genre/{date}")
-    public double getAveragePerGenreInMonth(@PathVariable("date") LocalDate date) {
-        int numberOfGenres = genreService.getGenres().size();
-        return lendingService.AveragePerGenreInMonth(date, numberOfGenres);
-    }
-
-     */
-
-    @Operation(summary = "Gets average lending duration per book")
-    @GetMapping("/average-per-book")
-    public Iterable<LendingAvgPerBookView> getAverageLendingDurationPerBook(@RequestHeader("Authorization") String authorization) {
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        // Check permissions
-        List<String> roles = getRolesFromToken(token);
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-        return lendingService.getAverageLendingDurationPerBook();
-    }
- /*
-    @Operation(summary = "Gets average lending duration per genre per month for a certain period")
-    @GetMapping("/average-duration-per-genre")
-    public Iterable<LendingAvgPerGenrePerMonthView> getAverageLendingDurationPerGenrePerMonth(
-            @RequestParam("startDate") LocalDate startDate, @RequestParam("endDate") LocalDate endDate) {
-        return lendingService.getAverageLendingDurationPerGenrePerMonth(startDate, endDate);
-    }
-
-
     @Operation(summary = "Creates a new Lending")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -171,8 +65,6 @@ public class LendingController {
         return ResponseEntity.created(newbarUri).eTag(Long.toString(lending.getVersion()))
                 .body(lendingViewMapper.toLendingView(lending));
     }
-
-     */
 
     @Operation(summary = "Return a Book")
     @PostMapping("/return")
@@ -223,23 +115,6 @@ public class LendingController {
             return Long.parseLong(ifMatchHeader.substring(1, ifMatchHeader.length() - 1));
         }
         return Long.parseLong(ifMatchHeader);
-    }
-
-
-
-    //Backend Endpoints
-    @GetMapping("/top-books")
-    public ResponseEntity<List<LentBookView>> getTopBooks() {
-
-        List<LentBookView> topBooks = lendingService.getTopBooks();
-        return ResponseEntity.ok(topBooks);
-    }
-
-    @GetMapping("/top-readers")
-    public ResponseEntity<List<LendingReaderView>> getTopReaders() {
-
-        List<LendingReaderView> topReaders = lendingService.getTopReaders();
-        return ResponseEntity.ok(topReaders);
     }
 
     //Auth

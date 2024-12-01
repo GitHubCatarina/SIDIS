@@ -138,6 +138,11 @@ TODO -> mudar de acordo com o código
 
 
 
+De forma a aumentar a eficiencia da base de dados, foi utilizado o mecanismo de allocation de sequence cache. As sequences armazenam os próximos valores de IDs num cache para acelerar a criação de novos registos.
+Quando o serviço reinicia, este cache é descartado e a base de dados aloca um novo bloco de valores (por exemplo, salta 51 IDs, indo para 52).
+Isso leva a uma não continuidade dos IDs entre inicializações, mas não interfere com nenhuma regra de negócio.
+
+
 Entregar:
 US:
 Criar reader + user

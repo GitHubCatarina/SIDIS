@@ -1,6 +1,10 @@
 package com.example.serviceLendingCom.lendingManagementCom.services;
 
 import com.example.serviceLendingCom.lendingManagementCom.api.*;
+import com.example.serviceLendingCom.lendingManagementCom.model.Book;
+import com.example.serviceLendingCom.lendingManagementCom.repositories.BookRepository;
+import com.example.serviceLendingCom.lendingManagementCom.model.Reader;
+import com.example.serviceLendingCom.lendingManagementCom.repositories.ReaderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -22,6 +26,8 @@ public class LendingServiceImpl implements LendingService {
     private final LendingRepository lendingRepository;
     private final LendingAvgPerBookViewMapper lendingAvgPerBookViewMapper;
     private final LendingAvgPerGenrePerMonthViewMapper lendingAvgPerGenrePerMonthViewMapper;
+    private final BookRepository bookRepository;
+    private final ReaderRepository readerRepository;
 
     @Value("${lending.days}")
     private int daysOfLending ;
@@ -29,33 +35,29 @@ public class LendingServiceImpl implements LendingService {
     private float lateFee;
 
     @Autowired
-    public LendingServiceImpl(LendingRepository lendingRepository, LendingAvgPerBookViewMapper lendingAvgPerBookViewMapper, LendingAvgPerGenrePerMonthViewMapper lendingAvgPerGenrePerMonthViewMapper) {
+    public LendingServiceImpl(LendingRepository lendingRepository, LendingAvgPerBookViewMapper lendingAvgPerBookViewMapper, LendingAvgPerGenrePerMonthViewMapper lendingAvgPerGenrePerMonthViewMapper, BookRepository bookRepository, ReaderRepository readerRepository) {
         this.lendingRepository = lendingRepository;
         this.lendingAvgPerBookViewMapper = lendingAvgPerBookViewMapper;
         this.lendingAvgPerGenrePerMonthViewMapper = lendingAvgPerGenrePerMonthViewMapper;
-
+        this.bookRepository = bookRepository;
+        this.readerRepository = readerRepository;
     }
 
     public Optional<Lending> getLending(final Long lendingId) {
         return lendingRepository.findById(lendingId);
     }
-
     public Page<Lending> getLendings(Pageable pageable) {
         return lendingRepository.findAll(pageable);
     }
-
     public Iterable<Lending> getAllLendings() {
         return lendingRepository.findAll();
     }
-
     public List<Lending> getLentBook(Long bookId) {
         return lendingRepository.getLentBook(bookId);
     }
-
     public Page<Lending> getOverdueLendings(Pageable pageable) {
         return lendingRepository.findOverdueLendings(pageable);
     }
-
     public double getAverageLendingDuration() {
         List<Lending> allLendings = lendingRepository.findAll();
         long totalDuration = 0;
@@ -71,34 +73,11 @@ public class LendingServiceImpl implements LendingService {
 
         return averageDuration;
     }
-/*
-    public double AveragePerGenreInMonth(LocalDate date, int numberOfGenres){
-        return lendingRepository.averagePerGenreInMonth(date, numberOfGenres);
-    }
-
-    public Map<Integer, Long> numberOfLendingsPerMonthByGenre(Genre genre) {
-        List<Object[]> results = lendingRepository.numberOfLendingsPerMonthByGenre(genre);
-        Map<Integer, Long> lendingsPerMonth = new HashMap<>();
-        for (Object[] result : results) {
-            Integer month = (Integer) result[0];
-            Long count = (Long) result[1];
-            lendingsPerMonth.put(month, count);
-        }
-        return lendingsPerMonth;
-    }
-
- */
-
     public Iterable<LendingAvgPerBookView> getAverageLendingDurationPerBook() {
         List<Object[]> results = lendingRepository.findAverageLendingDurationPerBook();
         return lendingAvgPerBookViewMapper.toLendingAvgPerBookViewList(results);
     }
 
-    /*
-    public Iterable<LendingAvgPerGenrePerMonthView> getAverageLendingDurationPerGenrePerMonth(LocalDate startDate, LocalDate endDate) {
-        List<Object[]> results = lendingRepository.findAverageLendingDurationPerGenrePerMonth(startDate, endDate);
-        return lendingAvgPerGenrePerMonthViewMapper.toLendingAvgPerGenrePerMonthViewList(results);
-    }
 
 
     public Lending createLending(final CreateLendingRequest resource) {
@@ -141,8 +120,6 @@ public class LendingServiceImpl implements LendingService {
 
         return lendingRepository.save(lending);
     }
-
- */
 
     public Lending returnBook(final EditLendingRequest resource, Long version) {
         Optional<Lending> lending = Optional.empty();
@@ -192,27 +169,6 @@ public class LendingServiceImpl implements LendingService {
         //Repo save I1
         // Salvar o empréstimo atualizado no repositório
         return lendingRepository.save(returnedLending);
-    }
-
-
-
-    @Override
-    public List<LentBookView> getTopBooks() {
-        List<Object[]> topBookIds = lendingRepository.findTopBookIds();
-
-        return topBookIds.stream()
-                .map(record -> new LentBookView((Long) record[0], (Long) record[1]))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<LendingReaderView> getTopReaders() {
-        Pageable pageable = PageRequest.of(0, 5); // Define que queremos apenas os 5 primeiros resultados
-        List<Object[]> topReaders = lendingRepository.findTopReaders(pageable);
-
-        return topReaders.stream()
-                .map(record -> new LendingReaderView((Long) record[0], (Long) record[1]))
-                .collect(Collectors.toList());
     }
 
     private float calculateFine(long daysOverdue) {
