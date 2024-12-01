@@ -51,6 +51,28 @@ public class AuthApi {
 	private final AuthEventProducer authEventProducer;
 	private final AuthEventConsumer authEventConsumer;
 
+
+	@PostMapping("register")
+	public UserView register(@RequestBody @Valid final CreateUserRequest request) {
+		System.out.println("Request to register user: " + request);
+
+		// Service I1
+		final var user = userService.create(request);
+		if (user.getId() == null) {
+			throw new IllegalStateException("User ID não pode ser nulo para sincronização.");
+		}
+
+		System.out.println("User criado, enviando evento para sincronização...");
+
+		// Converte User para UserDTO
+		UserDTO userDTO = new UserDTO().toUserDTO(user);
+
+		// Manda para I2
+		authEventProducer.sendUserCreatedEvent(userDTO);
+
+		return userViewMapper.toUserView(user);
+	}
+
 	@PostMapping("login")
 	public ResponseEntity<UserView> login(@RequestBody @Valid final AuthRequest request) {
 		try {
@@ -75,27 +97,6 @@ public class AuthApi {
 		} catch (final BadCredentialsException ex) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
-	}
-
-	@PostMapping("register")
-	public UserView register(@RequestBody @Valid final CreateUserRequest request) {
-		System.out.println("Request to register user: " + request);
-
-		// Service I1
-		final var user = userService.create(request);
-		if (user.getId() == null) {
-			throw new IllegalStateException("User ID não pode ser nulo para sincronização.");
-		}
-
-		System.out.println("User criado, enviando evento para sincronização...");
-
-		// Converte User para UserDTO
-		UserDTO userDTO = new UserDTO().toUserDTO(user);
-
-		// Manda para I2
-		authEventProducer.sendUserCreatedEvent(userDTO);
-
-		return userViewMapper.toUserView(user);
 	}
 
 	@GetMapping("/roles")

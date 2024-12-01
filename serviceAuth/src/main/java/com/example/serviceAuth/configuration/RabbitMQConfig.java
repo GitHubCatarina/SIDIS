@@ -6,27 +6,32 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.UUID;
+
 @Configuration
 public class RabbitMQConfig {
 
     // Exchange para comunicação entre instâncias
     @Bean
-    public TopicExchange authExchange() {
-        return new TopicExchange("auth.exchange");
+    public FanoutExchange authExchange() {
+        return new FanoutExchange("auth.exchange");
     }
 
-    // Queue para receber mensagens de sincronização
+
+    // Filas para as instâncias
     @Bean
     public Queue authQueue() {
-        return new Queue("auth.queue");
+        return new Queue("auth.queue." + UUID.randomUUID(), true, true, true); // Nome único
     }
 
-    // Bind queue ao exchange
+
+    // Binding para a fila principal
     @Bean
-    public Binding authBinding(Queue authQueue, TopicExchange authExchange) {
-        return BindingBuilder.bind(authQueue).to(authExchange).with("auth.user.created");
+    public Binding authBinding(Queue authQueue, FanoutExchange authExchange) {
+        return BindingBuilder.bind(authQueue).to(authExchange);
     }
 
+    // Converter de mensagem
     @Bean
     public MessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter(); // Usando Jackson para converter objetos em JSON

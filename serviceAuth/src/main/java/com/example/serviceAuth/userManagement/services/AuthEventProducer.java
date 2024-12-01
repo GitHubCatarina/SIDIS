@@ -12,7 +12,7 @@ public class AuthEventProducer {
     private final RabbitTemplate rabbitTemplate;
 
     public void sendUserCreatedEvent(UserDTO userDTO) {
-        rabbitTemplate.convertAndSend("auth.exchange", "auth.user.created", userDTO);
+        rabbitTemplate.convertAndSend("auth.exchange", "", userDTO);
         System.out.println("Mensagem enviada: utilizador criado com ID " + userDTO.getId());
     }
 
