@@ -293,4 +293,5 @@ public class BookServiceImpl implements BookService {
     public boolean bookExists(Long bookId) {
         return bookRepository.findById(bookId).isPresent();
     }
+
 }

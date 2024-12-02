@@ -129,11 +129,10 @@ public class BootStrap implements CommandLineRunner {
             BookAuthor bookAuthor18 = new BookAuthor(book18, author10);
             BookAuthor bookAuthor19 = new BookAuthor(book19, author10);
             BookAuthor bookAuthor20 = new BookAuthor(book20, author10);
-            BookAuthor bookAuthor21 = new BookAuthor(book2, author1);
 
             bookAuthorRepository.saveAll(Arrays.asList(
                     bookAuthor1, bookAuthor2, bookAuthor3, bookAuthor4, bookAuthor5, bookAuthor6, bookAuthor7, bookAuthor8, bookAuthor9, bookAuthor10,
-                    bookAuthor11, bookAuthor12, bookAuthor13, bookAuthor14, bookAuthor15, bookAuthor16, bookAuthor17, bookAuthor18, bookAuthor19, bookAuthor20, bookAuthor21
+                    bookAuthor11, bookAuthor12, bookAuthor13, bookAuthor14, bookAuthor15, bookAuthor16, bookAuthor17, bookAuthor18, bookAuthor19, bookAuthor20
             ));
         }
     }

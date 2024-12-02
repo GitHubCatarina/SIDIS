@@ -34,7 +34,7 @@ public class Book {
     @Column(length = 4096, nullable = true)
     private String description;
 
-    @OneToMany(mappedBy = "book", orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "book", orphanRemoval = true)
     private List<BookAuthor> bookAuthors;
 
 

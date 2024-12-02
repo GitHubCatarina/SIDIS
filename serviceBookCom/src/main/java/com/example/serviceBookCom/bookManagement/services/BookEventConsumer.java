@@ -1,17 +1,20 @@
 package com.example.serviceBookCom.bookManagement.services;
 
-import com.example.serviceBookCom.authorManagement.model.Author;
-import com.example.serviceBookCom.authorManagement.repository.AuthorRepository;
-import com.example.serviceBookCom.bookManagement.dto.SyncBookDTO;
 import com.example.serviceBookCom.bookManagement.model.Book;
-import com.example.serviceBookCom.bookManagement.model.BookAuthor;
+import com.example.serviceBookCom.bookManagement.repositories.BookRepository;
+import com.example.serviceBookCom.bookManagement.dto.SyncBookDTO;
 import com.example.serviceBookCom.bookManagement.model.BookCover;
 import com.example.serviceBookCom.bookManagement.model.Genre;
-import com.example.serviceBookCom.bookManagement.repositories.BookRepository;
 import com.example.serviceBookCom.bookManagement.repositories.GenreRepository;
+import com.example.serviceBookCom.authorManagement.model.Author;
+import com.example.serviceBookCom.authorManagement.repository.AuthorRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hibernate.Hibernate;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
+
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,50 +33,35 @@ public class BookEventConsumer {
         this.authorRepository = authorRepository;
     }
 
-    // Consumidor para a fila principal de sincronização
     @RabbitListener(queues = "#{bookQueue.name}", ackMode = "AUTO")
-    public void handleBookCreatedEvent(SyncBookDTO bookDTO) {
-        System.out.println("Mensagem recebida para livro com ID: " + bookDTO.getId());
+    public void handleBookCreatedEvent(BookEventMessage bookEventMessage) {
+        System.out.println("Mensagem recebida para livro com ID: " + bookEventMessage.getBookJson());
 
-        // Verificar se o livro já existe
-        boolean bookExists = bookService.bookExists(bookDTO.getId());
+        try {
+            // Desserializa o JSON para o objeto CreateBookRequest
+            CreateBookRequest resource = new ObjectMapper().readValue(bookEventMessage.getBookJson(), CreateBookRequest.class);
 
-        if (bookExists) {
-            System.out.println("Livro com ID " + bookDTO.getId() + " já existe, não será criado.");
-            return;
+            // Verificar se o livro já existe
+            boolean bookExists = bookRepository.existsByIsbn(resource.getIsbn());
+
+            if (bookExists) {
+                System.out.println("Livro com ISBN " + resource.getIsbn() + " já existe, não será criado.");
+                return;
+            }
+
+            // Criar o livro utilizando o método do BookService
+            Book book = bookService.createBook(resource, bookEventMessage.getCoverPhoto() != null ? new MultipartFileAdapter(bookEventMessage.getCoverPhoto()) : null);
+
+            // Inicializa as associações para evitar LazyInitializationException
+            Hibernate.initialize(book.getBookAuthors());
+
+            // Salvar o livro no repositório
+            bookRepository.save(book);
+            System.out.println("Livro com ISBN " + resource.getIsbn() + " criado com sucesso.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Erro ao processar a mensagem do livro.");
         }
-
-        // Recriar o objeto Book
-        Book book = new Book();
-        book.setId(bookDTO.getId());
-        book.setIsbn(bookDTO.getIsbn());
-        book.setTitle(bookDTO.getTitle());
-        book.setDescription(bookDTO.getDescription());
-
-        // Associar o género pelo nome (ou “ID”, dependendo da sua lógica)
-        Genre genre = genreRepository.findGenreById(bookDTO.getGenreId())
-                .orElseThrow(() -> new IllegalArgumentException("Género não encontrado: " + bookDTO.getGenreId()));
-        book.setGenre(genre);
-
-        // Adicionar autores
-        List<BookAuthor> bookAuthors = bookDTO.getBookAuthors().stream()
-                .map(authorName -> {
-                    Author author = authorRepository.findAuthorByName(authorName)
-                            .orElseThrow(() -> new IllegalArgumentException("Autor não encontrado: " + authorName));
-                    return new BookAuthor(book, author);
-                }).collect(Collectors.toList());
-        book.setBookAuthors(bookAuthors);
-
-        // Adicionar a capa, se presente
-        if (bookDTO.getCover() != null) {
-            BookCover cover = new BookCover();
-            cover.setCoverUrl(bookDTO.getCover().getCoverUrl());
-            cover.setContentType(bookDTO.getCover().getContentType());
-            book.setCover(cover);
-        }
-
-        bookRepository.save(book);
-        System.out.println("Livro com ID " + bookDTO.getId() + " criado com sucesso.");
     }
-
 }

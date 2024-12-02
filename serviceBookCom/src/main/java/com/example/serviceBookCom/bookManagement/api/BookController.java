@@ -100,7 +100,9 @@ public class BookController {
     @Operation(summary = "Creates a new Book")
     @PutMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<BookView> createBook(@Valid @RequestPart("book") final CreateBookRequest resource, @RequestPart(value = "cover", required = false) MultipartFile coverPhoto, @RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<BookView> createBook(@Valid @RequestPart("book") final CreateBookRequest resource,
+                                               @RequestPart(value = "cover", required = false) MultipartFile coverPhoto,
+                                               @RequestHeader("Authorization") String authorization) {
         String token = authorization.replace("Bearer ", ""); // Token from header
 
         // Check permissions
@@ -115,18 +117,21 @@ public class BookController {
                 .build().toUri();
 
         // Manda para I2
+        System.out.println("Livro criado, enviando evento para sincronização...");
 
-        System.out.println("User criado, enviando evento para sincronização...");
-
-        // Converte User para UserDTO
-        SyncBookDTO syncBookDTO = SyncBookDTO.toDTO(book);
-
-        // Manda para I2
-        bookEventProducer.sendBookCreatedEvent(syncBookDTO);
+        // Envia o evento para o RabbitMQ
+        try {
+            bookEventProducer.sendBookCreatedEvent(resource, coverPhoto);  // Ajustando a chamada aqui
+        } catch (Exception e) {
+            // Tratar o erro ou logar a exceção
+            System.out.println("Erro ao enviar evento para o RabbitMQ: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
 
         return ResponseEntity.created(newbarUri).eTag(Long.toString(book.getVersion()))
                 .body(bookViewMapper.toCreateBookView(book));
     }
+
 
     @Operation(summary = "Fully replaces an existing book")
     @PutMapping(path = "{bookId}")
