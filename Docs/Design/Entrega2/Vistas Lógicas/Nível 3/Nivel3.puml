@@ -22,7 +22,7 @@ boundary " "
 [Repository] -left(0- [Domain]
 [Service] -left(0- [Repository]
 [Repository] -up(0- [JPA]
-[JPA] -up(0- " ":SQL
+[JPA] )-up- " ":SQL
 
 
 

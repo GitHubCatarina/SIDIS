@@ -4,7 +4,7 @@
 title Vista Lógica Nível 1
 
 ' Definir o componente principal LMS
-component LMS {
+component <<system>>\nLMS {
   portin reader
   portin book
   portin lending

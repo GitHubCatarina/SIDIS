@@ -6,7 +6,7 @@ title Vista fisica nível 2
  hide circle
  skinparam classAttributeIconSize 0
 
-node "Instance 1"{
+node "Reader [n]"{
     component ReaderCom
 }
 
@@ -30,7 +30,7 @@ node "Instance  1 "{
     component LendingCom
 }
 
-node " Instance 1 ."{
+node " Instance 1" as I1{
     component LendingQuery
 }
 
@@ -39,7 +39,7 @@ node "Instance 1 "{
 }
 
 
-"" - "Instance 1 "
+"I1" - "Instance 1 " : AMQP
 
 
 

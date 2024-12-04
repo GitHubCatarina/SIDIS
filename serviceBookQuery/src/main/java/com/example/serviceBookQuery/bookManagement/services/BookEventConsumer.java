@@ -1,22 +1,13 @@
-package com.example.serviceBookCom.bookManagement.services;
+package com.example.serviceBookQuery.bookManagement.services;
 
-import com.example.serviceBookCom.bookManagement.model.Book;
-import com.example.serviceBookCom.bookManagement.repositories.BookRepository;
-import com.example.serviceBookCom.bookManagement.dto.SyncBookDTO;
-import com.example.serviceBookCom.bookManagement.model.BookCover;
-import com.example.serviceBookCom.bookManagement.model.Genre;
-import com.example.serviceBookCom.bookManagement.repositories.GenreRepository;
-import com.example.serviceBookCom.authorManagement.model.Author;
-import com.example.serviceBookCom.authorManagement.repository.AuthorRepository;
+import com.example.serviceBookQuery.authorManagement.repository.AuthorRepository;
+import com.example.serviceBookQuery.bookManagement.model.Book;
+import com.example.serviceBookQuery.bookManagement.repositories.BookRepository;
+import com.example.serviceBookQuery.bookManagement.repositories.GenreRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hibernate.Hibernate;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
-
-
-import java.util.Base64;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class BookEventConsumer {

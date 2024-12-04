@@ -37,8 +37,7 @@ public class Book {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "book", orphanRemoval = true)
     private List<BookAuthor> bookAuthors;
 
-
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private BookCover cover;
 
     public Book() {
