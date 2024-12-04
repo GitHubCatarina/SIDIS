@@ -1,5 +1,7 @@
 package com.example.serviceReaderCom.readerManagement.api;
 
+import com.example.serviceReaderCom.readerManagement.dto.ReaderDTO;
+import com.example.serviceReaderCom.readerManagement.services.ReaderEventProducer;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -58,6 +60,8 @@ public class ReaderController {
     private final ReaderLentsViewMapper readerLentsViewMapper;
     private final LendingServiceClient lendingServiceClient;
     private final RestTemplate restTemplate;
+    @Autowired
+    private ReaderEventProducer readerEventProducer;
 
     private boolean hasPermission(List<String> roles, String... allowedRoles) {
         for (String role : allowedRoles) {
@@ -66,186 +70,6 @@ public class ReaderController {
             }
         }
         return false;
-    }
-
-    @Operation(summary = "Gets a reader profile with a funny quote based on date of birth")
-    @GetMapping("/{readerId}")
-    @ApiResponse(description = "Success", content = { @Content(mediaType = "application/json",
-            schema = @Schema(implementation = ReaderProfileView.class)) })
-    public ResponseEntity<ReaderProfileView> getReaderProfileWithQuote(@PathVariable("readerId") Long id, @RequestHeader("Authorization") String authorization) {
-
-
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        // Roles from AuthService
-        List<String> roles = getRolesFromToken(token);
-
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-
-
-        var ReaderProfileView = readerProfileViewMapper.toReaderProfileView(readerService.getReaderByIdWithQuote(id).orElseThrow(() -> new NotFoundException(Reader.class, id)));
-        return ResponseEntity.ok().body(ReaderProfileView);
-    }
-
-    @Operation(summary = "Gets Readers")
-    @GetMapping
-    @ApiResponse(description = "Success", responseCode = "200", content = { @Content(mediaType = "application/json",
-            array = @ArraySchema(schema = @Schema(implementation = ReaderView.class))) })
-    public Iterable<ReaderView> getReaders(@RequestParam(value = "phoneNumber", required = false) String phoneNumber,
-                                           @RequestParam(value = "email", required = false) String email,
-                                           @RequestParam(value = "name", required = false) String name,
-                                           @RequestParam(defaultValue = "0", required = false) int page,
-                                           @RequestParam(defaultValue = "100", required = false) int size,
-                                           @RequestHeader("Authorization") String authorization) {
-
-
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        // Roles from AuthService
-        List<String> roles = getRolesFromToken(token);
-
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-
-
-
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Reader> readersPage;
-
-        if (name != null) {
-            readersPage = readerService.getReadersByName(name, pageable);
-        } else if (phoneNumber != null && email != null) {
-            readersPage = readerService.getReadersByPhoneNumberAndEmail(phoneNumber, email, pageable);
-        } else if (phoneNumber != null) {
-            readersPage = readerService.getReadersByPhoneNumber(phoneNumber, pageable);
-        } else if (email != null) {
-            readersPage = readerService.getReadersByEmail(email, pageable);
-        } else {
-            readersPage = readerService.getReaders(pageable);
-        }
-
-        return  readersPage.map(readerViewMapper::toReaderView).getContent();
-    }
-/*
-    @Operation(summary = "Gets the Top 5 Readers")
-    @GetMapping("/top-readers")
-    @ApiResponse(description = "Success", content = { @Content(mediaType = "application/json",
-            array = @ArraySchema(schema = @Schema(implementation = ReaderView.class))) })
-    public ResponseEntity<Iterable<ReaderView>> getTopReaders(@RequestHeader("Authorization") String authorization) {
-
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        // Roles from AuthService
-        List<String> roles = getRolesFromToken(token);
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        List<ReaderView> readerViews = readerService.getTopReaders();
-
-        return ResponseEntity.ok(readerViews);
-    }
-
- */
-
-
-
-    /*
-    @Operation(summary = "Gets book suggestions based on reader's interest list")
-    @GetMapping("/{readerId}/suggestions")
-    public Iterable<BookView> getSuggestedBooks(@PathVariable("readerId") Long readerId,
-                                                @RequestParam(defaultValue = "0", required = false) int page,
-                                                @RequestParam(defaultValue = "100", required = false) int size, @RequestHeader("Authorization") String authorization) {
-         /*
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        // Roles from AuthService
-        List<String> roles = getRolesFromToken(token);
-
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-         *//*
-        Pageable pageable = PageRequest.of(page, size);
-        return bookViewMapper.toBookView(readerService.getSuggestedBooks(readerId, pageable));
-    }*/
-
-    /*
-    @Operation(summary = "Gets the Top 5 Readers per genre of a certain period")
-    @GetMapping("/top-readers/{genreId}")
-    public Iterable<ReaderView> getTopReadersPerGenre(@PathVariable("genreId") Long genreId,
-                                                      @RequestParam("startDate") final LocalDate startDate,
-                                                      @RequestParam("endDate") final LocalDate endDate, @RequestHeader("Authorization") String authorization){
-
-         /*
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        // Roles from AuthService
-        List<String> roles = getRolesFromToken(token);
-
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-         */
-        /*
-        final var genre = genreService.getGenreById(genreId).orElseThrow(() -> new NotFoundException(Reader.class, genreId));
-        return readerViewMapper.toReaderView(readerService.getTopReadersperGenre(5, genre, startDate, endDate));
-    }
-    */
-    /*
-    @Operation(summary = "Gets Monthly lending per reader of a certain period")
-    @GetMapping("/monthly-lending")
-    public Iterable<ReaderLentsView> getMonthlyLending(@RequestParam("startDate") final LocalDate startDate,
-                                                       @RequestParam("endDate") final LocalDate endDate, @RequestHeader("Authorization") String authorization){
-         /*
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        // Roles from AuthService
-        List<String> roles = getRolesFromToken(token);
-
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-         */
-/*
-        Iterable<Reader> readers = readerService.getAllReaders();
-        for (Reader reader : readers) {
-            reader.setLents(readerService.getMonthlyLending(reader.getId(), startDate, endDate));
-        }
-        return readerLentsViewMapper.toReaderLentsView(readers);
-    }
-    */
-    @Operation(summary = "Downloads a cover of a reader by id")
-    @GetMapping("/{readerId}/photo")
-    public ResponseEntity<Resource> getReaderPhoto(@PathVariable("readerId") final String readerId,
-                                                 final HttpServletRequest request, @RequestHeader("Authorization") String authorization) {
-
-
-        String token = authorization.replace("Bearer ", ""); // Token from header
-
-        // Roles from AuthService
-        List<String> roles = getRolesFromToken(token);
-
-        if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-
-        ReaderPhoto readerPhoto = readerService.getReaderPhoto(readerId);
-
-        final Resource resource = new ByteArrayResource(readerPhoto.getImage());
-
-        String contentType = readerPhoto.getContentType();
-
-        return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
     }
 
     @Operation(summary = "Creates a new Reader")
@@ -272,6 +96,24 @@ public class ReaderController {
         } catch (IOException e) {
             e.printStackTrace(); // Log do erro
         }
+
+        // 2. Envia o evento para o RabbitMQ
+        ReaderDTO readerDTO = new ReaderDTO(
+                reader.getId(),
+                reader.getReaderCode(),
+                reader.getName(),
+                reader.getEmail(),
+                reader.getDateOfBirth(),
+                reader.getAge(),
+                reader.getPhoneNumber(),
+                reader.getGDBRConsent(),
+                reader.getInterests(),
+                reader.getFunnyQuote()
+        );
+
+
+        // Envia a mensagem para o RabbitMQ
+        readerEventProducer.sendReaderCreatedEvent(readerDTO);
 
         final var newbarUri = ServletUriComponentsBuilder.fromCurrentRequestUri().pathSegment(reader.getId().toString())
                 .build().toUri();
