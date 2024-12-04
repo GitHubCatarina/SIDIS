@@ -47,8 +47,8 @@ public class Reader {
     @Column(name = "interest", nullable = true)
     private List<String> interests;
 
-    //@OneToOne(cascade = CascadeType.ALL)
-    //private ReaderPhoto readerPhoto;
+    @OneToOne(cascade = CascadeType.ALL)
+    private ReaderPhoto readerPhoto;
 
     private String funnyQuote;
 
@@ -85,6 +85,20 @@ public class Reader {
         this.phoneNumber = phoneNumber;
         this.GDBRConsent = GDBRConsent;
         this.interests = interests;
+    }
+
+    public Reader(String readerCode, String name, String email, LocalDate dateOfBirth, Integer phoneNumber, Boolean GDBRConsent, List<String> interests,ReaderPhoto readerPhoto) {
+        this.readerCode = readerCode;
+        this.name = name;
+        this.email = email;
+        this.dateOfBirth = dateOfBirth;
+        LocalDate currentDate = LocalDate.now();
+        Period period = Period.between(dateOfBirth, currentDate);
+        this.age = period.getYears();
+        this.phoneNumber = phoneNumber;
+        this.GDBRConsent = GDBRConsent;
+        this.interests = interests;
+        this.readerPhoto = readerPhoto;
     }
 
     public Long getId() {
@@ -174,6 +188,14 @@ public class Reader {
 
     public void setInterests(List<String> interests) {
         this.interests = interests;
+    }
+
+    public ReaderPhoto getReaderPhoto() {
+        return readerPhoto;
+    }
+
+    public void setReaderPhoto(ReaderPhoto readerPhoto) {
+        this.readerPhoto = readerPhoto;
     }
 
     public String getFunnyQuote() {

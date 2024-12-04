@@ -41,5 +41,7 @@ public interface ReaderRepository extends JpaRepository<Reader, Long> {
 
     @Query("SELECT MAX(r.id) FROM Reader r")
     int findMaxReaderId();
+
+    Optional<Reader> findByReaderCode(String readerCode);
 }
 
