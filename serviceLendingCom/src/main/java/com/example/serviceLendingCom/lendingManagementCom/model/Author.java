@@ -1,10 +1,12 @@
 package com.example.serviceLendingCom.lendingManagementCom.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.hibernate.StaleObjectStateException;
 
 @Entity
 @Table
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Author {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

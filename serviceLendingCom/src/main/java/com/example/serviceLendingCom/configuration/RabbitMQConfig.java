@@ -12,11 +12,18 @@ import java.util.UUID;
 @Configuration
 public class RabbitMQConfig {
 
-    // Exchange para comunicação entre instâncias
+    // Exchange para comunicação entre lending
     @Bean
     public FanoutExchange lendingExchange() {
         return new FanoutExchange("lending.exchange");
     }
+
+    // Exchange para comunicação entre books
+    @Bean
+    public FanoutExchange bookExchange() {
+        return new FanoutExchange("book.exchange");
+    }
+
 
 
     // Filas para as instâncias
@@ -25,11 +32,22 @@ public class RabbitMQConfig {
         return new Queue("lending.queue." + UUID.randomUUID(), true, true, true); // Nome único
     }
 
+    @Bean
+    public Queue bookQueue() {
+        return new Queue("book.queue." + UUID.randomUUID(), true, true, true); // Nome único
+    }
+
+
 
     // Binding para a fila principal
     @Bean
     public Binding lendingBinding(Queue lendingQueue, FanoutExchange lendingExchange) {
         return BindingBuilder.bind(lendingQueue).to(lendingExchange);
+    }
+
+    @Bean
+    public Binding bookBinding(Queue bookQueue, FanoutExchange bookExchange) {
+        return BindingBuilder.bind(bookQueue).to(bookExchange);
     }
 
     // Converter de mensagem

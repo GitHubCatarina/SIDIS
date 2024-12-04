@@ -20,4 +20,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Query(value = "SELECT g FROM Genre g JOIN Book b ON g.id = b.genre.id GROUP BY g.id, g.name ORDER BY COUNT(b.id) DESC LIMIT 5")
     List<Genre> findTopGenres();
+
+    boolean existsByIsbn(String isbn);
 }

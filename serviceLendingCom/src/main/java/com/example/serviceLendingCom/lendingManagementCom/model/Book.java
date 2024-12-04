@@ -1,7 +1,6 @@
 package com.example.serviceLendingCom.lendingManagementCom.model;
 
-import com.example.serviceLendingCom.lendingManagementCom.model.BookAuthor;
-import com.example.serviceLendingCom.lendingManagementCom.model.Genre;
+import com.example.serviceLendingCom.lendingManagementCom.util.BookUtil;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -35,13 +34,23 @@ public class Book {
     @Column(length = 4096, nullable = true)
     private String description;
 
-    @OneToMany(mappedBy = "book", orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "book", orphanRemoval = true)
     private List<BookAuthor> bookAuthors;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private BookCover cover;
 
     public Book() {
     }
 
+    public Book(String isbn, String title, Genre genre, String description, List<BookAuthor> bookAuthors, BookCover cover) {
+        this.isbn = isbn;
+        this.title = title;
+        this.genre = genre;
+        this.description = description;
+        this.bookAuthors = bookAuthors;
+        this.cover = cover;
+    }
 
     public Book(String isbn, String title, Genre genre, List<BookAuthor> bookAuthors, String description) {
         this.isbn = isbn;
@@ -79,6 +88,9 @@ public class Book {
     }
 
     public void setIsbn(String isbn) {
+        if (!BookUtil.isValidISBN(isbn)) {
+            throw new IllegalArgumentException("[ERROR] Isbn is no valid.");
+        }
         this.isbn = isbn;
     }
 
@@ -127,6 +139,13 @@ public class Book {
         this.bookAuthors = bookAuthors;
     }
 
+    public BookCover getCover() {
+        return cover;
+    }
+
+    public void setCover(BookCover cover) {
+        this.cover = cover;
+    }
 
     public void updateData(final long desiredVersion, final String title, final Genre genre, final String description) {
         if (this.version != desiredVersion) {
