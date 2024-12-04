@@ -7,9 +7,9 @@ participant ":HTTP Client" as Client
 participant ":LMS" as System
 
 ' Criação de autor
-Client -> System: POST /authors
+Client -> System: POST /lendings
 alt success
-    System --> Client: 1.1: 201 Created (Autor criado)
+    System --> Client: 1.1: 201 Created (Empréstimo criado)
 else error
     System --> Client: 1.2: 400 Bad Request (Erro de validação)
 end

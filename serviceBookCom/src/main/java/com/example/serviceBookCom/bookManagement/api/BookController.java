@@ -98,7 +98,7 @@ public class BookController {
     }
 
     @Operation(summary = "Creates a new Book")
-    @PutMapping
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<BookView> createBook(@Valid @RequestPart("book") final CreateBookRequest resource,
                                                @RequestPart(value = "cover", required = false) MultipartFile coverPhoto,

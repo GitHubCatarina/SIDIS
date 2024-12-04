@@ -8,11 +8,11 @@ participant ":LMS" as System
 
 
 ' Atualização de livro
-Client -> System: PUT /books/{isbn}
+Client -> System: POST /books
 alt success
-    System --> Client: 2.1: 200 OK (Livro atualizado)
+    System --> Client: 2.1: 200 OK (Livro criado)
 else error
-    System --> Client: 2.2: 404 Not Found (Livro não encontrado)
+    System --> Client: 1.2: 400 Bad Request (Erro de validação)
 end
 
 @enduml

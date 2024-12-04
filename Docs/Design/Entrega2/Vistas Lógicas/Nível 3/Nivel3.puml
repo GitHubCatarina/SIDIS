@@ -6,25 +6,29 @@
 
 title Vista lógica nível 3
 
-component "BE" {
-    [Router]
-    [Controler]
-    [Service]
-    [Domain]
-    [Repository]
-    [JPA]
+component "ReaderCom" <<container>> as ReaderC{
+    portout " " as portoutReaderC1
+    portout " " as portoutReaderC2
+    portin " " as portinReaderC
+
+    component "ServiceReaderCom" <<component>>{
+        portin " " as portinReaderCBE
+        portout " " as portoutReaderBE1
+        portout " " as portoutReaderBE2
+    }
+
+    component "ReaderCom Database" <<component>>
+
+    portoutReaderBE1 -- portoutReaderC1
+    portoutReaderBE2 -- portoutReaderC2
+    portinReaderC - portinReaderCBE
+
 }
-boundary " "
-[Router] ~up~ boundary :REST API
-[Router] -down(0- [Controler]
-[Controler] -down(0- [Service]
-[Service] -down(0- [Domain]
-[Repository] -left(0- [Domain]
-[Service] -left(0- [Repository]
-[Repository] -up(0- [JPA]
-[JPA] )-up- " ":SQL
 
-
+"ReaderCom Database" -0)- ServiceReaderCom : "SQL"
+"Publish API" )-- portinReaderC
+portoutReaderC1 -- "HTTP ReaderCom API"
+portoutReaderC2 -- "Notify API"
 
 
 @enduml

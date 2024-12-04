@@ -1,32 +1,33 @@
 @startuml
 ' Definindo os participantes
 participant "HTTP Client" as client
-participant "reader[0] : Reader" as reader0
-participant "reader[1] : Reader" as reader1
+participant "auth[0] : Auth" as auth0
 participant "Message Broker" as mb
+participant "auth[1] : Auth" as auth1
 
 ' O cliente faz uma requisição para criar um novo leitor
-client o-> reader0: POST /readers {readerData, photo}
-activate reader0
+client o-> auth0: POST /auth/register {userData}
+activate auth0
 
-' O Reader Service valida o token e permissões localmente
-reader0 -> reader0: Validar token JWT e permissões
+' O user Service valida o token e permissões localmente
+auth0 -> auth0: Valida requisição
 
 ' Verifica as permissões e cria o leitor
-reader0 -> reader0: save(readerData, photo)
+auth0 -> auth0: save(userData)
 
-reader0 -> mb: publish(readerCreated)
+auth0 -> mb: publish(userCreated)
 
+activate mb
 ' Replicando dados para a outra instância (espelhamento)
-mb -> reader1: notify(readerCreated)
-activate reader1
-reader1 -> reader1: save(reader)
+mb -> auth1: notify(userCreated)
+deactivate mb
+activate auth1
+
+auth1 -> auth1: save(user)
 
 
 ' Responder ao cliente com sucesso final após a replicação
-
-
-reader0 -->o client: 201 Created
-deactivate reader1
-deactivate reader0
+auth0 -->o client: 201 Created
+deactivate auth1
+deactivate auth0
 @enduml

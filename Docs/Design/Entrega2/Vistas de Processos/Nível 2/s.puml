@@ -1,0 +1,36 @@
+@startuml
+!define RECTANGLE class
+
+participant "HTTP Client" as client
+participant "API (Controller)" as controller
+participant "Lending Service" as lendingService
+participant "Book Repository" as bookRepo
+participant "Reader Repository" as readerRepo
+participant "Lending Repository" as lendingRepo
+participant "LendingDTO" as lendingDTO
+participant "Lending View Mapper" as lendingViewMapper
+participant "Lending" as lending
+participant "Message Broker" as eventProducer
+
+client -> controller : Requisição POST (CreateLendingRequest)
+controller -> lendingService : createLending(request)
+lendingService -> bookRepo : findById(resource.bookId)
+bookRepo -> lendingService : Book (ou erro)
+lendingService -> readerRepo : findById(resource.readerId)
+readerRepo -> lendingService : Reader (ou erro)
+lendingService -> lendingRepo : findOverdueBooksByReaderId(reader.id)
+lendingRepo -> lendingService : Overdue books (ou vazio)
+lendingService -> lendingRepo : findAlreadyLendedBook(reader.id, book.id)
+lendingRepo -> lendingService : Already lent books (ou vazio)
+lendingService -> lendingRepo : countLentBooksByReaderId(reader.id)
+lendingRepo -> lendingService : Count of lent books
+lendingService -> lending : create Lending entity
+lending -> lendingRepo : save(lending)
+lendingRepo -> lendingService : Lending saved
+lendingService -> eventProducer : sendLendingCreatedEvent(lendingDTO)
+eventProducer -> lendingService : Event sent
+lendingService -> controller : Return ResponseEntity with LendingView
+
+controller -> client : Response (Created LendingView)
+
+@enduml

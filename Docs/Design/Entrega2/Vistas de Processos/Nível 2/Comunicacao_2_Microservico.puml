@@ -1,37 +1,57 @@
 @startuml
+' Definindo os participantes
 participant "HTTP Client" as client
-participant "lending[0] : Lending" as lending0
-participant "lending[1] : Lending" as lending1
-participant "reader[0] : Reader" as reader0
-participant "reader[1] : Reader" as reader1
+participant "lendingCom[0] : lendingCom" as lending0
+participant "Message Broker" as mb
+participant "lendingCom[1] : lendingCom" as lending1
+participant "lendingQuery[0] : lendingQuery" as lending01
+participant "lendingQuery[1] : lendingQuery" as lending11
+participant "top[0] : top" as top0
+participant "top[1] : top" as top1
 
-' O cliente faz uma solicitação para o serviço Lending
-client -> lending0: GET /lendings/top-readers
+
+' O cliente faz uma requisição para criar um novo leitor
+client o-> lending0: POST /lendings {lendingData}
 activate lending0
 
-' lending[0] busca os top readers localmente
-lending0 -> lending0: call getTopReaders()
+' O lending Service valida o token e permissões localmente
+lending0 -> lending0: Validar token JWT e permissões
 
-' lending[0] consulta a primeira instância de Reader para detalhes dos leitores
-lending0 -> reader0: GET /readers/{readerId} (detalhes)
-activate reader0
-reader0 --> lending0: 200 OK {readerDetails}
-deactivate reader0
+' Verifica as permissões e cria o leitor
+lending0 -> lending0: save(lendingData)
 
-' lending[0] também consulta a segunda instância de Reader para consistência
-lending0 -> reader1: GET /readers/{readerId}/internal (detalhes)
-activate reader1
-reader1 --> lending0: 200 OK {readerDetails}
-deactivate reader1
+lending0 -> mb: publish(lendingCreated)
+activate mb
 
-' Replicação para a segunda instância do Lending
-lending0 -> lending1: POST /lendings/internal/top-readers {replicatedData}
+' Replicando dados para a outra instância (espelhamento)
+mb -> lending1: notify(lendingCreated)
 activate lending1
-lending1 -> lending1: save replicated data
-lending1 --> lending0: 201 Created
-deactivate lending1
+mb -> lending01: notify(lendingCreated)
+activate lending01
+mb -> lending11: notify(lendingCreated)
+activate lending11
+mb -> top0: notify(lendingCreated)
+activate top0
+mb -> top1: notify(lendingCreated)
+deactivate mb
 
-' Resposta final ao cliente
-lending0 --> client: 200 OK [Lista de Top Readers]
+activate top1
+
+
+
+lending1 -> lending1: save(lending)
+lending01 -> lending01: save(lending)
+deactivate lending1
+lending11 -> lending11: save(lending)
+deactivate lending01
+top0 -> top0: save(lending)
+deactivate lending11
+top1 -> top1: save(lending)
+deactivate top0
+
+
+' Responder ao cliente com sucesso final após a replicação
+lending0 -->o client: 201 Created
+deactivate top1
 deactivate lending0
 @enduml
