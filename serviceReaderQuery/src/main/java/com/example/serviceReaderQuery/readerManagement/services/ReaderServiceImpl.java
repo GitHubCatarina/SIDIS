@@ -301,4 +301,8 @@ public class ReaderServiceImpl implements ReaderService {
     }
 
 
+    public boolean readerExists(String readerCode) {
+        return readerRepository.findByReaderCode(readerCode).isPresent();
+    }
+
 }
