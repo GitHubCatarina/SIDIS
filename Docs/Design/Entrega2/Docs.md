@@ -226,7 +226,6 @@ mantendo a separação e a independência entre os componentes do sistema.
 
 A vista lógica de nível 1 representa a arquitetura de comunicação entre o sistema LMS e as suas APIs externas. Cada componente do sistema, como Auth, BookCom, LendingCom, entre outros, expõe interfaces HTTP (APIs) que são consumidas por diferentes serviços. As portas de comunicação (portout) ligam as funcionalidades internas do sistema às APIs correspondentes, facilitando a interação e troca de dados entre os microserviços e os sistemas externos.
 
-# REVER
 ### Vista Lógica Nível 2
 ![VistaLogica2](/Docs/Design/Entrega2/Vistas Lógicas/Nível 2/Nivel2-Vista Lógica Nível 2.svg)
 
@@ -245,7 +244,33 @@ A comunicação entre eles é feita via portas, com o serviço a enviar e recebe
 A Publish API recebe dados através da porta de entrada de ReaderCom, 
 enquanto as respostas são enviadas por duas portas de saída, uma para a API HTTP e outra para o serviço de notificação Notify API.
 
+## Como correr
+### Para iniciar
+  - Iniciar RabbitMQ:
+      ```shell
+      docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:management
+      ```
+- Iniciar os servidores H2 com o script "linux-h2-servers.sh"
+  ```shell
+      cd ../../..
+  
+      ./start_h2_server.sh
+   ```
+- Iniciar os microserviços desejados
 
+
+- [Interface do RabbitMQ Management](http://localhost:15672/)
+   - DefaultUsername: guest
+   - DefaultPassword: guest
+### Para encerrar
+  - Eliminar o container do RabbitMQ:
+    ```shell
+      docker rm -f rabbitmq
+    ```
+  - Eliminar os servidores H2:
+    ```shell
+      sudo pkill -f "org.h2.tools.Server"
+    ```
 
 ## Notas finais
 De forma a aumentar a eficiencia da base de dados, foi utilizado o mecanismo de allocation de sequence cache. As sequences armazenam os próximos valores de IDs num cache para acelerar a criação de novos registos.
