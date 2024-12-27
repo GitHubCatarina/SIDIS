@@ -1,0 +1,33 @@
+@startuml
+' Definindo os participantes
+participant "HTTP Client" as client
+participant "auth[0] : Auth" as auth0
+participant "Message Broker" as mb
+participant "auth[1] : Auth" as auth1
+
+' O cliente faz uma requisição para criar um novo leitor
+client o-> auth0: POST /auth/register {userData}
+activate auth0
+
+' O user Service valida o token e permissões localmente
+auth0 -> auth0: Valida requisição
+
+' Verifica as permissões e cria o leitor
+auth0 -> auth0: save(userData)
+
+auth0 -> mb: publish(userCreated)
+
+activate mb
+' Replicando dados para a outra instância (espelhamento)
+mb -> auth1: notify(userCreated)
+deactivate mb
+activate auth1
+
+auth1 -> auth1: save(user)
+
+
+' Responder ao cliente com sucesso final após a replicação
+auth0 -->o client: 201 Created
+deactivate auth1
+deactivate auth0
+@enduml

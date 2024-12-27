@@ -1,0 +1,112 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+title Vista Lógica Nível 2
+
+component "LMS" <<system>> as LMS {
+ component "Message Broker" <<container>> {
+ portin " " as innerportinmb
+ portout " " as innerportoutmb
+ }
+
+ component "Auth" <<container>> {
+ portout " " as innerportoutauth
+ }
+
+ component "BookCom" <<container>> {
+ portin " " as innerportinbookc
+ portout " " as innerportoutbookc
+ }
+
+ component "BookQuery" <<container>> {
+ portout " " as innerportoutbookq
+ }
+
+ component "LendingCom" <<container>> {
+ portin " " as innerportinlendingc
+ portout " " as innerportoutlendingc
+ }
+
+ component "LendingQuery" <<container>> {
+ portin " " as innerportinlendingq
+ portout " " as innerportoutlendingq
+ }
+
+ component "ReaderCom" <<container>> {
+ portin " " as innerportinreaderc
+ portout " " as innerportoutreaderc
+ }
+
+ component "ReaderQuery" <<container>> {
+ portout " " as innerportoutreaderq
+ }
+
+ component "TopQuery" <<container>> {
+ portout " " as innerportouttopq
+ }
+
+ Auth -[hidden]l- Auth
+ BookCom -[hidden]l- BookCom
+ BookCom -[hidden]l- BookQuery
+ BookCom -[hidden]l- LendingCom
+ LendingCom -[hidden]l- TopQuery
+ LendingCom -[hidden]l- LendingCom
+ LendingCom -[hidden]l- LendingQuery
+ ReaderCom -[hidden]l- ReaderCom
+ ReaderCom -[hidden]l- ReaderQuery
+ ReaderCom -[hidden]l- LendingCom
+
+
+ innerportoutmb -0)- innerportoutauth : "Publish API"
+ innerportinmb -(0----- innerportoutauth : "Notify API"
+ innerportoutmb -0)- innerportoutbookc : "Publish API"
+ innerportinmb -(0----- innerportoutbookc : "Notify API"
+ innerportinmb -(0----- innerportoutbookq : "Notify API"
+ innerportoutmb -0)- innerportinlendingc : "Publish API"
+ innerportinmb -(0----- innerportinlendingc : "Notify API"
+ innerportinmb -(0----- innerportoutlendingq : "Notify API"
+ innerportoutmb -0)- innerportinreaderc : "Publish API"
+ innerportinmb -(0----- innerportoutreaderc : "Notify API"
+ innerportinmb -(0----- innerportoutreaderq : "Notify API"
+ innerportinmb -(0----- innerportouttopq : "Notify API"
+
+ portout auth as portauth
+ portout bookCom as portbookc
+ portout bookQuery as portbookq
+ portout lendingCom as portlendingc
+ portout lendingQuery as portlendingq
+ portout readerCom as portreaderc
+ portout readerQuery as portreaderq
+ portout topQuery as porttopq
+
+ innerportoutauth -- portauth
+ innerportoutbookc -- portbookc
+ innerportoutbookq -- portbookq
+ innerportoutlendingc -- portlendingc
+ innerportoutlendingq -- portlendingq
+ innerportoutreaderc -- portreaderc
+ innerportoutreaderq -- portreaderq
+ innerportouttopq -- porttopq
+
+}
+
+() "HTTP Auth API" as authapi
+() "HTTP BookCom API" as bookapic
+() "HTTP BookQuery API" as bookapiq
+() "HTTP LendingCom API" as lendingapic
+() "HTTP LendingQuery API" as lendingapiq
+() "HTTP ReaderCom API" as readerapic
+() "HTTP ReaderQuery API" as readerapiq
+() "HTTP TopQuery API" as topapiq
+
+
+
+portauth -- authapi
+portbookc -- bookapic
+portbookq -- bookapiq
+portlendingc -- lendingapic
+portlendingq -- lendingapiq
+portreaderc -- readerapic
+portreaderq -- readerapiq
+porttopq -- topapiq
+@enduml

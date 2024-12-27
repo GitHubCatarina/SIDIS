@@ -1,0 +1,18 @@
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+title Vista de processo nível 1
+
+participant ":HTTP Client" as Client
+participant ":LMS" as System
+
+
+' Consulta dos top 5 livros
+Client -> System: GET /top/top-books
+alt success
+    System --> Client: 4.1: 200 OK (Lista dos top 5 livros)
+else error
+    System --> Client: 4.2: 500 Internal Server Error (Erro interno)
+end
+
+@enduml

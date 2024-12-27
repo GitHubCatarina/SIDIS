@@ -1,0 +1,55 @@
+@startuml
+ 'https://plantuml.com/class-diagram
+
+title Vista física nível 2
+
+ hide circle
+ skinparam classAttributeIconSize 0
+
+node "mb:" as messageBroker {
+    [Message Broker]
+}
+
+node "auth[n]:" as auth {
+    [Auth]
+}
+
+node "bookCom[n]:" as bookCom {
+    [BooksQuery]
+}
+
+node "bookQuery[n]:" as bookQuery {
+    [BooksCom]
+}
+
+node "lendingCom[n]:" as lendingCom {
+    [LendingsCom]
+}
+
+node "lendingQuery[n]:" as lendingQuery {
+    [LendingsQuery]
+}
+
+node "readerCom[n]:" as readerCom {
+    [ReadersCom]
+}
+
+node "readerQuery[n]:" as readerQuery {
+    [ReadersQuery]
+}
+
+node "topQuery[n]:" as top {
+    [TopQuery]
+}
+
+
+auth -- messageBroker : AMQP
+bookCom -- messageBroker : AMQP
+bookQuery -- messageBroker : AMQP
+lendingCom -- messageBroker : AMQP
+lendingQuery -- messageBroker : AMQP
+readerCom -- messageBroker : AMQP
+readerQuery -- messageBroker : AMQP
+top -- messageBroker : AMQP
+
+@enduml

@@ -1,0 +1,37 @@
+@startuml
+' https://plantuml.com/class-diagram
+
+title Vista Lógica Nível 1
+
+component "<<system>>\nLMS" {
+ portout auth as Pauth
+ portout bookCom as PbookC
+ portout bookQuery as PbookQ
+ portout lendingCom as PlendingC
+ portout lendingQuery as PlendingQ
+ portout readerCom as PreaderC
+ portout readerQuery as PreaderQ
+ portout topQuery as top
+ }
+
+() "HTTP Auth API" as authapi
+() "HTTP BookCom API" as booksapic
+() "HTTP BookQuery API" as booksapiq
+() "HTTP LendingCom API" as lendingsapic
+() "HTTP LendingQuery API" as lendingsapiq
+() "HTTP ReaderCom API" as readersapic
+() "HTTP ReaderQuery API" as readersapiq
+() "HTTP TopQuery API" as  topapiq
+
+
+Pauth -- authapi
+PbookC -- booksapic
+PbookQ -- booksapiq
+PlendingC -- lendingsapic
+PlendingQ --- lendingsapiq
+PreaderC -- readersapic
+PreaderQ --- readersapiq
+top --- topapiq
+
+
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+title Vista de processo nível 1
+
+participant ":HTTP Client" as Client
+participant ":LMS" as System
+
+
+' Atualização de livro
+Client -> System: POST /books
+alt success
+    System --> Client: 2.1: 200 OK (Livro criado)
+else error
+    System --> Client: 1.2: 400 Bad Request (Erro de validação)
+end
+
+@enduml

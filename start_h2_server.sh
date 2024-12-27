@@ -47,3 +47,4 @@ start_h2_server "serviceLendingQuery" 4301 4302
 start_h2_server "serviceReaderCom" 5201 5202
 start_h2_server "serviceReaderQuery" 5301 5302
 start_h2_server "serviceTopQuery" 6301 6302
+start_h2_server "serviceRecomCom" 7201 7202

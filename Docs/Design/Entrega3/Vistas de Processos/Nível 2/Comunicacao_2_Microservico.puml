@@ -1,0 +1,57 @@
+@startuml
+' Definindo os participantes
+participant "HTTP Client" as client
+participant "lendingCom[0] : lendingCom" as lending0
+participant "Message Broker" as mb
+participant "lendingCom[1] : lendingCom" as lending1
+participant "lendingQuery[0] : lendingQuery" as lending01
+participant "lendingQuery[1] : lendingQuery" as lending11
+participant "top[0] : top" as top0
+participant "top[1] : top" as top1
+
+
+' O cliente faz uma requisição para criar um novo leitor
+client o-> lending0: POST /lendings {lendingData}
+activate lending0
+
+' O lending Service valida o token e permissões localmente
+lending0 -> lending0: Validar token JWT e permissões
+
+' Verifica as permissões e cria o leitor
+lending0 -> lending0: save(lendingData)
+
+lending0 -> mb: publish(lendingCreated)
+activate mb
+
+' Replicando dados para a outra instância (espelhamento)
+mb -> lending1: notify(lendingCreated)
+activate lending1
+mb -> lending01: notify(lendingCreated)
+activate lending01
+mb -> lending11: notify(lendingCreated)
+activate lending11
+mb -> top0: notify(lendingCreated)
+activate top0
+mb -> top1: notify(lendingCreated)
+deactivate mb
+
+activate top1
+
+
+
+lending1 -> lending1: save(lending)
+lending01 -> lending01: save(lending)
+deactivate lending1
+lending11 -> lending11: save(lending)
+deactivate lending01
+top0 -> top0: save(lending)
+deactivate lending11
+top1 -> top1: save(lending)
+deactivate top0
+
+
+' Responder ao cliente com sucesso final após a replicação
+lending0 -->o client: 201 Created
+deactivate top1
+deactivate lending0
+@enduml

@@ -1,0 +1,34 @@
+@startuml
+ 'https://plantuml.com/class-diagram
+
+ hide circle
+ skinparam classAttributeIconSize 0
+
+title Vista lógica nível 3
+
+component "ReaderCom" <<container>> as ReaderC{
+    portout " " as portoutReaderC1
+    portout " " as portoutReaderC2
+    portin " " as portinReaderC
+
+    component "ServiceReaderCom" <<component>>{
+        portin " " as portinReaderCBE
+        portout " " as portoutReaderBE1
+        portout " " as portoutReaderBE2
+    }
+
+    component "ReaderCom Database" <<component>>
+
+    portoutReaderBE1 -- portoutReaderC1
+    portoutReaderBE2 -- portoutReaderC2
+    portinReaderC - portinReaderCBE
+
+}
+
+"ReaderCom Database" -0)- ServiceReaderCom : "SQL"
+"Publish API" )-- portinReaderC
+portoutReaderC1 -- "HTTP ReaderCom API"
+portoutReaderC2 -- "Notify API"
+
+
+@enduml
