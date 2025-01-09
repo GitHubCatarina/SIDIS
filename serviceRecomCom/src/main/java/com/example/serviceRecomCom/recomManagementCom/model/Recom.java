@@ -1,5 +1,6 @@
 package com.example.serviceRecomCom.recomManagementCom.model;
 
+import com.example.serviceRecomCom.recomManagementCom.dto.RecomDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 @Entity
@@ -68,5 +69,14 @@ public class Recom {
                 ", recommend=" + recommend +
                 ", comment='" + comment + '\'' +
                 '}';
+    }
+
+    public RecomDTO toDTO() {
+        RecomDTO recomDTO = new RecomDTO();
+        recomDTO.setId(this.id);
+        recomDTO.setLendingId(this.lendingId);
+        recomDTO.setRecommend(this.recommend);
+        recomDTO.setComment(this.comment);
+        return recomDTO;
     }
 }

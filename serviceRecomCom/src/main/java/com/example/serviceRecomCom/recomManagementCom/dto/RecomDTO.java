@@ -13,7 +13,7 @@ public class RecomDTO {
     private Long id; // ID da recomendação
 
     @NotNull
-    private Long lendingId; // ID do empréstimo associado
+    private String lendingId; // ID do empréstimo associado
 
     private Boolean recommend; // true = Recomendo, false = Não Recomendo
 
