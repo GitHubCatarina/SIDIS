@@ -120,6 +120,33 @@ public class LendingController {
                 .body(lendingViewMapper.toLendingView(lending));
     }
 
+    @Operation(summary = "Deletes a Lending by ID")
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> deleteLending(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authorization) {
+
+        String token = authorization.replace("Bearer ", ""); // Extrai o token do header
+
+        // Verificar permissões
+        List<String> roles = getRolesFromToken(token);
+        if (!hasPermission(roles, "LIBRARIAN", "ADMIN")) { // Apenas LIBRARIAN e ADMIN podem eliminar
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        // Verifica se o Lending existe antes de tentar eliminar
+        if (!lendingService.existsById(id)) {
+            throw new NotFoundException("Lending com ID " + id + " não encontrado.");
+        }
+
+        // Eliminar o Lending
+        lendingService.deleteById(id);
+
+        return ResponseEntity.noContent().build(); // Retorna 204 No Content
+    }
+
+
     private Long getVersionFromIfMatchHeader(final String ifMatchHeader) {
         if (ifMatchHeader == null || ifMatchHeader.isEmpty()) {
             // Retorna 0 quando o cabeçalho não for fornecido

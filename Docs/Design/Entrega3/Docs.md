@@ -163,29 +163,25 @@ Cada microserviço subscreve às queues de interesse, permitindo-lhes consumir a
 ## Vista de Processos
 
 ### Nível 1
-![GET-books-top5](/Docs/Design/Entrega2/Vistas de Processos/Nível 1/GET-books-top5-Vista de processo nível 1.svg)
+![GET-books-top5](/Docs/Design/Entrega3/Vistas de Processos/Nível 1/GET-books-top5-Vista de processo nível 1.svg)
 
 GET-books-top5.puml
    - Representa uma vista de processo em que um cliente HTTP faz uma solicitação para obter a lista dos 5 melhores livros por meio da API /books/top-books. O sistema responde com os detalhes da lista em caso de sucesso (200 OK) ou retorna um erro interno do servidor (500 Internal Server Error) em caso de falha.
   
-![GET-reader](/Docs/Design/Entrega2/Vistas de Processos/Nível 1/GET-reader-Vista de processo nível 1.svg)
+![GET-reader](/Docs/Design/Entrega3/Vistas de Processos/Nível 1/GET-reader-Vista de processo nível 1.svg)
 
 GET-reader.puml
    - Mostra o fluxo de um cliente fazendo uma solicitação para obter detalhes de um leitor específico através da API /readers/{id}. O sistema retorna os dados do leitor em caso de sucesso (200 OK) ou uma mensagem de erro informando que o leitor não foi encontrado (404 Not Found).
 
-![POST-books](/Docs/Design/Entrega2/Vistas de Processos/Nível 1/POST-books-Vista de processo nível 1.svg)
+![POST-books](/Docs/Design/Entrega3/Vistas de Processos/Nível 1/POST-books-Vista de processo nível 1.svg)
 
 POST-books.puml
    - Exibe o processo de criação de um novo livro, onde o cliente envia uma solicitação POST para /books. O sistema confirma a criação com um código 201 Created em caso de sucesso, ou retorna um erro de validação (400 Bad Request) se houver problemas com a solicitação.
 
-![POST-lendings](/Docs/Design/Entrega2/Vistas de Processos/Nível 1/POST-lendings-Vista de processo nível 1.svg)
-
-POST-lendings.puml
-   - Demonstra o fluxo de criação de informações de um empréstimo, com o cliente enviando uma solicitação POST para /lendings. O sistema retorna um código 201 Created se o empréstimo for criado com sucesso, ou retorna um erro de validação (400 Bad Request) se houver problemas com a solicitação.
 
 ### Nível 2
 
-![Com-1-servico](/Docs/Design/Entrega2/Vistas de Processos/Nível 2/Comunicacao_1_Microservico.svg)
+![Com-1-servico](/Docs/Design/Entrega3/Vistas de Processos/Nível 2/Comunicacao_1_Microservico.svg)
 
 Comunicação 1 Microserviço (Comunicacao_1_Microservico.puml)
   - Descreve a interação entre um cliente e duas instâncias do serviço de autenticação (Auth). 
@@ -195,7 +191,7 @@ Comunicação 1 Microserviço (Comunicacao_1_Microservico.puml)
 
       
 
-![Com-2-servico](/Docs/Design/Entrega2/Vistas de Processos/Nível 2/Comunicacao_2_Microservico.svg)
+![Com-2-servico](/Docs/Design/Entrega3/Vistas de Processos/Nível 2/Comunicacao_2_Microservico.svg)
 
 Comunicação 2 Microserviços (Comunicacao_2_Microservico.puml)
 - Mostra a comunicação entre os serviços de consulta e de comando de empréstimos (Lending) e o serviço de Top, assim como entre as instâncias de cada serviço. 
@@ -205,16 +201,16 @@ O message broker, envia uma notificação para todas as instância de LendingCom
 - O processo é análogo na criação de um leitor (Reader), que é guardado em ReaderCom, ReaderQuery e LendingCom e para a criação de um livro (Book) que é guardado em BookCom, BookQuery e LendingCom.
 
 
+![Com-SAGA](/Docs/Design/Entrega3/Vistas de Processos/Nível 2/ReturnLendingRecom.svg)
+# SEM Com / Query
+Comunicação com padrão SAGA
+- Interação entre os serviços no contexto de criação de um empréstimo (**lending**) e a sua sincronização com os serviços relacionados. O **Recom**, que trata de recomendações, recebe uma notificação do **Message Broker** sobre a criação do empréstimo e valida os dados associados à recomendação. Em caso de sucesso, salva a recomendação e notifica o **Message Broker**, propagando o evento para os outros serviços. Caso ocorra um erro, o Recom publica uma mensagem de falha que resulta na reversão do estado no **lendingCom**, utilizando o padrão **Saga**. 
+- Este padrão é essencial para garantir consistência eventual em sistemas distribuídos, coordenando passos compensatórios para desfazer ações previamente executadas, caso um erro impeça a conclusão do fluxo completo.
+
 ## Vistas Físicas
 
-### Vista Física Nível 1
-![VistaFisica1](/Docs/Design/Entrega2/Vistas Físicas/Nível 1/Nivel1-Vista fisica nível 1.svg)
-
-A vista física de nível 1 representa uma visão geral do sistema LMS (Learning Management System), mostrando-o como uma única unidade encapsulada. Essa vista destaca o sistema de forma simplificada, indicando que ele é um componente singular com interfaces e funcionalidades internas.
-
-
 ### Vista Física Nível 2
-![VistaFisica2](/Docs/Design/Entrega2/Vistas Físicas/Nível 2/Nivel2-Vista física nível 2.svg)
+![VistaFisica2](/Docs/Design/Entrega3/Vistas Físicas/Nível 2/Nivel2-Vista física nível 2.svg)
 
 A vista física de nível 2 representa a arquitetura de comunicação entre os microserviços, 
 onde todos os serviços interagem com o Message Broker via protocolo AMQP. 
@@ -224,7 +220,7 @@ Este modelo facilita a escalabilidade e a flexibilidade do sistema,
 permitindo que diferentes serviços possam comunicar sem dependências diretas
 
 ### Vista Física Nível 3
-![VistaFisica3](/Docs/Design/Entrega2/Vistas Físicas/Nível 3/Nivel3-Vista física nível 3.svg)
+![VistaFisica3](/Docs/Design/Entrega3/Vistas Físicas/Nível 3/Nivel3-Vista física nível 3.svg)
 
 A vista física de nível 3 exemplifica a interação entre o serviço ReaderCom e a sua base de dados por TCP/IP. 
 Este padrão de comunicação é aplicável de forma idêntica a todos os microserviços, 
@@ -237,12 +233,12 @@ mantendo a separação e a independência entre os componentes do sistema.
 ## Vistas Lógicas
 
 ### Vista Lógica Nível 1
-![VistaLogica1](/Docs/Design/Entrega2/Vistas Lógicas/Nível 1/Nivel1-Vista Lógica Nível 1.svg)
+![VistaLogica1](/Docs/Design/Entrega3/Vistas Lógicas/Nível 1/Nivel1-Vista Lógica Nível 1.svg)
 
 A vista lógica de nível 1 representa a arquitetura de comunicação entre o sistema LMS e as suas APIs externas. Cada componente do sistema, como Auth, BookCom, LendingCom, entre outros, expõe interfaces HTTP (APIs) que são consumidas por diferentes serviços. As portas de comunicação (portout) ligam as funcionalidades internas do sistema às APIs correspondentes, facilitando a interação e troca de dados entre os microserviços e os sistemas externos.
 
 ### Vista Lógica Nível 2
-![VistaLogica2](/Docs/Design/Entrega2/Vistas Lógicas/Nível 2/Nivel2-Vista Lógica Nível 2.svg)
+![VistaLogica2](/Docs/Design/Entrega3/Vistas Lógicas/Nível 2/Nivel2-Vista Lógica Nível 2.svg)
 
 A vista lógica de nível 2 apresenta a interação entre os componentes internos do sistema LMS e as APIs externas. 
 Cada componente possui portas de comunicação de entrada e saida que facilitam a troca de mensagens entre os sistemas internos e as APIs.
@@ -250,7 +246,7 @@ A comunicação entre os componentes é realizada via Message Broker, que public
 As APIs externas são expostas pelas portas correspondentes, permitindo a interação com os serviços externos, como Auth API, BookCom API, LendingCom API, etc.
 
 ### Vista Lógica Nível 3
-![VistaLogica3](/Docs/Design/Entrega2/Vistas Lógicas/Nível 3/Nivel3-Vista lógica nível 3.svg)
+![VistaLogica3](/Docs/Design/Entrega3/Vistas Lógicas/Nível 3/Nivel3-Vista lógica nível 3.svg)
 
 
 A vista lógica de nível 3 ilustra a estrutura interna de um componente de comando. 
@@ -292,3 +288,9 @@ De forma a aumentar a eficiencia da base de dados, foi utilizado o mecanismo de 
 
 Por vezes, quando o serviço reinicia, este cache é descartado e a base de dados aloca um novo bloco de valores (por exemplo, salta 51 IDs, indo para 52).
 Isso leva a uma não continuidade dos IDs entre inicializações, mas não interfere com nenhuma regra de negócio.
+
+# Questões
+1. Deployment view é vista física?
+   2. 
+2. Recom também precisa de divisão Com / Query?
+   3. 

@@ -6,6 +6,7 @@ participant "Message Broker" as mb
 participant "lendingCom[1] : lendingCom" as lending1
 participant "lendingQuery[0] : lendingQuery" as lending01
 participant "lendingQuery[1] : lendingQuery" as lending11
+participant "lendingQuery[1] : lendingQuery" as lending11
 participant "top[0] : top" as top0
 participant "top[1] : top" as top1
 
@@ -20,7 +21,7 @@ lending0 -> lending0: Validar token JWT e permissões
 ' Verifica as permissões e cria o leitor
 lending0 -> lending0: save(lendingData)
 
-lending0 -> mb: publish(lendingCreated)
+lending0 -> mb: publish(lendingCreated without recomendation)
 activate mb
 
 ' Replicando dados para a outra instância (espelhamento)

@@ -57,7 +57,7 @@ public class RecomController {
         return ResponseEntity.notFound().build();
     }
 
-    // Endpoint para deletar um Recom
+    // Endpoint para eliminar um Recom
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRecom(@PathVariable Long id) {
         Optional<Recom> recom = recomRepository.findById(id);

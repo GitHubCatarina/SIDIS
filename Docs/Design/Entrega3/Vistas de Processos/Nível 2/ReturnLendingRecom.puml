@@ -8,6 +8,8 @@ participant "lendingQuery[0] : lendingQuery" as lending01
 participant "lendingQuery[1] : lendingQuery" as lending11
 participant "top[0] : top" as top0
 participant "top[1] : top" as top1
+participant "recom[1] : recom" as  recom1
+participant "recom[2] : recom" as  recom2
 
 
 ' O cliente faz uma requisição para criar um novo leitor
@@ -20,41 +22,47 @@ lending0 -> lending0: Validar token JWT e permissões
 ' Verifica as permissões e cria o leitor
 lending0 -> lending0: save(lendingData)
 
-lending0 -> mb: publish(lendingCreated with recomendation)
+lending0 -> mb: publish(lendingReturned with recomendation)
 activate mb
 deactivate lending0
-mb -> recom1: notify(lendingCreated with recomendation)
+mb -> recom1: notify(lendingReturned with recomendation)
 deactivate mb
 activate recom1
 recom1 -> recom1: validate(recom)
 alt success
 recom1 -> recom1: save(recom)
 
-recom1 -> mb: notify(recomendation)
+recom1 -> mb: publish(recomendation)
 
 
 deactivate recom1
 activate mb
 
-mb -> lending0: notify(lendingCreated with recomendation)
-deactivate mb
+mb -> lending0: notify(lendingReturned with recomendation)
 activate lending0
+mb -> recom2: notify(lendingReturned with recomendation)
+activate recom2
+
+recom2 -> recom2: save(recom)
+deactivate mb
 
 
-lending0 -> mb: publish(lendingCreated)
+
+lending0 -> mb: publish(lendingReturned)
+deactivate recom2
 
 activate mb
 
 ' Replicando dados para a outra instância (espelhamento)
-mb -> lending1: notify(lendingCreated)
+mb -> lending1: notify(lendingReturned)
 activate lending1
-mb -> lending01: notify(lendingCreated)
+mb -> lending01: notify(lendingReturned)
 activate lending01
-mb -> lending11: notify(lendingCreated)
+mb -> lending11: notify(lendingReturned)
 activate lending11
-mb -> top0: notify(lendingCreated)
+mb -> top0: notify(lendingReturned)
 activate top0
-mb -> top1: notify(lendingCreated)
+mb -> top1: notify(lendingReturned)
 deactivate mb
 
 activate top1
@@ -73,7 +81,7 @@ deactivate top0
 
 
 ' Responder ao cliente com sucesso final após a replicação
-lending0 -->o client: 201 Created
+lending0 -->o client: 201 Returned
 deactivate top1
 deactivate lending0
 else error
@@ -82,7 +90,7 @@ activate recom1
 recom1 -> mb: notify(recomendationFailed)
 deactivate recom1
 activate mb
-mb -> lending0: notify(lendingCreated with error)
+mb -> lending0: notify(lendingReturned with error)
 deactivate mb
 activate lending0
 lending0 -> lending0: delete(lendingData)

@@ -12,6 +12,9 @@ component "LMS" <<system>> as LMS {
  component "Auth" <<container>> {
  portout " " as innerportoutauth
  }
+ component "Recom" <<container>> {
+ portout " " as innerportoutrecom
+ }
 
  component "BookCom" <<container>> {
  portin " " as innerportinbookc
@@ -46,6 +49,7 @@ component "LMS" <<system>> as LMS {
  }
 
  Auth -[hidden]l- Auth
+  Recom -[hidden]l- Recom
  BookCom -[hidden]l- BookCom
  BookCom -[hidden]l- BookQuery
  BookCom -[hidden]l- LendingCom
@@ -59,6 +63,10 @@ component "LMS" <<system>> as LMS {
 
  innerportoutmb -0)- innerportoutauth : "Publish API"
  innerportinmb -(0----- innerportoutauth : "Notify API"
+
+  innerportoutmb -0)- innerportoutrecom : "Publish API"
+  innerportinmb -(0----- innerportoutrecom : "Notify API"
+
  innerportoutmb -0)- innerportoutbookc : "Publish API"
  innerportinmb -(0----- innerportoutbookc : "Notify API"
  innerportinmb -(0----- innerportoutbookq : "Notify API"
@@ -71,6 +79,7 @@ component "LMS" <<system>> as LMS {
  innerportinmb -(0----- innerportouttopq : "Notify API"
 
  portout auth as portauth
+  portout recom as portrecom
  portout bookCom as portbookc
  portout bookQuery as portbookq
  portout lendingCom as portlendingc
@@ -80,6 +89,7 @@ component "LMS" <<system>> as LMS {
  portout topQuery as porttopq
 
  innerportoutauth -- portauth
+  innerportoutrecom -- portrecom
  innerportoutbookc -- portbookc
  innerportoutbookq -- portbookq
  innerportoutlendingc -- portlendingc
@@ -91,6 +101,7 @@ component "LMS" <<system>> as LMS {
 }
 
 () "HTTP Auth API" as authapi
+() "HTTP Recom API" as recomapi
 () "HTTP BookCom API" as bookapic
 () "HTTP BookQuery API" as bookapiq
 () "HTTP LendingCom API" as lendingapic
@@ -102,6 +113,7 @@ component "LMS" <<system>> as LMS {
 
 
 portauth -- authapi
+portrecom -- recomapi
 portbookc -- bookapic
 portbookq -- bookapiq
 portlendingc -- lendingapic

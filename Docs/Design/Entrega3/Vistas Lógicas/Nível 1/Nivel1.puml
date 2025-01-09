@@ -11,6 +11,7 @@ component "<<system>>\nLMS" {
  portout lendingQuery as PlendingQ
  portout readerCom as PreaderC
  portout readerQuery as PreaderQ
+  portout recom as Precom
  portout topQuery as top
  }
 
@@ -21,6 +22,7 @@ component "<<system>>\nLMS" {
 () "HTTP LendingQuery API" as lendingsapiq
 () "HTTP ReaderCom API" as readersapic
 () "HTTP ReaderQuery API" as readersapiq
+() "HTTP Recom API" as recomapi
 () "HTTP TopQuery API" as  topapiq
 
 
@@ -31,6 +33,7 @@ PlendingC -- lendingsapic
 PlendingQ --- lendingsapiq
 PreaderC -- readersapic
 PreaderQ --- readersapiq
+Precom -- recomapi
 top --- topapiq
 
 

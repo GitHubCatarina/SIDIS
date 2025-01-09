@@ -180,4 +180,12 @@ public class LendingServiceImpl implements LendingService {
         return lendingRepository.findByLendingCode(lendingCode).isPresent();
     }
 
+    public boolean existsById(Long id) {
+        return lendingRepository.existsById(id);  // Usando Long como tipo do ID
+    }
+
+    public void deleteById(Long id) {
+        lendingRepository.deleteById(id);  // Usando Long como tipo do ID
+    }
+
 }
