@@ -12,15 +12,12 @@ participant "recom[1] : recom" as  recom1
 participant "recom[2] : recom" as  recom2
 
 
-' O cliente faz uma requisição para criar um novo leitor
-client o-> lending0: POST /lendings {lendingData}
+client o-> lending0: POST /lendings/return {lendingData}
 activate lending0
 
-' O lending Service valida o token e permissões localmente
 lending0 -> lending0: Validar token JWT e permissões
 
-' Verifica as permissões e cria o leitor
-lending0 -> lending0: save(lendingData)
+lending0 -> lending0: saveTemp(lendingData)
 
 lending0 -> mb: publish(lendingReturned with recomendation)
 activate mb
@@ -42,6 +39,8 @@ mb -> lending0: notify(lendingReturned with recomendation)
 activate lending0
 mb -> recom2: notify(lendingReturned with recomendation)
 activate recom2
+lending0 -> lending0: save(lendingData)
+
 
 recom2 -> recom2: save(recom)
 deactivate mb
@@ -93,7 +92,7 @@ activate mb
 mb -> lending0: notify(lendingReturned with error)
 deactivate mb
 activate lending0
-lending0 -> lending0: delete(lendingData)
+lending0 -> lending0: deleteTemp(lendingData)
 
 
 lending0 -->o client: 500 Internal Server Error (Erro interno)

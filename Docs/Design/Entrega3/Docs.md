@@ -202,7 +202,6 @@ O message broker, envia uma notificação para todas as instância de LendingCom
 
 
 ![Com-SAGA](/Docs/Design/Entrega3/Vistas de Processos/Nível 2/ReturnLendingRecom.svg)
-# SEM Com / Query
 Comunicação com padrão SAGA
 - Interação entre os serviços no contexto de criação de um empréstimo (**lending**) e a sua sincronização com os serviços relacionados. O **Recom**, que trata de recomendações, recebe uma notificação do **Message Broker** sobre a criação do empréstimo e valida os dados associados à recomendação. Em caso de sucesso, salva a recomendação e notifica o **Message Broker**, propagando o evento para os outros serviços. Caso ocorra um erro, o Recom publica uma mensagem de falha que resulta na reversão do estado no **lendingCom**, utilizando o padrão **Saga**. 
 - Este padrão é essencial para garantir consistência eventual em sistemas distribuídos, coordenando passos compensatórios para desfazer ações previamente executadas, caso um erro impeça a conclusão do fluxo completo.
@@ -288,9 +287,3 @@ De forma a aumentar a eficiencia da base de dados, foi utilizado o mecanismo de 
 
 Por vezes, quando o serviço reinicia, este cache é descartado e a base de dados aloca um novo bloco de valores (por exemplo, salta 51 IDs, indo para 52).
 Isso leva a uma não continuidade dos IDs entre inicializações, mas não interfere com nenhuma regra de negócio.
-
-# Questões
-1. Deployment view é vista física?
-   2. 
-2. Recom também precisa de divisão Com / Query?
-   3. 

@@ -38,12 +38,8 @@ node "readerQuery[n]:" as readerQuery {
     [ReadersQuery]
 }
 
-node "recomCom[n]:" as recomCom {
-    [RecomCom]
-}
-
-node "recomQuery[n]:" as recomQuery {
-    [RecomQuery]
+node "recom[n]:" as recom {
+    [Recom]
 }
 
 node "topQuery[n]:" as top {
@@ -58,8 +54,7 @@ lendingCom -- messageBroker : AMQP
 lendingQuery -- messageBroker : AMQP
 readerCom -- messageBroker : AMQP
 readerQuery -- messageBroker : AMQP
-recomCom -- messageBroker : AMQP
-recomQuery -- messageBroker : AMQP
+recom -- messageBroker : AMQP
 top -- messageBroker : AMQP
 
 @enduml
