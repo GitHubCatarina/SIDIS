@@ -1,17 +1,21 @@
 package com.example.serviceLendingCom.lendingManagementCom.services;
 
 import com.example.serviceLendingCom.lendingManagementCom.dto.LendingDTO;
+import com.example.serviceLendingCom.lendingManagementCom.dto.RecomResponseDTO;
 import com.example.serviceLendingCom.lendingManagementCom.model.Lending;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LendingEventConsumer {
 
     private final LendingServiceImpl lendingService;
+    private final RabbitTemplate rabbitTemplate;
 
-    public LendingEventConsumer(LendingServiceImpl lendingService) {
+    public LendingEventConsumer(LendingServiceImpl lendingService, RabbitTemplate rabbitTemplate) {
         this.lendingService = lendingService;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @RabbitListener(queues = "#{lendingQueue.name}", ackMode = "AUTO")
@@ -37,5 +41,11 @@ public class LendingEventConsumer {
                 System.out.println("Empréstimo com código " + lendingDTO.getLendingCode() + " criado.");
             }
         }
+    }
+    // Consumir eventos da fila "recom.queue"
+    @RabbitListener(queues = "#{recomlendingQueue.name}", ackMode = "AUTO")
+    public void handleRecomEvent(RecomResponseDTO recomDTO) {
+        System.out.println("Mensagem recebida para recomendação com ID: " + recomDTO.getLendingId());
+
     }
 }

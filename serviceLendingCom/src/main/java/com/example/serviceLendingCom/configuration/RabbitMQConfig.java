@@ -56,6 +56,24 @@ public class RabbitMQConfig {
     }
 
 
+
+
+    @Bean
+    public FanoutExchange recomlendingExchange() {
+        return new FanoutExchange("recomlending.exchange");
+    }
+
+    @Bean
+    public Queue recomlendingQueue() {
+        return new Queue("recomlending.queue." + UUID.randomUUID(), true, true, true); // Nome único
+    }
+
+    @Bean
+    public Binding recomlendingBinding(Queue recomlendingQueue, FanoutExchange recomlendingExchange) {
+        return BindingBuilder.bind(recomlendingQueue).to(recomlendingExchange);
+    }
+
+
     // Converter de mensagem
     @Bean
     public MessageConverter messageConverter() {

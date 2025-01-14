@@ -17,8 +17,8 @@ public class RabbitMQConfig {
     public FanoutExchange recomExchange() { return new FanoutExchange("recom.exchange");}
 
     @Bean
-    public FanoutExchange lendingExchange() {
-        return new FanoutExchange("lending.exchange");
+    public FanoutExchange recomlendingExchange() {
+        return new FanoutExchange("recomlending.exchange");
     }
 
 
@@ -27,8 +27,8 @@ public class RabbitMQConfig {
     public Queue recomQueue() { return new Queue("recom.queue." + UUID.randomUUID(), true, true, true); } // Nome único
 
     @Bean
-    public Queue lendingQueue() {
-        return new Queue("lending.queue." + UUID.randomUUID(), true, true, true); // Nome único
+    public Queue recomlendingQueue() {
+        return new Queue("recomlending.queue." + UUID.randomUUID(), true, true, true); // Nome único
     }
 
     // Binding para a fila principal
@@ -38,8 +38,8 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding lendingBinding(Queue lendingQueue, FanoutExchange lendingExchange) {
-        return BindingBuilder.bind(lendingQueue).to(lendingExchange);
+    public Binding recomlendingBinding(Queue recomlendingQueue, FanoutExchange recomlendingExchange) {
+        return BindingBuilder.bind(recomlendingQueue).to(recomlendingExchange);
     }
 
 
