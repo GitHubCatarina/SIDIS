@@ -1,21 +1,15 @@
 package com.example.serviceLendingCom.lendingManagementCom.api;
 
 import com.example.serviceLendingCom.lendingManagementCom.dto.LendingDTO;
-import com.example.serviceLendingCom.lendingManagementCom.services.CreateLendingRequest;
-import com.example.serviceLendingCom.lendingManagementCom.services.LendingEventProducer;
+import com.example.serviceLendingCom.lendingManagementCom.dto.ReturnLendingTempRequest;
+import com.example.serviceLendingCom.lendingManagementCom.model.LendingTemp;
+import com.example.serviceLendingCom.lendingManagementCom.services.*;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -23,8 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.example.serviceLendingCom.lendingManagementCom.model.Lending;
-import com.example.serviceLendingCom.lendingManagementCom.services.EditLendingRequest;
-import com.example.serviceLendingCom.lendingManagementCom.services.LendingServiceImpl;
 import com.example.serviceLendingCom.exceptions.NotFoundException;
 
 import java.util.Arrays;
@@ -46,6 +38,8 @@ public class LendingController {
     private final LendingViewMapper lendingViewMapper;
     @Autowired
     private LendingEventProducer lendingEventProducer;
+    @Autowired
+    private LendingTempService lendingTempService;
 
     private boolean hasPermission(List<String> roles, String... allowedRoles) {
         for (String role : allowedRoles) {
@@ -80,7 +74,8 @@ public class LendingController {
     }
 
 
-
+//return a book og
+    /*
     @Operation(summary = "Return a Book")
     @PostMapping("/return")
     @ResponseStatus(HttpStatus.CREATED)
@@ -118,6 +113,32 @@ public class LendingController {
 
         return ResponseEntity.created(newbarUri).eTag(Long.toString(lending.getVersion()))
                 .body(lendingViewMapper.toLendingView(lending));
+    }
+     */
+
+    @Operation(summary = "Return a Book")
+    @PostMapping("/return")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<String> returnBookTemp(
+            @Valid @RequestBody final ReturnLendingTempRequest resource,
+            @RequestHeader("Authorization") String authorization) {
+
+        String token = authorization.replace("Bearer ", "");
+
+        // Check permissions
+        List<String> roles = getRolesFromToken(token);
+        if (!hasPermission(roles, "LIBRARIAN", "ADMIN", "READER")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        // Processar o retorno e salvar o LendingTemp
+        LendingTemp lendingTemp = lendingTempService.processReturnRequest(resource);
+
+        // Produzir mensagem
+        String message = "LendingTemp criado: " + lendingTemp.toString();
+        System.out.println(message);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(message);
     }
 
 

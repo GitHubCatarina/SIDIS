@@ -215,4 +215,7 @@ public class LendingServiceImpl implements LendingService {
         lendingRepository.save(lending);
     }
 
+    public Optional<Lending> findById(Long id) {
+        return lendingRepository.findById(id);
+    }
 }
