@@ -13,7 +13,11 @@ public class LendingEventProducer {
 
     public void sendLendingCreatedEvent(LendingDTO lendingDTO) {
         rabbitTemplate.convertAndSend("lending.exchange", "", lendingDTO);
-        System.out.println("Mensagem enviada: utilizador criado com ID " + lendingDTO.getId());
+        System.out.println("Mensagem enviada: empréstimo criado com código " + lendingDTO.getLendingCode());
     }
 
+    public void sendLendingReturnedEvent(LendingDTO lendingDTO) {
+        rabbitTemplate.convertAndSend("lending.exchange", "", lendingDTO);
+        System.out.println("Mensagem enviada: empréstimo devolvido com código " + lendingDTO.getLendingCode());
+    }
 }

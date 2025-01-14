@@ -14,25 +14,28 @@ public class LendingEventConsumer {
         this.lendingService = lendingService;
     }
 
-    // Consumidor para a fila principal de sincronização
     @RabbitListener(queues = "#{lendingQueue.name}", ackMode = "AUTO")
-    public void handleLendingCreatedEvent(LendingDTO lendingDTO) {
+    public void handleLendingEvent(LendingDTO lendingDTO) {
         System.out.println("Mensagem recebida para empréstimo com código: " + lendingDTO.getLendingCode());
 
-        // Verificar se o empréstimo já existe pelo lendingCode
-        boolean lendingExists = lendingService.lendingExists(lendingDTO.getLendingCode());
-
-        if (lendingExists) {
-            System.out.println("Empréstimo com código " + lendingDTO.getLendingCode() + " já existe, não será criado.");
+        if (lendingDTO.isReturned()) {
+            // Passar o comentário, que pode ser nulo ou vazio
+            lendingService.markAsReturned(lendingDTO.getLendingCode(), lendingDTO.getComment());
+            System.out.println("Empréstimo com código " + lendingDTO.getLendingCode() + " marcado como devolvido.");
         } else {
-            // Criar um objeto CreateLendingRequest a partir do LendingDTO
-            CreateLendingRequest lendingRequest = new CreateLendingRequest();
-            lendingRequest.setReaderId(lendingDTO.getReaderId());
-            lendingRequest.setBookId(lendingDTO.getBookId());
+            // Verificar se o empréstimo já existe
+            boolean lendingExists = lendingService.lendingExists(lendingDTO.getLendingCode());
 
-            // Usar o método de criação de empréstimo
-            lendingService.createLending(lendingRequest);  // Cria o empréstimo no sistema
-            System.out.println("Empréstimo com código " + lendingDTO.getLendingCode() + " criado com sucesso.");
+            if (lendingExists) {
+                System.out.println("Empréstimo com código " + lendingDTO.getLendingCode() + " já existe.");
+            } else {
+                CreateLendingRequest lendingRequest = new CreateLendingRequest();
+                lendingRequest.setReaderId(lendingDTO.getReaderId());
+                lendingRequest.setBookId(lendingDTO.getBookId());
+
+                lendingService.createLending(lendingRequest);
+                System.out.println("Empréstimo com código " + lendingDTO.getLendingCode() + " criado.");
+            }
         }
     }
 }

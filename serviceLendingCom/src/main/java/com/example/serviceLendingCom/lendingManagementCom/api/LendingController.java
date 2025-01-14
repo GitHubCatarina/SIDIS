@@ -89,7 +89,7 @@ public class LendingController {
             @RequestHeader("Authorization") String authorization,
             @RequestHeader(value = "If-Match", required = false) String ifMatchHeader) {
 
-        String token = authorization.replace("Bearer ", ""); // Token from header
+        String token = authorization.replace("Bearer ", "");
 
         // Check permissions
         List<String> roles = getRolesFromToken(token);
@@ -100,25 +100,27 @@ public class LendingController {
         // Extract version from If-Match header
         Long version = getVersionFromIfMatchHeader(ifMatchHeader);
 
-        // Service I1
         Lending lending = lendingService.returnBook(resource, version);
+
         if (lending.getId() == null) {
             throw new IllegalStateException("Lending ID must not be null for synchronization.");
         }
 
+        // Produzir evento de devolução
+        LendingDTO lendingDTO = new LendingDTO().toDTO(lending);
+        lendingDTO.setReturned(true); // Indicar que o empréstimo foi devolvido
+        lendingEventProducer.sendLendingReturnedEvent(lendingDTO);
 
-        // Manda para I2
-
-        // Prepare the URI for the response
         final var newbarUri = ServletUriComponentsBuilder.fromCurrentRequestUri()
                 .pathSegment(lending.getId().toString())
                 .build()
                 .toUri();
 
-
         return ResponseEntity.created(newbarUri).eTag(Long.toString(lending.getVersion()))
                 .body(lendingViewMapper.toLendingView(lending));
     }
+
+
 
     @Operation(summary = "Deletes a Lending by ID")
     @DeleteMapping("/{id}")
