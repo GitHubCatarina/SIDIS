@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface RecomRepository extends JpaRepository<Recom, Long> {
     // Método para buscar Recom por lendingId
     Recom findByLendingId(String lendingId);
+    boolean existsByLendingId(String lendingId);
 }

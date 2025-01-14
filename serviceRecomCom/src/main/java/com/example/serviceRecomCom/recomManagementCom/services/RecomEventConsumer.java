@@ -48,26 +48,34 @@ public class RecomEventConsumer {
 
     @RabbitListener(queues = "recomlending.queue", ackMode = "MANUAL")
     public void handleLendingTempEvent(LendingTemp lendingTemp, Message message, Channel channel) throws IOException {
-        // Processar a mensagem recebida
-        System.out.println("Mensagem recebida para LendingTemp:");
-        System.out.println("Lending Code: " + lendingTemp.getLendingCode());
+            // Verificar se o LendingId já existe
+            if (recomService.existsByLendingId(lendingTemp.getLendingCode())) {
+                System.out.println("LendingId já existe. Rejeitando a mensagem: " + lendingTemp.getLendingCode());
+                channel.basicReject(message.getMessageProperties().getDeliveryTag(), false); // Rejeitar sem reencaminhar para a fila
+                return;
+            }
 
-        // Criar o objeto Recom baseado nas informações de LendingTemp
-        Recom recom = new Recom();
-        recom.setLendingId(lendingTemp.getLendingCode());  // Usando o LendingTemp ID
-        recom.setRecommend(lendingTemp.isRecom());  // A recomendação recebida (true ou false)
-        recom.setComment(lendingTemp.getCom());  // O comentário da devolução
+            // Processar a mensagem recebida
+            System.out.println("Mensagem recebida para LendingTemp:");
+            System.out.println("Lending Code: " + lendingTemp.getLendingCode());
 
-        // Salvar o recom no banco de dados
-        Recom savedRecom = recomService.createRecom(recom);
+            // Criar o objeto Recom baseado nas informações de LendingTemp
+            Recom recom = new Recom();
+            recom.setLendingId(lendingTemp.getLendingCode());  // Usando o LendingTemp ID
+            recom.setRecommend(lendingTemp.isRecom());  // A recomendação recebida (true ou false)
+            recom.setComment(lendingTemp.getCom());  // O comentário da devolução
 
-        // Converter para DTO e enviar evento para RabbitMQ
-        recomEventProducer.sendRecomCreatedEvent(savedRecom.toDTO());
+            // Salvar o recom no banco de dados
+            Recom savedRecom = recomService.createRecom(recom);
 
-        // Imprimir confirmação de envio do evento
-        System.out.println("Recom criado e evento enviado com ID: " + savedRecom.getId());
+            // Converter para DTO e enviar evento para RabbitMQ
+            recomEventProducer.sendRecomCreatedEvent(savedRecom.toDTO());
 
-        // Confirmar a mensagem
-        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+            // Imprimir confirmação de envio do evento
+            System.out.println("Recom criado e evento enviado com ID: " + savedRecom.getId());
+
+            // Confirmar a mensagem
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+
     }
 }

@@ -52,5 +52,10 @@ public class RecomServiceImpl implements RecomService {
     public boolean existsById(Long id) {
         return recomRepository.existsById(id);  // Usando Long como tipo do ID
     }
+
+    public boolean existsByLendingId(String lendingId) {
+        return recomRepository.existsByLendingId(lendingId);
+    }
+
 }
 
