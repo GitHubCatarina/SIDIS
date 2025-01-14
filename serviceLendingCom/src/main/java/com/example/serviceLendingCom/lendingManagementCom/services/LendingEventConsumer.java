@@ -43,9 +43,12 @@ public class LendingEventConsumer {
         }
     }
     // Consumir eventos da fila "recom"
-    @RabbitListener(queues = "#{recomlendingQueue.name}", ackMode = "AUTO")
+    /*
+    @RabbitListener(queues = "#{recomlendingQueue.name}", ackMode = "MANUAL")
     public void handleRecomEvent(RecomResponseDTO recomDTO) {
         System.out.println("Mensagem recebida para recomendação com ID: " + recomDTO.getLendingId());
 
     }
+
+     */
 }

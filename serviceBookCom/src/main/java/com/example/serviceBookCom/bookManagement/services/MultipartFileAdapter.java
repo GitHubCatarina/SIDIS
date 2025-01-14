@@ -16,8 +16,8 @@ public class MultipartFileAdapter implements MultipartFile {
 
     public MultipartFileAdapter(byte[] fileData) {
         this.fileData = fileData;
-        this.filename = "cover.jpg";  // Você pode ajustar o nome do arquivo conforme necessário
-        this.contentType = "image/jpeg";  // Ajuste conforme o tipo de conteúdo real
+        this.filename = "cover.jpg";
+        this.contentType = "image/jpeg";
     }
 
     @Override

@@ -60,7 +60,7 @@ public class LendingController {
                 .build().toUri();
 
 
-        System.out.println("User criado, enviando evento para sincronização...");
+        System.out.println("Lending criado, a enviar evento para sincronização...");
 
         // Converte User para UserDTO
         LendingDTO lendingDTO = new LendingDTO().toDTO(lending);

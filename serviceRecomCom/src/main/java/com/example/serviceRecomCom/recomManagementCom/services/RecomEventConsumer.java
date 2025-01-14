@@ -3,8 +3,12 @@ package com.example.serviceRecomCom.recomManagementCom.services;
 import com.example.serviceRecomCom.recomManagementCom.dto.RecomDTO;
 import com.example.serviceRecomCom.recomManagementCom.model.LendingTemp;
 import com.example.serviceRecomCom.recomManagementCom.model.Recom;
+import com.rabbitmq.client.Channel;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 public class RecomEventConsumer {
@@ -41,11 +45,13 @@ public class RecomEventConsumer {
         }
     }
 
-    @RabbitListener(queues = "#{recomlendingQueue.name}", ackMode = "AUTO")
-    public void handleLendingTempEvent(LendingTemp lendingTemp) {
-        // Imprimir o conteúdo do LendingTemp recebido
+
+    @RabbitListener(queues = "recomlending.queue", ackMode = "MANUAL")
+    public void handleLendingTempEvent(LendingTemp lendingTemp, Message message, Channel channel) throws IOException {
+        // Processar a mensagem recebida
         System.out.println("Mensagem recebida para LendingTemp:");
         System.out.println("Lending Code: " + lendingTemp.getLendingCode());
+
         // Criar o objeto Recom baseado nas informações de LendingTemp
         Recom recom = new Recom();
         recom.setLendingId(lendingTemp.getLendingCode());  // Usando o LendingTemp ID
@@ -60,5 +66,8 @@ public class RecomEventConsumer {
 
         // Imprimir confirmação de envio do evento
         System.out.println("Recom criado e evento enviado com ID: " + savedRecom.getId());
+
+        // Confirmar a mensagem
+        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }
 }

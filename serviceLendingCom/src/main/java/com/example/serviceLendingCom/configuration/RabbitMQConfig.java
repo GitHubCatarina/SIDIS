@@ -58,21 +58,21 @@ public class RabbitMQConfig {
 
 
 
+    // Configuração para a distribuição de mensagens com balanceamento de carga
     @Bean
-    public FanoutExchange recomlendingExchange() {
-        return new FanoutExchange("recomlending.exchange");
+    public DirectExchange recomlendingExchange() {
+        return new DirectExchange("recomlending.exchange");
     }
 
     @Bean
     public Queue recomlendingQueue() {
-        return new Queue("recomlending.queue." + UUID.randomUUID(), true, true, true); // Nome único
+        return new Queue("recomlending.queue", true, false, false); // Fila compartilhada
     }
 
     @Bean
-    public Binding recomlendingBinding(Queue recomlendingQueue, FanoutExchange recomlendingExchange) {
-        return BindingBuilder.bind(recomlendingQueue).to(recomlendingExchange);
+    public Binding recomlendingBinding(Queue recomlendingQueue, DirectExchange recomlendingExchange) {
+        return BindingBuilder.bind(recomlendingQueue).to(recomlendingExchange).with("recomlending.routingKey"); // Usando a chave de roteamento
     }
-
 
     // Converter de mensagem
     @Bean

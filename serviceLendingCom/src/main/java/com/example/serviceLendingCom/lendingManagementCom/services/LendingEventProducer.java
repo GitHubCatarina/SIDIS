@@ -13,7 +13,8 @@ public class LendingEventProducer {
     private final RabbitTemplate rabbitTemplate;
 
     public void sendLendingTempEvent(LendingTemp lendingTemp) {
-        rabbitTemplate.convertAndSend("recomlending.exchange", "", lendingTemp);
+        String routingKey = "recomlending.routingKey";
+        rabbitTemplate.convertAndSend("recomlending.exchange", routingKey, lendingTemp);
         System.out.println("Mensagem enviada para recomlending.exchange com código: " + lendingTemp.getLendingCode());
         System.out.println("Mensagem enviada para recomlending.exchange com comentário: " + lendingTemp.getCom());
     }
