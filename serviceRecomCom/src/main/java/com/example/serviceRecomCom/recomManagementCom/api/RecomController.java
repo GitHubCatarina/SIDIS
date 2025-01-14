@@ -25,9 +25,9 @@ public class RecomController {
     @PostMapping
     public ResponseEntity<Recom> createRecom(@Valid @RequestBody Recom recom) {
         Recom savedRecom = recomService.createRecom(recom);
-
+        //TODO eliminar todos o os "supondo"
         // Enviar um evento para o EventProducer para atualizar outras instâncias
-        recomEventProducer.sendRecomCreatedEvent(savedRecom.toDTO());  // Supondo que você tem um método toDTO() para converter para RecomDTO
+        recomEventProducer.sendRecomCreatedEvent(savedRecom.toDTO());  // Supondo que você tem um metodo toDTO() para converter para RecomDTO
 
         return ResponseEntity.ok(savedRecom);
     }

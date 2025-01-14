@@ -3,10 +3,16 @@ package com.example.serviceRecomCom.recomManagementCom.model;
 import com.example.serviceRecomCom.recomManagementCom.dto.RecomDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 @Entity
 @Table
 public class Recom {
 
+    // Getters e Setters
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,39 +31,6 @@ public class Recom {
     public Recom(String lendingId, Boolean recommend, String comment) {
         this.lendingId = lendingId;
         this.recommend = recommend;
-        this.comment = comment;
-    }
-
-    // Getters e Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getLendingId() {
-        return lendingId;
-    }
-
-    public void setLendingId(String lendingId) {
-        this.lendingId = lendingId;
-    }
-
-    public Boolean getRecommend() {
-        return recommend;
-    }
-
-    public void setRecommend(Boolean recommend) {
-        this.recommend = recommend;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
         this.comment = comment;
     }
 

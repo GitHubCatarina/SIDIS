@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 public class RecomEventConsumer {
 
     private final RecomServiceImpl recomService;
+    private final RecomEventProducer recomEventProducer;
 
-    public RecomEventConsumer(RecomServiceImpl recomService) {
+    public RecomEventConsumer(RecomServiceImpl recomService, RecomEventProducer recomEventProducer) {
         this.recomService = recomService;
+        this.recomEventProducer = recomEventProducer;
     }
 
     // Consumidor para a fila principal de sincronização
@@ -44,6 +46,19 @@ public class RecomEventConsumer {
         // Imprimir o conteúdo do LendingTemp recebido
         System.out.println("Mensagem recebida para LendingTemp:");
         System.out.println("Lending Code: " + lendingTemp.getLendingCode());
-        System.out.println("Com: " + lendingTemp.getCom());
+        // Criar o objeto Recom baseado nas informações de LendingTemp
+        Recom recom = new Recom();
+        recom.setLendingId(lendingTemp.getLendingCode());  // Usando o LendingTemp ID
+        recom.setRecommend(lendingTemp.isRecom());  // A recomendação recebida (true ou false)
+        recom.setComment(lendingTemp.getCom());  // O comentário da devolução
+
+        // Salvar o recom no banco de dados
+        Recom savedRecom = recomService.createRecom(recom);
+
+        // Converter para DTO e enviar evento para RabbitMQ
+        recomEventProducer.sendRecomCreatedEvent(savedRecom.toDTO());
+
+        // Imprimir confirmação de envio do evento
+        System.out.println("Recom criado e evento enviado com ID: " + savedRecom.getId());
     }
 }
