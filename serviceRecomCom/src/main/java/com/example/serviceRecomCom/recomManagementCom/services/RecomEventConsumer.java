@@ -1,6 +1,7 @@
 package com.example.serviceRecomCom.recomManagementCom.services;
 
 import com.example.serviceRecomCom.recomManagementCom.dto.RecomDTO;
+import com.example.serviceRecomCom.recomManagementCom.model.LendingTemp;
 import com.example.serviceRecomCom.recomManagementCom.model.Recom;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
@@ -36,5 +37,13 @@ public class RecomEventConsumer {
             recomService.createRecom(recom);  // Cria a recomendação no sistema
             System.out.println("Recomendação com ID " + recomDTO.getId() + " criada com sucesso.");
         }
+    }
+
+    @RabbitListener(queues = "#{recomlendingQueue.name}", ackMode = "AUTO")
+    public void handleLendingTempEvent(LendingTemp lendingTemp) {
+        // Imprimir o conteúdo do LendingTemp recebido
+        System.out.println("Mensagem recebida para LendingTemp:");
+        System.out.println("Lending Code: " + lendingTemp.getLendingCode());
+        System.out.println("Com: " + lendingTemp.getCom());
     }
 }

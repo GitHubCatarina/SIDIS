@@ -138,6 +138,8 @@ public class LendingController {
         String message = "LendingTemp criado: " + lendingTemp.toString();
         System.out.println(message);
 
+        lendingEventProducer.sendLendingTempEvent(lendingTemp);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(message);
     }
 
