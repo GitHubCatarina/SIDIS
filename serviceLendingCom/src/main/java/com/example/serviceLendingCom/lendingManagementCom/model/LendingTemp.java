@@ -13,6 +13,7 @@ public class LendingTemp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(unique = true)
     private String lendingCode;
     private String comment;
     private boolean recom;

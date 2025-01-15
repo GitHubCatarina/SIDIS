@@ -74,6 +74,23 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(recomlendingQueue).to(recomlendingExchange).with("recomlending.routingKey"); // Usando a chave de roteamento
     }
 
+
+    @Bean
+    public FanoutExchange recomToLendingExchange() {
+        return new FanoutExchange("recom-to-lending.exchange");
+    }
+
+    @Bean
+    public Queue recomToLendingQueue() {
+        return new Queue("recom-to-lending.queue" + UUID.randomUUID(), true, false, false); // Fila persistente
+    }
+
+    @Bean
+    public Binding recomToLendingBinding(Queue recomToLendingQueue, FanoutExchange recomToLendingExchange) {
+        return BindingBuilder.bind(recomToLendingQueue).to(recomToLendingExchange);
+    }
+
+
     // Converter de mensagem
     @Bean
     public MessageConverter messageConverter() {

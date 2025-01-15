@@ -44,4 +44,8 @@ public class LendingTempService {
         // Salvar LendingTemp
         return lendingTempRepository.save(lendingTemp);
     }
+
+    public LendingTemp findByLendingCode(String lendingCode) {
+        return lendingTempRepository.findFirstByLendingCode(lendingCode);
+    }
 }

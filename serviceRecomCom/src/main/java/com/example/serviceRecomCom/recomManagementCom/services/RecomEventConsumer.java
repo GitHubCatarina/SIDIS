@@ -71,6 +71,10 @@ public class RecomEventConsumer {
             // Converter para DTO e enviar evento para RabbitMQ
             recomEventProducer.sendRecomCreatedEvent(savedRecom.toDTO());
 
+
+            // Enviar o LendingTemp de volta ao Lending
+            recomEventProducer.sendLendingTempBack(lendingTemp);
+
             // Imprimir confirmação de envio do evento
             System.out.println("Recom criado e evento enviado com ID: " + savedRecom.getId());
 

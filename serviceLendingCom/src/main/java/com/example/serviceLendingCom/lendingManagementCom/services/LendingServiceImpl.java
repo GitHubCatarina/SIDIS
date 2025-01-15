@@ -121,7 +121,7 @@ public class LendingServiceImpl implements LendingService {
         return lendingRepository.save(lending);
     }
 
-    public Lending returnBook(final EditLendingRequest resource, Long version) {
+    public Lending returnBook(final EditLendingRequest resource) {
         Optional<Lending> lending = Optional.empty();
         Lending returnedLending;
 
@@ -138,10 +138,6 @@ public class LendingServiceImpl implements LendingService {
 
         returnedLending = lending.get();
 
-        // Verificação da versão para evitar conflitos de concorrência
-        if (version != null && !Long.valueOf(returnedLending.getVersion()).equals(version)) {
-            throw new RuntimeException("[ERROR] Version mismatch. Expected version: " + version + ", but found: " + returnedLending.getVersion());
-        }
 
         // Verificar se o livro já foi devolvido
         if (returnedLending.isReturned()) {

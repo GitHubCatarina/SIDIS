@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LendingTempRepository extends JpaRepository<LendingTemp, Long> {
+    LendingTemp findFirstByLendingCode(String lendingCode);
 }

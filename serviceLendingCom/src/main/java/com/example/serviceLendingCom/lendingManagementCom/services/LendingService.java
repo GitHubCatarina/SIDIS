@@ -18,6 +18,6 @@ public interface LendingService {
     Page<Lending> getOverdueLendings(Pageable pageable);
     double getAverageLendingDuration();
     Iterable<LendingAvgPerBookView> getAverageLendingDurationPerBook();
-   Lending returnBook(EditLendingRequest resource, Long version);
+   Lending returnBook(EditLendingRequest resource);
 
 }
