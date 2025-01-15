@@ -16,11 +16,13 @@ public class LendingEventConsumer {
     private final LendingServiceImpl lendingService;
     private final RabbitTemplate rabbitTemplate;
     private final LendingTempService lendingTempService;
+    private final LendingEventProducer lendingEventProducer;
 
-    public LendingEventConsumer(LendingServiceImpl lendingService, RabbitTemplate rabbitTemplate, LendingTempService lendingTempService) {
+    public LendingEventConsumer(LendingServiceImpl lendingService, RabbitTemplate rabbitTemplate, LendingTempService lendingTempService, LendingEventProducer lendingEventProducer) {
         this.lendingService = lendingService;
         this.rabbitTemplate = rabbitTemplate;
         this.lendingTempService = lendingTempService;
+        this.lendingEventProducer = lendingEventProducer;
     }
 
     @RabbitListener(queues = "#{lendingQueue.name}", ackMode = "AUTO")
@@ -49,67 +51,67 @@ public class LendingEventConsumer {
     }
 
     // Consumir eventos da fila "recom"
-    @RabbitListener(queues = "recom-to-lending.queue", ackMode = "MANUAL")
-    public void handleRecomEvent(LendingTemp lendingTemp, Channel channel, Message message) {
+    // Consumir eventos da fila "recom"
+    @RabbitListener(queues = "recom-to-lending.queue", ackMode = "AUTO")
+    public void handleRecomEvent(LendingTemp lendingTemp, Message message) {
         try {
-        System.out.println("Mensagem recebida do recom-to-lending.exchange com Lending Code: " + lendingTemp.getLendingCode());
+            System.out.println("Mensagem recebida do recom-to-lending.exchange com Lending Code: " + lendingTemp.getLendingCode());
 
-        // Recuperar o LendingTemp guardado no banco com o mesmo lendingCode
-        LendingTemp savedLendingTemp = lendingTempService.findByLendingCode(lendingTemp.getLendingCode());
+            // Recuperar o LendingTemp guardado no banco com o mesmo lendingCode
+            LendingTemp savedLendingTemp = lendingTempService.findByLendingCode(lendingTemp.getLendingCode());
 
-        if (savedLendingTemp == null) {
+            if (savedLendingTemp == null) {
                 throw new IllegalArgumentException("LendingTemp não encontrado para LendingCode: " + lendingTemp.getLendingCode());
-        }
-
-        if (savedLendingTemp != null) {
-            // Comparar os parâmetros
-            boolean isEqual = true;
-
-            // Comparando todos os campos (exemplo de comparação)
-            if (!lendingTemp.getLendingCode().equals(savedLendingTemp.getLendingCode())) {
-                isEqual = false;
-                System.out.println("LendingCode não é igual.");
-            }
-            if (lendingTemp.isRecom() != savedLendingTemp.isRecom()) {
-                isEqual = false;
-                System.out.println("Recomendação não é igual.");
-            }
-            if (lendingTemp.getCom() == null ? savedLendingTemp.getCom() != null : !lendingTemp.getCom().equals(savedLendingTemp.getCom())) {
-                isEqual = false;
-                System.out.println("Comentário não é igual.");
             }
 
-            // Se todos os campos forem iguais
-            if (isEqual) {
-                System.out.println("Os parâmetros de LendingTemp são iguais.");
+            if (savedLendingTemp != null) {
+                // Comparar os parâmetros
+                boolean isEqual = true;
 
-                // Criar um EditLendingRequest com base no LendingTemp para passar ao método returnBook
-                EditLendingRequest editLendingRequest = new EditLendingRequest();
-                editLendingRequest.setLendingCode(savedLendingTemp.getLendingCode());
-                editLendingRequest.setComment(savedLendingTemp.getCom());  // Ajuste conforme o campo correto
-                // Adicione outros campos necessários aqui...
+                // Comparando todos os campos (exemplo de comparação)
+                if (!lendingTemp.getLendingCode().equals(savedLendingTemp.getLendingCode())) {
+                    isEqual = false;
+                    System.out.println("LendingCode não é igual.");
+                }
+                if (lendingTemp.isRecom() != savedLendingTemp.isRecom()) {
+                    isEqual = false;
+                    System.out.println("Recomendação não é igual.");
+                }
+                if (lendingTemp.getCom() == null ? savedLendingTemp.getCom() != null : !lendingTemp.getCom().equals(savedLendingTemp.getCom())) {
+                    isEqual = false;
+                    System.out.println("Comentário não é igual.");
+                }
 
-                // Chamar o método returnBook
-                lendingService.returnBook(editLendingRequest);
+                // Se todos os campos forem iguais
+                if (isEqual) {
+                    System.out.println("Os parâmetros de LendingTemp são iguais.");
 
+                    // Criar um EditLendingRequest com base no LendingTemp para passar ao método returnBook
+                    EditLendingRequest editLendingRequest = new EditLendingRequest();
+                    editLendingRequest.setLendingCode(savedLendingTemp.getLendingCode());
+                    editLendingRequest.setComment(savedLendingTemp.getCom());  // Ajuste conforme o campo correto
+                    // Adicione outros campos necessários aqui...
 
+                    // Chamar o método returnBook
+                    Lending lending = lendingService.returnBook(editLendingRequest);
+
+                    LendingDTO lendingDTO = new LendingDTO().toDTO(lending);
+                    lendingDTO.setReturned(true); // Indicar que o empréstimo foi devolvido
+                    lendingEventProducer.sendLendingReturnedEvent(lendingDTO);
+
+                    // Publicar evento no exchange de sincronização
+                    rabbitTemplate.convertAndSend("lending.exchange", "", lendingDTO);
+                    System.out.println("Evento de sincronização enviado para LendingCode: " + lendingDTO.getLendingCode());
+                } else {
+                    System.out.println("Os parâmetros de LendingTemp não são iguais.");
+                }
             } else {
-                System.out.println("Os parâmetros de LendingTemp não são iguais.");
+                System.out.println("LendingTemp com o LendingCode " + lendingTemp.getLendingCode() + " não encontrado.");
             }
-        } else {
-            System.out.println("LendingTemp com o LendingCode " + lendingTemp.getLendingCode() + " não encontrado.");
-        }
         } catch (Exception e) {
             System.err.println("Erro ao processar mensagem: " + e.getMessage());
-            try {
-                // Rejeitar a mensagem e reenviá-la para a fila
-                channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true);
-            } catch (Exception nackException) {
-                System.err.println("Erro ao reenviar mensagem: " + nackException.getMessage());
-            }
+            // Não é necessário manipular ack manualmente, o Spring gerenciará o reconhecimento automaticamente
         }
     }
-
-
 
 }

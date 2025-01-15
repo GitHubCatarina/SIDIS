@@ -82,8 +82,9 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue recomToLendingQueue() {
-        return new Queue("recom-to-lending.queue" + UUID.randomUUID(), true, false, false); // Fila persistente
+        return new Queue("recom-to-lending.queue", true, false, false); // Fila persistente, sem UUID
     }
+
 
     @Bean
     public Binding recomToLendingBinding(Queue recomToLendingQueue, FanoutExchange recomToLendingExchange) {
