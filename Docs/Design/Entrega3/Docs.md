@@ -10,10 +10,9 @@ Este documento descreve a arquitetura e funcionamento dos microserviços do sist
 O projeto foi reestruturado utilizando RabbitMQ, um message broker baseado em AMQP, para assegurar a sincronização entre serviços. 
 
 Adicionalmente, foi implementado o padrão Command-Query Responsibility Segregation (CQRS), separando as responsabilidades em microserviços de comando (modificação de dados) e de consulta (consultas de dados).
-
-## Atualizações
+### Atualizações
 Neste Sprint foi implementado o padrão SAGA na US "As a reader, upon returning a Book, I want to recommend it (positively or
-negatively). It implies a service for Recommendations.". Para tal foi criado o microserviço de recomendações, que é responsável por receber as recomendações positivas ou negativas dos leitores. 
+negatively). It implies a service for Recommendations.". Para tal foi criado o microserviço de recomendações, que é responsável por receber as recomendações positivas ou negativas dos leitores, e as exchanges necessárias para implementar o padrão SAGA. 
 
 ## Índice
 <!-- TOC -->
@@ -42,6 +41,7 @@ negatively). It implies a service for Recommendations.". Para tal foi criado o m
   * [Vista de Processos](#vista-de-processos)
     * [Nível 1](#nível-1)
     * [Nível 2](#nível-2)
+    * [Nível 3](#nível-3)
   * [Como correr](#como-correr)
     * [Para iniciar](#para-iniciar)
     * [Para encerrar](#para-encerrar)
@@ -80,44 +80,44 @@ Abaixo, apresenta-se a configuração de portas e instâncias para os diferentes
 
 #### Tabela de portas padrão:
 
-| Serviço | Tipo       | Instância | Porta |
-|---------|------------|-----------|-------|
-| Auth    | -          | 1         | 2001  |
-| Auth    | -          | 2         | 2002  |
-| Auth    | DB         | 1         | 2201  |
-| Auth    | DB         | 2         | 2202  |
-| Book    | Command    | 1         | 3001  |  
-| Book    | Command    | 2         | 3002  |  
-| Book    | Query      | 1         | 3101  |
-| Book    | Query      | 2         | 3102  |
-| Book    | DB Command | 1         | 3201  |  
-| Book    | DB Command | 2         | 3202  |  
-| Book    | DB Query   | 1         | 3301  |
-| Book    | DB Query   | 2         | 3302  |
-| Lending | Command    | 1         | 4001  | 
-| Lending | Command    | 2         | 4002  | 
-| Lending | Query      | 1         | 4101  |
-| Lending | Query      | 2         | 4102  |
-| Lending | DB Command | 1         | 4201  | 
-| Lending | DB Command | 2         | 4202  | 
-| Lending | DB Query   | 1         | 4301  |
-| Lending | DB Query   | 2         | 4302  |
-| Reader  | Command    | 1         | 5001  | 
-| Reader  | Command    | 2         | 5002  | 
-| Reader  | Query      | 1         | 5101  |
-| Reader  | Query      | 2         | 5102  |
-| Reader  | DB Command | 1         | 5201  | 
-| Reader  | DB Command | 2         | 5202  | 
-| Reader  | DB Query   | 1         | 5301  |
-| Reader  | DB Query   | 2         | 5302  |
-| Top     | Query      | 1         | 6101  |
-| Top     | Query      | 2         | 6102  | 
-| Top     | DB Query   | 1         | 6301  | 
-| Top     | DB Query   | 2         | 6302  |
-| Recom   | Comand     | 1         | 7001  |
-| Recom   | Comand     | 2         | 7002  |
-| Recom   | DB Comand  | 1         | 7201  |
-| Recom   | DB Comand  | 2         | 7202  |
+| Serviço | Tipo       | Instância | Porta | Link                                                                                                     |
+|---------|------------|-----------|-------|----------------------------------------------------------------------------------------------------------|
+| Auth    | -          | 1         | 2001  | [Interface do H2](http://localhost:2001/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Auth    | -          | 2         | 2002  | [Interface do H2](http://localhost:2002/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Auth    | DB         | 1         | 2201  |                                                                                                          |
+| Auth    | DB         | 2         | 2202  |                                                                                                          |
+| Book    | Command    | 1         | 3001  | [Interface do H2](http://localhost:3001/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Book    | Command    | 2         | 3002  | [Interface do H2](http://localhost:3002/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Book    | Query      | 1         | 3101  | [Interface do H2](http://localhost:3101/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Book    | Query      | 2         | 3102  | [Interface do H2](http://localhost:3102/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Book    | DB Command | 1         | 3201  |                                                                                                          |
+| Book    | DB Command | 2         | 3202  |                                                                                                          |
+| Book    | DB Query   | 1         | 3301  |                                                                                                          |
+| Book    | DB Query   | 2         | 3302  |                                                                                                          |
+| Lending | Command    | 1         | 4001  | [Interface do H2](http://localhost:4001/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Lending | Command    | 2         | 4002  | [Interface do H2](http://localhost:4002/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Lending | Query      | 1         | 4101  | [Interface do H2](http://localhost:4101/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Lending | Query      | 2         | 4102  | [Interface do H2](http://localhost:4102/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Lending | DB Command | 1         | 4201  |                                                                                                          |
+| Lending | DB Command | 2         | 4202  |                                                                                                          |
+| Lending | DB Query   | 1         | 4301  |                                                                                                          |
+| Lending | DB Query   | 2         | 4302  |                                                                                                          |
+| Reader  | Command    | 1         | 5001  | [Interface do H2](http://localhost:5001/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Reader  | Command    | 2         | 5002  | [Interface do H2](http://localhost:5002/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Reader  | Query      | 1         | 5101  | [Interface do H2](http://localhost:5101/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Reader  | Query      | 2         | 5102  | [Interface do H2](http://localhost:5102/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Reader  | DB Command | 1         | 5201  |                                                                                                          |
+| Reader  | DB Command | 2         | 5202  |                                                                                                          |
+| Reader  | DB Query   | 1         | 5301  |                                                                                                          |
+| Reader  | DB Query   | 2         | 5302  |                                                                                                          |
+| Top     | Query      | 1         | 6101  | [Interface do H2](http://localhost:6101/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Top     | Query      | 2         | 6102  | [Interface do H2](http://localhost:6102/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Top     | DB Query   | 1         | 6301  |                                                                                                          |
+| Top     | DB Query   | 2         | 6302  |                                                                                                          |
+| Recom   | Comand     | 1         | 7001  | [Interface do H2](http://localhost:7001/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Recom   | Comand     | 2         | 7002  | [Interface do H2](http://localhost:7001/h2-console/login.do?jsessionid=08a1a3645bc73e654d9de58192af534a) |
+| Recom   | DB Comand  | 1         | 7201  |                                                                                                          |
+| Recom   | DB Comand  | 2         | 7202  |                                                                                                          |
 
 ## Notas sobre a Base de Dados
 De forma a aumentar a eficiência da base de dados, foi utilizado o mecanismo de allocation de sequence cache. As sequences armazenam os próximos valores de IDs num cache para acelerar a criação de novos registos.
@@ -135,6 +135,15 @@ Para a comunicação entre os microserviços, foi decidido o uso de Fanout Excha
 - **Escalabilidade:** Ideal para cenários em que várias instâncias de microserviços precisam de receber e processar o mesmo evento.
 - **Desacoplamento:** Permite que os serviços consumidores não precisem de conhecer os detalhes de quem está a publicar as mensagens.
 
+#### Uso de Direct Exchanges
+Para a comunicação entre a instância com o LendingTemp e uma instância de Recom, foi decidido o uso de Direct Exchanges, um tipo de exchange que permite o envio de mensagens a filas específicas através de routing keys. Esta abordagem oferece maior controlo sobre a entrega das mensagens, permitindo que cada fila receba apenas as mensagens destinadas a si com base na chave de roteamento associada. Este tipo de exchange é prática para que apenas uma instância de recom receba o LendingTemp.
+
+##### Vantagens do Direct Exchange:
+- **Controlo na entrega:** Permite direccionar mensagens apenas para as filas que correspondem à chave de roteamento especificada.
+- **Flexibilidade:** Ideal para cenários em que diferentes filas ou microserviços precisam de processar mensagens distintas.
+- **Desempenho otimizado:** Reduz a carga em filas desnecessárias, uma vez que apenas as filas associadas à chave recebem as mensagens.
+- **Adaptabilidade:** Facilita a implementação de múltiplas filas com propósitos específicos dentro de uma mesma aplicação.
+
 
 ### Mensagens JSON e Conversão
 Todos os microserviços utilizam o Jackson2JsonMessageConverter para a conversão das mensagens em formato JSON. Este padrão garante que todos os dados trocados entre os microserviços seguem o mesmo formato, evitando problemas de compatibilidade e facilitando a integração entre os diferentes serviços.
@@ -144,29 +153,32 @@ Todos os microserviços utilizam o Jackson2JsonMessageConverter para a conversã
 Os microserviços enviam mensagens para as exchanges sempre que ocorre uma alteração significativa no sistema. As mensagens enviadas são sempre publicadas na exchange correspondente, e os microserviços subscritos a essas queues processam essas mensagens.
 
 ##### Tabela de ações e exchanges
-| **Microserviço** | **Ação**              | **Exchange**     |
-|----------------|-----------------------|------------------|
-| **Auth**         | Criação de Utilizador | auth.exchange    |
-| **BookCom**        | Criação de Livro      | book.exchange    |
-| **LendingCom**     | Criação de Empréstimo | lending.exchange |
-| **ReaderCom**      | Criação de Leitor     | reader.exchange  |
-
-
+| **Microserviço** | **Ação**                                                    | **Exchange**              |
+|------------------|-------------------------------------------------------------|---------------------------|
+| **Auth**         | Criação de Utilizador                                       | auth.exchange             |
+| **BookCom**      | Criação de Livro                                            | book.exchange             |
+| **LendingCom**   | Criação de Empréstimo                                       | lending.exchange          |
+| **ReaderCom**    | Criação de Leitor                                           | reader.exchange           |
+| **RecomCom**     | Criação de Recom                                            | recom.exchange            |
+| **LendingCom**   | Criação de LendingTemp                                      | recomlending.exchange     |
+| **ReaderCom**    | Recom criado com sucesso, pode guardar o Lending definitivo | recom-to-lending.exchange |
 ### Subscrição de Filas
 Cada microserviço subscreve às queues de interesse, permitindo-lhes consumir as mensagens que são enviadas pelas exchanges. As queues são configuradas de forma única para cada instância, utilizando o padrão UUID.randomUUID(), o que garante a unicidade das filas, especialmente útil em sistemas distribuídos com múltiplas instâncias de microserviços, como é o caso.
 
+No caso do "recomlending", a fila direct é vinculada a uma chave de roteamento específica, permitindo que apenas mensagens com a chave correspondente sejam entregues à fila. No exemplo, a fila "recomlending.queue" está associada à chave "recomlending.routingKey", garantindo que somente mensagens relevantes sejam roteadas.
 ##### Tabela de Subscrições de Filas
 
-| **Microserviço**   | **Queue**                                   |
-|----------------|-----------------------------------------|
-| **Auth**           | auth.queue                              | 
-| **BookCom**        | book.queue                              | 
-| **BookQuery**      | book.queue                              |
-| **LendingCom**     | reader.queue, book.queue, lending.queue |
-| **LendingQuery**	  | lending.queue                           |
-| **ReaderCom**      | reader.queue                            |
-| **ReaderQuery**    | reader.queue                            | 
-| **Top**            | lending.queue                           | 
+| **Microserviço**  | **Queue**                                                          |
+|-------------------|--------------------------------------------------------------------|
+| **Auth**          | auth.queue                                                         | 
+| **BookCom**       | book.queue                                                         | 
+| **BookQuery**     | book.queue                                                         |
+| **LendingCom**    | reader.queue, book.queue, lending.queue, recom-to-lending.exchange |
+| **LendingQuery**	 | lending.queue                                                      |
+| **ReaderCom**     | reader.queue                                                       |
+| **ReaderQuery**   | reader.queue                                                       | 
+| **Top**           | lending.queue                                                      | 
+| **Recom**         | recom.exchange, recomlending.exchange                              | 
 
 
 
@@ -241,7 +253,7 @@ POST-books.puml
 
 ![Com-1-servico](/Docs/Design/Entrega3/Vistas de Processos/Nível 2/Comunicacao_1_Microservico.svg)
 
-Comunicação 1 Microserviço (Comunicacao_1_Microservico.puml)
+Comunicação 1 Microserviço
 - Descreve a interação entre um cliente e duas instâncias do serviço de autenticação (Auth).
   O cliente faz uma solicitação para criar um novo utilizador.
   O serviço Auth processa a criação e envia uma notificação para o message broker, retornando um código 201 Created ao cliente.
@@ -251,7 +263,7 @@ Comunicação 1 Microserviço (Comunicacao_1_Microservico.puml)
 
 ![Com-2-servico](/Docs/Design/Entrega3/Vistas de Processos/Nível 2/Comunicacao_2_Microservico.svg)
 
-Comunicação 2 Microserviços (Comunicacao_2_Microservico.puml)
+Comunicação 2 Microserviços
 - Mostra a comunicação entre os serviços de consulta e de comando de empréstimos (Lending) e o serviço de Top, assim como entre as instâncias de cada serviço.
   O cliente solicita ao serviço Lending o empréstimo de um livro, que processa os detalhes e, caso esteja tudo correto, guarda o novo empréstimo e envia uma notificação para o message broker, retornando um código 201 Created ao cliente.
   O message broker, envia uma notificação para todas as instância de LendingCom e LendingQuery e de Top, que também guarda o empréstimo criado.
@@ -268,11 +280,25 @@ Comunicação com padrão SAGA
 #### Lending temporário
 ![Com-SAGA](/Docs/Design/Entrega3/Vistas de Processos/Nível 3/ReturnLendingRecom1.svg)
 
+Detalhe da criação do LendingTemp
+- Mostra o processo detalhado de criação de um LendingTemp durante a devolução de um empréstimo. O cliente envia os dados de devolução para o serviço LendingCom, que valida as permissões e encaminha os dados para o LendingTempService. Este serviço verifica se o empréstimo já foi devolvido e cria um LendingTemp com as informações recebidas.
+- O LendingTemp é guardado no repositório e posteriormente enviado para o message broker, que distribui o evento para os serviços Recom e LendingQuery, permitindo a sincronização e validação dos dados entre microserviços.
+
 #### Recomendação
 ![Com-SAGA](/Docs/Design/Entrega3/Vistas de Processos/Nível 3/ReturnLendingRecom2.svg)
 
+Detalhe da criação da Recomendação
+- Mostra o fluxo detalhado para criar uma recomendação durante a devolução de um empréstimo. O cliente envia os dados de devolução para o serviço LendingCom, que publica o evento no message broker. Este notifica o serviço Recom, onde o evento é processado.
+- O Recom verifica se a recomendação já existe e, caso contrário, cria e salva os dados no banco de dados. Após isso, um evento de recomendação criada é publicado no message broker, que sincroniza as informações entre as instâncias do serviço Recom.
+
 #### Lending permanente
 ![Com-SAGA](/Docs/Design/Entrega3/Vistas de Processos/Nível 3/ReturnLendingRecom3.svg)
+
+Detalhe da atualização dos Empréstimos
+- Detalha o processo de devolução de empréstimos, onde o cliente envia os dados de devolução ao serviço Lending. Após validar as informações e salvar temporariamente os dados, o serviço publica um evento no message broker. O serviço de recomendações valida e guarda os dados da recomendação, sincronizando-os entre instâncias.
+- O serviço Lending processa a devolução permanentemente, atualizando o estado do empréstimo e calculando multas, enviando o resultado ao broker. Este sincroniza os dados de devolução com as instâncias LendingQuery, LendingCom e Top, garantindo consistência entre os serviços.
+- Em caso de sucesso, retorna 201 Created ao cliente. Se ocorrer erro, notifica as instâncias e retorna 500 Internal Server Error ao cliente."
+
 
 ## Como correr
 ### Para iniciar
