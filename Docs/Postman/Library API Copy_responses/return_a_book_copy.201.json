@@ -1,0 +1,15 @@
+{
+  "id": 24,
+  "lendingCode": "2024/24",
+  "readerId": 24,
+  "bookId": 24,
+  "bookTitle": "Os Miseráveis",
+  "lendDate": "2024-05-21",
+  "limitDate": "2024-06-04",
+  "returnedDate": "2024-11-27",
+  "daysTillReturn": 0,
+  "daysOverdue": 176,
+  "fine": 176,
+  "returned": true,
+  "comment": "liked it"
+}

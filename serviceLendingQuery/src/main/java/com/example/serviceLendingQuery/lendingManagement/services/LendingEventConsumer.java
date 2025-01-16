@@ -18,32 +18,39 @@ public class LendingEventConsumer {
     }
 
     // Consumidor para a fila principal de sincronização
+    // Consumidor para a fila principal de sincronização
     @RabbitListener(queues = "#{lendingQueue.name}", ackMode = "AUTO")
-    public void handleLendingCreatedEvent(LendingDTO lendingDTO) {
+    public void handleLendingEvent(LendingDTO lendingDTO) {
         System.out.println("Mensagem recebida para empréstimo com código: " + lendingDTO.getLendingCode());
 
-        // Verificar se o empréstimo já existe pelo lendingCode
-        boolean lendingExists = lendingService.lendingExists(lendingDTO.getLendingCode());
-
-        if (lendingExists) {
-            System.out.println("Empréstimo com código " + lendingDTO.getLendingCode() + " já existe, não será criado.");
+        if (lendingDTO.isReturned()) {
+            // Passar o comentário, que pode ser nulo ou vazio
+            lendingService.markAsReturned(lendingDTO.getLendingCode(), lendingDTO.getComment());
+            System.out.println("Empréstimo com código " + lendingDTO.getLendingCode() + " marcado como devolvido.");
         } else {
-            // Criar um objeto Lending a partir do LendingDTO
-            Lending lending = new Lending();
-            lending.setLendingCode(lendingDTO.getLendingCode());
-            lending.setReaderId(lendingDTO.getReaderId());
-            lending.setBookId(lendingDTO.getBookId());
-            lending.setBookTitle(lendingDTO.getBookTitle());
-            lending.setLendDate(lendingDTO.getLendDate());
-            lending.setLimitDate(lendingDTO.getLimitDate());
-            lending.setReturnedDate(lendingDTO.getReturnedDate());
-            lending.setReturned(lendingDTO.isReturned());
-            lending.setFine(lendingDTO.getFine());
-            lending.setComment(lendingDTO.getComment());
+            // Verificar se o empréstimo já existe
+            boolean lendingExists = lendingService.lendingExists(lendingDTO.getLendingCode());
 
-            // Usar o método de criação de empréstimo
-            lendingRepository.save(lending); // Cria o empréstimo no sistema
-            System.out.println("Empréstimo com código " + lendingDTO.getLendingCode() + " criado com sucesso.");
+            if (lendingExists) {
+                System.out.println("Empréstimo com código " + lendingDTO.getLendingCode() + " já existe.");
+            } else {
+                // Criar um objeto Lending a partir do LendingDTO
+                Lending lending = new Lending();
+                lending.setLendingCode(lendingDTO.getLendingCode());
+                lending.setReaderId(lendingDTO.getReaderId());
+                lending.setBookId(lendingDTO.getBookId());
+                lending.setBookTitle(lendingDTO.getBookTitle());
+                lending.setLendDate(lendingDTO.getLendDate());
+                lending.setLimitDate(lendingDTO.getLimitDate());
+                lending.setReturnedDate(lendingDTO.getReturnedDate());
+                lending.setReturned(lendingDTO.isReturned());
+                lending.setFine(lendingDTO.getFine());
+                lending.setComment(lendingDTO.getComment());
+
+                // Usar o método de criação de empréstimo
+                lendingRepository.save(lending); // Cria o empréstimo no sistema
+                System.out.println("Empréstimo com código " + lendingDTO.getLendingCode() + " criado com sucesso.");
+            }
         }
     }
 }

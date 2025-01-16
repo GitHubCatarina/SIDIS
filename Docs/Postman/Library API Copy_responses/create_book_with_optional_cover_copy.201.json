@@ -1,0 +1,10 @@
+{
+  "id": 21,
+  "isbn": "9798666830864",
+  "title": "Sample Book",
+  "genre": {
+    "name": "Mystery"
+  },
+  "description": "A sample book description",
+  "bookAuthors": []
+}

@@ -1,0 +1,1868 @@
+# Entrega 2
+
+###
+# group: Auth
+# @name Login Copy
+POST http://localhost:2001/api/auth/login
+Authorization: Bearer {{set_token}}
+Content-Type: application/json
+
+{
+  "username": "Roberta43@hotmail.com",
+  "password": "newPassword"
+}
+
+
+###
+# group: Auth
+# @name Register Copy
+POST http://localhost:2001/api/auth/register
+Authorization: Bearer {{set_token}}
+Content-Type: application/json
+
+{
+  "username": "{{$randomEmail}}",
+  "fullName": "{{$randomUserName}}",
+  "password": "newPassword",
+  "rePassword": "newPassword",
+  "authorities": [
+    "ADMIN"
+  ]
+}
+
+
+###
+# group: Auth
+# @name Get roles Copy
+GET http://localhost:2001/api/auth/roles
+Authorization: Bearer eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJleGFtcGxlLmlvIiwic3ViIjoiMTQsbmV3dXNlckBleGFtcGxlLmNvbSIsImV4cCI6MTczNTMzNjgzNCwiaWF0IjoxNzMyNzQ0ODM0LCJyb2xlcyI6IkFETUlOIn0.O1c90R3NsOVrOhxB_aQKDY27Z3FA4k3oZEJ9ucv11c9eCsi1V-t6ekvHSJilpwAqs0dQbZBK7r_sgGqIc-DzhVCpIq7CMaBvge6TL6Y4g5mw9s1xWlFGGCwfTNtJI5V2qLc-AUwp84PGn_IWPpQoHwXtSTjmm5t8J8zyyPjy1is7nf8XAXXgV6oFmuvd6MNKAZ8FbVOEc6lsa56V7poYxe7XlrjfuINMRLn44MBC7eNLUjyZOorVCyqYCnsGZgnmxAWv2l0tFmT6LBBCKz_bgrOvqVahBRb6K-yFJo-exmh0gyIYjvaL3NwLnHzTqMX2m8TxRwiV7rzLdK06SOf81_bb1JnNWm7EyAfjXiEeQlzxWoM3i2GX7YX2-gkLi8L4xqh0hUkgyHWkfWbQKLLEc-22vMTW0ANokxLe25tpT-ftZEXt9R1s6DDfh25Vkse0mbIE0oHFFrqrivJNLHt50yI2wOu5R6qdybqWZPkOkyIS5fjjwxRMP_IfbVgN59ylrXZQeyseXAGsToRo_mItDErmMcNozEY8kDYE2Fx5oXjnAip0XJ4WwqiAdl9lKzTfCltkf81Jk1RTKl2sKjYLQicmOb_A03ozaWTQIEwLFGpo4BXfcvGKHOaRVf2uEaWmYy22KR_hayP9KAQtnVT4oRfEvEY03V3rA64Y7x5EmI0
+
+###
+# group: BookCom
+# @name Set Cover To Book Copy
+POST http://localhost:3001/api/books/5/cover
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="1ef2fd82-10bd-4640-95fd-639f3e7c01c5"
+
+< postman-cloud:///1ef2fd82-10bd-4640-95fd-639f3e7c01c5
+--WebAppBoundary
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 201", function () {
+
+    //   pm.expect(pm.response.code).to.equal(201);
+
+    // });
+
+    // 
+
+    // pm.test("Response has the required fields", function () {
+
+    //     const responseData = pm.response.json();
+
+    // 
+
+    //     pm.expect(responseData).to.be.an('object');
+
+    //     pm.expect(responseData.fileName).to.exist;
+
+    //     pm.expect(responseData.fileDownloadUri).to.exist;
+
+    //     pm.expect(responseData.fileType).to.exist;
+
+    //     pm.expect(responseData.size).to.exist;
+
+    // });
+
+    // 
+
+    // pm.test("File type is in a valid format", function () {
+
+    //     const responseData = pm.response.json();
+
+    //     
+
+    //     pm.expect(responseData).to.be.an('object');
+
+    //     pm.expect(responseData.fileType).to.exist.and.to.be.a('string');
+
+    //     // Add additional validation for specific file type format if required
+
+    // });
+
+    // 
+
+    // pm.test("Response time is less than 500ms", function () {
+
+    //   pm.expect(pm.response.responseTime).to.be.below(500);
+
+    // });
+%}
+
+###
+# group: BookCom
+# @name Create Book With Optional Cover Copy
+PUT http://localhost:3001/api/books
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="book"
+
+{
+    "isbn": "9798666830864",
+    "title": "Sample Book",
+    "genre": {
+        "id": 3,
+        "name": "Mystery"
+    },
+    "description": "A sample book description",
+    "bookAuthors": [
+        {
+            "author": {
+                "name": "James Clear",
+                "shortBio": "An author and speaker focused on habits, decision-making, and continuous improvement."
+            }
+        },
+        {
+            "author": {
+                "name": "Stephen R. Covey",
+                "shortBio": "An American educator, author, businessman, and keynote speaker."
+            }
+        }
+    ]
+}
+--WebAppBoundary
+Content-Disposition: form-data; name="cover"; filename="1ef227e9-07dc-4540-b53c-be9fc9eea1d3"
+
+< postman-cloud:///1ef227e9-07dc-4540-b53c-be9fc9eea1d3
+--WebAppBoundary
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 201", function () {
+    //     pm.expect(pm.response.code).to.equal(201);
+    // });
+    //
+    //
+    // pm.test("Response time is less than 500ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(500);
+    // });
+    //
+    //
+    // pm.test("Validate the response schema for the required fields", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData.id).to.exist;
+    //     pm.expect(responseData.isbn).to.exist;
+    //     pm.expect(responseData.title).to.exist;
+    //     pm.expect(responseData.genre).to.exist;
+    //     pm.expect(responseData.description).to.exist;
+    //     pm.expect(responseData.bookAuthors).to.exist;
+    // });
+    //
+    //
+    // pm.test("Ensure that the genre name is a non-empty string", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData.genre.name).to.be.a('string').and.to.have.lengthOf.at.least(1, "Genre name should not be empty");
+    // });
+    //
+%}
+
+<> ./Library API Copy_responses/create_book_with_optional_cover_copy.201.json
+// http://localhost:3001/api/books
+
+###
+# group: BookCom
+# @name Complete Book Edit Copy
+PUT http://localhost:3001/api/books/1
+Authorization: Bearer {{adminToken}}
+If-Match: 0
+Content-Type: application/json
+
+{
+  "isbn": "9780735211293",
+  "title": "Atokmic Habits",
+  "genre": {
+    "id": 3,
+    "name": "Mystery"
+  },
+  "description": "122231",
+  "bookAuthors": [
+    {
+      "author": {
+        "id": 2,
+        "name": "James Clear",
+        "shortBio": "An author and speaker focused on habits, decision-making, and continuous improvement."
+      }
+    }
+  ]
+}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //   pm.expect(pm.response.code).to.equal(200);
+    // });
+    //
+    //
+    // pm.test("Response Content-Type header is application/json", function () {
+    //     pm.expect(pm.response.headers.get("Content-Type")).to.include("application/json");
+    // });
+    //
+    //
+    // pm.test("Validate the response schema", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData.id).to.exist.and.to.be.a('number');
+    //     pm.expect(responseData.isbn).to.exist.and.to.be.a('string');
+    //     pm.expect(responseData.title).to.exist.and.to.be.a('string');
+    //     pm.expect(responseData.genre).to.exist.and.to.be.an('object');
+    //     pm.expect(responseData.description).to.exist.and.to.be.a('string');
+    //     pm.expect(responseData.bookAuthors).to.exist.and.to.be.an('array');
+    // });
+    //
+    //
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+    //
+%}
+
+<> ./Library API Copy_responses/complete_book_edit_copy.200.json
+// http://localhost:3001/api/books/1
+
+###
+# group: BookCom
+# @name Partial Book Edit Copy
+PATCH http://localhost:3001/api/books/4
+Authorization: Bearer {{adminToken}}
+If-Match: 0
+Content-Type: application/json
+
+{
+  "id": 2,
+  "title": "joao o cavaleiro",
+  "isbn": "9781982137274"
+}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.expect(pm.response.code).to.equal(200);
+    // });
+    //
+    //
+    // pm.test("ISBN is a non-empty string", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData.isbn).to.be.a('string').and.to.have.lengthOf.at.least(1, "ISBN should not be empty");
+    // });
+    //
+%}
+
+<> ./Library API Copy_responses/partial_book_edit_copy.200.json
+// http://localhost:3001/api/books/4
+
+###
+# group: BookQuery
+# @name Book By ISBN Copy
+GET http://localhost:3101/api/books/9780062316110
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.response.to.have.status(200);
+    // });
+    //
+    //
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+    //
+    //
+    // pm.test("Response has the required fields", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData.id).to.exist;
+    //     pm.expect(responseData.isbn).to.exist;
+    //     pm.expect(responseData.title).to.exist;
+    //     pm.expect(responseData.genre).to.exist;
+    //     pm.expect(responseData.description).to.exist;
+    //     pm.expect(responseData.bookAuthors).to.exist;
+    // });
+    //
+    //
+    // pm.test("Genre object contains the required field 'name'", function () {
+    //   const responseData = pm.response.json();
+    //   
+    //   pm.expect(responseData).to.be.an('object');
+    //   pm.expect(responseData.genre).to.exist;
+    //   pm.expect(responseData.genre.name).to.exist;
+    // });
+    //
+    //
+    // pm.test("BookAuthors array should contain 'author' and 'shortBio'", function () {
+    //     const responseData = pm.response.json();
+    //
+    //     pm.expect(responseData.bookAuthors).to.be.an('array');
+    //     responseData.bookAuthors.forEach(function(author){
+    //         pm.expect(author).to.have.property('author');
+    //         pm.expect(author).to.have.property('shortBio');
+    //     });
+    // });
+    //
+%}
+
+###
+# group: BookQuery
+# @name Book By Genre, Title and Author Copy
+GET http://localhost:3101/api/books?
+    genre=Self-Improvement&
+    title=atomic&
+    author=Dale Carnegie
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.response.to.have.status(200);
+    // });
+    //
+    //
+    // pm.test("Response has the required fields", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('array');
+    //     
+    //     responseData.forEach(function(book) {
+    //         pm.expect(book).to.have.property('id');
+    //         pm.expect(book).to.have.property('isbn');
+    //         pm.expect(book).to.have.property('title');
+    //         pm.expect(book).to.have.property('genre');
+    //         pm.expect(book).to.have.property('description');
+    //         pm.expect(book).to.have.property('bookAuthors');
+    //     });
+    // });
+    //
+    //
+    // pm.test("Genre object contains a non-empty name field", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('array');
+    //     
+    //     responseData.forEach(function(book) {
+    //         pm.expect(book.genre.name).to.exist.and.to.have.lengthOf.at.least(1, "Name field should not be empty");
+    //     });
+    // });
+    //
+    //
+    // pm.test("Book authors array contains non-empty author and shortBio fields", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('array');
+    //     responseData.forEach(function(book) {
+    //         pm.expect(book.bookAuthors).to.be.an('array');
+    //         book.bookAuthors.forEach(function(author) {
+    //             pm.expect(author.author).to.be.a('string').and.to.have.lengthOf.at.least(1, "Author field should not be empty");
+    //             pm.expect(author.shortBio).to.be.a('string').and.to.have.lengthOf.at.least(1, "ShortBio field should not be empty");
+    //         });
+    //     });
+    // });
+    //
+    //
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+    //
+%}
+
+###
+# group: BookQuery
+# @name Book Cover by Book Id Copy
+GET http://localhost:3101/api/books/5/cover
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.expect(pm.response.code).to.equal(200);
+    // });
+    //
+    //
+    // pm.test("Content-Type header is 'image/png'", function () {
+    //     pm.expect(pm.response.headers.get("Content-Type")).to.equal("image/png");
+    // });
+    //
+    //
+    // pm.test("Response time is less than 500ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(500);
+    // });
+    //
+%}
+
+###
+# group: ReaderCom
+# @name Reader With Optional Photo Copy
+POST http://localhost:5001/api/readers
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="reader"
+
+{
+    "name": "Daniel Ribeiro",
+    "email": "danielribeiro@gmail.com",
+    "dateOfBirth": "2000-09-20",
+    "phoneNumber": 987654321,
+    "gdbrconsent": true
+}
+--WebAppBoundary
+Content-Disposition: form-data; name="photo"; filename="1ef2fd82-10bd-4640-95fd-639f3e7c01c5"
+
+< postman-cloud:///1ef2fd82-10bd-4640-95fd-639f3e7c01c5
+--WebAppBoundary
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+    //
+%}
+
+###
+# group: ReaderCom
+# @name Photo To Reader Copy
+POST http://localhost:5001/api/readers/5/photo
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="1ef2fd82-10bd-4640-95fd-639f3e7c01c5"
+
+< postman-cloud:///1ef2fd82-10bd-4640-95fd-639f3e7c01c5
+--WebAppBoundary
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 500", function () {
+
+    //     pm.expect(pm.response.code).to.equal(500);
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Response time is within an acceptable range", function () {
+
+    //     pm.expect(pm.response.responseTime).to.be.below(1000);
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Presence of timestamp, status, error, and path fields in the response schema", function () {
+
+    //     const responseData = pm.response.json();
+
+    // 
+
+    //     pm.expect(responseData).to.be.an('object');
+
+    //     pm.expect(responseData.timestamp).to.exist;
+
+    //     pm.expect(responseData.status).to.exist;
+
+    //     pm.expect(responseData.error).to.exist;
+
+    //     pm.expect(responseData.path).to.exist;
+
+    // });
+
+    //
+%}
+
+###
+# group: ReaderCom
+# @name Complete Reader Edit Copy
+PUT http://localhost:5001/api/readers/2
+Authorization: Bearer {{adminToken}}
+If-Match: 0
+Content-Type: application/json
+
+{
+  "name": "Francisco Goncalves",
+  "email": "franciscogoncalves@gmail.com",
+  "dateOfBirth": "2001-10-14",
+  "phoneNumber": 987654639,
+  "gdbrconsent": true
+}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.response.to.have.status(200);
+    // });
+    //
+    //
+    // pm.test("Response time is less than 500ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(500);
+    // });
+    //
+%}
+
+###
+# group: ReaderCom
+# @name Partial Reader Edit Copy
+PATCH http://localhost:5001/api/readers/1
+Authorization: Bearer {{adminToken}}
+If-Match: 0
+Content-Type: application/json
+
+{
+  "name": "Antonio Mendes",
+  "email": "antoniomendes@gmail.com"
+}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.response.to.have.status(200);
+    // });
+    //
+    //
+    // pm.test("Response time is less than 500ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(500);
+    // });
+    //
+%}
+
+###
+# group: ReaderQuery
+# @name Reader By Id Copy
+GET http://localhost:5101/api/readers/2
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.expect(pm.response.code).to.equal(200);
+    // });
+    //
+    //
+    // pm.test("Response has the required fields", function () {
+    //     const responseData = pm.response.json();
+    //
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData).to.have.property('id');
+    //     pm.expect(responseData).to.have.property('readerCode');
+    //     pm.expect(responseData).to.have.property('name');
+    //     pm.expect(responseData).to.have.property('email');
+    //     pm.expect(responseData).to.have.property('age');
+    //     pm.expect(responseData).to.have.property('phoneNumber');
+    //     pm.expect(responseData).to.have.property('interests');
+    //     pm.expect(responseData).to.have.property('funnyQuote');
+    //     pm.expect(responseData).to.have.property('gdbrconsent');
+    // });
+    //
+    //
+    // pm.test("Email is in a valid format", function () {
+    //   const responseData = pm.response.json();
+    //   
+    //   pm.expect(responseData.email).to.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email format is not valid");
+    // });
+    //
+    //
+    // pm.test("Phone number is a non-negative integer", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData.phoneNumber).to.be.a('number');
+    //     pm.expect(responseData.phoneNumber).to.be.at.least(0, "Phone number should be non-negative");
+    // });
+    //
+    //
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+    //
+%}
+
+###
+# group: ReaderQuery
+# @name All Readers Or Filter By Email Or Phone Number Copy
+GET http://localhost:5101/api/readers
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="phoneNumber"
+
+99
+--WebAppBoundary
+Content-Disposition: form-data; name="email"
+
+outlook.com
+--WebAppBoundary
+Content-Disposition: form-data; name="name"
+
+Daniel
+--WebAppBoundary
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.response.to.have.status(200);
+    // });
+    //
+    //
+    // pm.test("Response has the required fields", function () {
+    //     const responseData = pm.response.json();
+    //
+    //     pm.expect(responseData).to.be.an('array').that.is.not.empty;
+    //
+    //     responseData.forEach(function (reader) {
+    //         pm.expect(reader).to.have.property('id');
+    //         pm.expect(reader).to.have.property('readerCode');
+    //         pm.expect(reader).to.have.property('name');
+    //         pm.expect(reader).to.have.property('email');
+    //         pm.expect(reader).to.have.property('age');
+    //         pm.expect(reader).to.have.property('phoneNumber');
+    //         pm.expect(reader).to.have.property('interests');
+    //         pm.expect(reader).to.have.property('gdbrconsent');
+    //     });
+    // });
+    //
+    //
+    // pm.test("Email is in a valid format", function () {
+    //     const responseData = pm.response.json();
+    //
+    //     pm.expect(responseData).to.be.an('array');
+    //     responseData.forEach(function (reader) {
+    //         pm.expect(reader.email).to.be.a('string').and.to.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email should be in a valid format");
+    //     });
+    // });
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+%}
+
+###
+# group: ReaderQuery
+# @name Reader Montlhy Lendings Copy
+GET http://localhost:5101/api/readers/monthly-lending
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="startDate"
+
+2024-05-17
+--WebAppBoundary
+Content-Disposition: form-data; name="endDate"
+
+2024-05-17
+--WebAppBoundary
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+
+    //     pm.response.to.have.status(200);
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Response has the required fields", function () {
+
+    //     const responseData = pm.response.json();
+
+    // 
+
+    //     pm.expect(responseData).to.be.an('array').that.is.not.empty;
+
+    // 
+
+    //     responseData.forEach(reader => {
+
+    //         pm.expect(reader).to.have.property('id');
+
+    //         pm.expect(reader).to.have.property('readerCode');
+
+    //         pm.expect(reader).to.have.property('name');
+
+    //         pm.expect(reader).to.have.property('email');
+
+    //         pm.expect(reader).to.have.property('age');
+
+    //         pm.expect(reader).to.have.property('phoneNumber');
+
+    //         pm.expect(reader).to.have.property('interests');
+
+    //         pm.expect(reader).to.have.property('lents');
+
+    //         pm.expect(reader).to.have.property('gdbrconsent');
+
+    //     });
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Email is in a valid format", function () {
+
+    //     const responseData = pm.response.json();
+
+    // 
+
+    //     responseData.forEach(function (reader) {
+
+    //         pm.expect(reader.email).to.be.a('string').and.to.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+
+    //     });
+
+    // });
+
+    // 
+
+    // 
+
+    // 
+
+    // 
+
+    // 
+
+    // pm.test("Response time is less than 200ms", function () {
+
+    //     pm.expect(pm.response.responseTime).to.be.below(200);
+
+    // });
+
+    //
+%}
+
+###
+# group: ReaderQuery
+# @name Reader Photo Copy
+GET http://localhost:5101/api/readers/21/photo
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 405", function () {
+
+    //     pm.expect(pm.response.code).to.equal(405);
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Response has the required fields - type, title, status, detail, and instance", function () {
+
+    //     const responseData = pm.response.json();
+
+    // 
+
+    //     pm.expect(responseData).to.be.an('object');
+
+    //     pm.expect(responseData).to.have.property('type');
+
+    //     pm.expect(responseData).to.have.property('title');
+
+    //     pm.expect(responseData).to.have.property('status');
+
+    //     pm.expect(responseData).to.have.property('detail');
+
+    //     pm.expect(responseData).to.have.property('instance');
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Content type is application/problem+json", function () {
+
+    //     pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Response time is less than 200ms", function () {
+
+    //     pm.expect(pm.response.responseTime).to.be.below(200);
+
+    // });
+
+    //
+%}
+
+###
+# group: LendingCom
+# @name Create Lending
+POST http://localhost:4001/api/lendings
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "readerId": 2,
+  "bookId": 6
+}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 201", function () {
+    //   pm.expect(pm.response.code).to.equal(201);
+    // });
+    //
+    //
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+    //
+    // pm.test("Validate the response schema", function () {
+    //     const responseData = pm.response.json();
+    //
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData.id).to.exist.and.to.be.a('number');
+    //     pm.expect(responseData.lendingCode).to.exist.and.to.be.a('string');
+    //     pm.expect(responseData.readerId).to.exist.and.to.be.a('number');
+    //     pm.expect(responseData.bookId).to.exist.and.to.be.a('number');
+    //     pm.expect(responseData.bookTitle).to.exist.and.to.be.a('string');
+    //     pm.expect(responseData.lendDate).to.exist.and.to.be.a('string');
+    //     pm.expect(responseData.limitDate).to.exist.and.to.be.a('string');
+    //     pm.expect(responseData.returned).to.exist.and.to.be.a('boolean');
+    // });
+%}
+
+###
+# group: LendingCom
+# @name Return A Book Copy
+POST http://localhost:4001/api/lendings/return
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "id": 24,
+  "comment": "liked it"
+}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 201", function () {
+    //   pm.response.to.have.status(201);
+    // });
+    //
+    // pm.test("Response has the required fields", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData.id).to.exist;
+    //     pm.expect(responseData.lendingCode).to.exist;
+    //     pm.expect(responseData.readerId).to.exist;
+    //     pm.expect(responseData.bookId).to.exist;
+    //     pm.expect(responseData.bookTitle).to.exist;
+    //     pm.expect(responseData.lendDate).to.exist;
+    //     pm.expect(responseData.limitDate).to.exist;
+    //     pm.expect(responseData.returnedDate).to.exist;
+    //     pm.expect(responseData.daysTillReturn).to.exist;
+    //     pm.expect(responseData.daysOverdue).to.exist;
+    //     pm.expect(responseData.fine).to.exist;
+    //     pm.expect(responseData.returned).to.exist;
+    //     pm.expect(responseData.comment).to.exist;
+    // });
+    //
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+    //
+    // pm.test("ReaderId and bookId are non-negative integers", function () {
+    //   const responseData = pm.response.json();
+    //
+    //   pm.expect(responseData).to.be.an('object');
+    //   pm.expect(responseData.readerId).to.be.a('number').and.to.be.at.least(0);
+    //   pm.expect(responseData.bookId).to.be.a('number').and.to.be.at.least(0);
+    // });
+%}
+
+<> ./Library API Copy_responses/return_a_book_copy.201.json
+// http://localhost:4001/api/lendings/return
+
+###
+# group: LendingQuery
+# @name All Lendings Copy
+GET http://localhost:4101/api/lendings
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.expect(pm.response.code).to.equal(200);
+    // });
+    //
+    // pm.test("Response has the required fields", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('array').that.is.not.empty;
+    //     
+    //     responseData.forEach(function(item) {
+    //         pm.expect(item).to.include.all.keys(
+    //             'id', 'lendingCode', 'readerId', 'bookId', 'bookTitle', 'lendDate', 
+    //             'limitDate', 'returnedDate', 'daysTillReturn', 'daysOverdue', 'fine', 
+    //             'returned', 'comment'
+    //         );
+    //     });
+    // });
+    //
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+    //
+    // pm.test("Content-Type header is application/json", function () {
+    //     pm.expect(pm.response.headers.get("Content-Type")).to.include("application/json");
+    // });
+    //
+    // pm.test("Returned field is a boolean value", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     responseData.forEach(function(item) {
+    //         pm.expect(item.returned).to.be.a('boolean');
+    //     });
+    // });
+%}
+
+###
+# group: LendingQuery
+# @name Lendings Average Copy
+GET http://localhost:4101/api/lendings/average
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //   pm.expect(pm.response.code).to.equal(200);
+    // });
+    //
+    //
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+    //
+    //
+    // pm.test("Response has the required Content-Type header of application/json", function () {
+    //     pm.expect(pm.response.headers.get("Content-Type")).to.include("application/json");
+    // });
+    //
+    //
+    //
+    //
+    //
+%}
+
+###
+# group: LendingQuery
+# @name Lending By Id Copy
+GET http://localhost:4101/api/lendings/2
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.response.to.have.status(200);
+    // });
+    //
+    // pm.test("Response has the required fields", function () {
+    //     const responseData = pm.response.json();
+    //
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData).to.have.property('id');
+    //     pm.expect(responseData).to.have.property('lendingCode');
+    //     pm.expect(responseData).to.have.property('readerId');
+    //     pm.expect(responseData).to.have.property('bookId');
+    //     pm.expect(responseData).to.have.property('bookTitle');
+    //     pm.expect(responseData).to.have.property('lendDate');
+    //     pm.expect(responseData).to.have.property('limitDate');
+    //     pm.expect(responseData).to.have.property('returnedDate');
+    //     pm.expect(responseData).to.have.property('daysTillReturn');
+    //     pm.expect(responseData).to.have.property('daysOverdue');
+    //     pm.expect(responseData).to.have.property('fine');
+    //     pm.expect(responseData).to.have.property('returned');
+    //     pm.expect(responseData).to.have.property('comment');
+    // });
+    //
+    // pm.test("Returned date is either null or in a valid date format", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData.returnedDate).to.satisfy((date) => {
+    //         return date === null || !isNaN(Date.parse(date));
+    //     }, "Returned date should be null or in a valid date format");
+    // });
+    //
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+%}
+
+###
+# group: LendingQuery
+# @name Average Lending Per Genre Of Certain Month Copy
+GET http://localhost:4101/api/lendings/average-per-genre/2024-05-01
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.expect(pm.response.code).to.equal(200);
+    // });
+    //
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+    //
+    // pm.test("Response has a content type of application/json", function () {
+    //     pm.expect(pm.response.headers.get("Content-Type")).to.include("application/json");
+    // });
+    //
+    // pm.test("Response schema is valid JSON", function () {
+    //   pm.response.to.be.json;
+    // });
+%}
+
+###
+# group: LendingQuery
+# @name Overdue Lendings Copy
+GET http://localhost:4101/api/lendings/overdue
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+
+    //     pm.response.to.have.status(200);
+
+    // });
+
+    // 
+
+    // pm.test("Response has the required fields", function () {
+
+    //   const responseData = pm.response.json();
+
+    // 
+
+    //   pm.expect(responseData).to.be.an('array');
+
+    //   responseData.forEach(function(entry) {
+
+    //     pm.expect(entry).to.have.property('id');
+
+    //     pm.expect(entry).to.have.property('lendingCode');
+
+    //     pm.expect(entry).to.have.property('readerId');
+
+    //     pm.expect(entry).to.have.property('bookId');
+
+    //     pm.expect(entry).to.have.property('bookTitle');
+
+    //     pm.expect(entry).to.have.property('lendDate');
+
+    //     pm.expect(entry).to.have.property('limitDate');
+
+    //     pm.expect(entry).to.have.property('returnedDate');
+
+    //     pm.expect(entry).to.have.property('daysTillReturn');
+
+    //     pm.expect(entry).to.have.property('daysOverdue');
+
+    //     pm.expect(entry).to.have.property('fine');
+
+    //     pm.expect(entry).to.have.property('returned');
+
+    //     pm.expect(entry).to.have.property('comment');
+
+    //   });
+
+    // });
+
+    // 
+
+    // pm.test("Response time is less than 200ms", function () {
+
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+
+    // });
+%}
+
+###
+# group: LendingQuery
+# @name Average Lending Duration Per Book Copy
+GET http://localhost:4101/api/lendings/average-per-book
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.response.to.have.status(200);
+    // });
+    //
+    // pm.test("Response has the required fields - bookId and averageDuration", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('array');
+    //     responseData.forEach(function(item) {
+    //         pm.expect(item).to.have.property('bookId');
+    //         pm.expect(item).to.have.property('averageDuration');
+    //     });
+    // });
+    //
+    // pm.test("Content-Type header is application/json", function () {
+    //     pm.expect(pm.response.headers.get("Content-Type")).to.include("application/json");
+    // });
+    //
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+%}
+
+###
+# group: Tops
+# @name Top Genres Copy
+GET http://localhost:6101/api/tops/top-genres
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+
+    //     pm.response.to.have.status(200);
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Response has the required fields - id, name, and bookCount", function () {
+
+    //     const responseData = pm.response.json();
+
+    //     
+
+    //     pm.expect(responseData).to.be.an('array');
+
+    //     responseData.forEach(function(item) {
+
+    //         pm.expect(item).to.have.property('id');
+
+    //         pm.expect(item).to.have.property('name');
+
+    //         pm.expect(item).to.have.property('bookCount');
+
+    //     });
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Name is a non-empty string", function () {
+
+    //   const responseData = pm.response.json();
+
+    //   
+
+    //   responseData.forEach(function(item) {
+
+    //     pm.expect(item.name).to.be.a('string').and.to.have.lengthOf.at.least(1, "Name should not be empty");
+
+    //   });
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Validate the response content type is application/json", function () {
+
+    //     pm.expect(pm.response.headers.get("Content-Type")).to.include("application/json");
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Response time is less than 200ms", function () {
+
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+
+    // });
+
+    //
+%}
+
+###
+# group: Tops
+# @name Top Books Copy
+GET http://localhost:6101/api/tops/top-books
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+
+    //     pm.response.to.have.status(200);
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Response time is less than 200ms", function () {
+
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Response has the required fields", function () {
+
+    //     const responseData = pm.response.json();
+
+    //     
+
+    //     pm.expect(responseData).to.be.an('array');
+
+    //     responseData.forEach(function(book) {
+
+    //         pm.expect(book).to.have.property('lentCount');
+
+    //         pm.expect(book).to.have.property('id');
+
+    //         pm.expect(book).to.have.property('isbn');
+
+    //         pm.expect(book).to.have.property('title');
+
+    //         pm.expect(book).to.have.property('genre');
+
+    //         pm.expect(book).to.have.property('description');
+
+    //         pm.expect(book).to.have.property('bookAuthors');
+
+    //     });
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Genre name is a non-empty string", function () {
+
+    //   const responseData = pm.response.json();
+
+    // 
+
+    //   pm.expect(responseData).to.be.an('array');
+
+    //   responseData.forEach(function(book) {
+
+    //     pm.expect(book.genre.name).to.be.a('string').and.to.have.lengthOf.at.least(1, "Genre name should not be empty");
+
+    //   });
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("BookAuthors array should have non-empty Author and shortBio", function () {
+
+    //   const responseData = pm.response.json();
+
+    //   
+
+    //   pm.expect(responseData).to.be.an('array');
+
+    //   
+
+    //   responseData.forEach(function(book) {
+
+    //     pm.expect(book.bookAuthors).to.be.an('array');
+
+    //     
+
+    //     book.bookAuthors.forEach(function(author) {
+
+    //       pm.expect(author.author).to.be.a('string').and.to.have.lengthOf.at.least(1, "Author should not be empty");
+
+    //       pm.expect(author.shortBio).to.be.a('string').and.to.have.lengthOf.at.least(1, "ShortBio should not be empty");
+
+    //     });
+
+    //   });
+
+    // });
+
+    //
+%}
+
+###
+# group: Tops
+# @name Top Readers Per Genre Of a Certain Period Copy
+GET http://localhost:6101/api/tops/top-readers/1
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="startDate"
+
+2024-05-15
+--WebAppBoundary
+Content-Disposition: form-data; name="endDate"
+
+2024-05-19
+--WebAppBoundary
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+
+    //     pm.response.to.have.status(200);
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Response has the required fields", function () {
+
+    //     const responseData = pm.response.json();
+
+    // 
+
+    //     pm.expect(responseData).to.be.an('array');
+
+    //     responseData.forEach(function (reader) {
+
+    //         pm.expect(reader).to.have.property('id');
+
+    //         pm.expect(reader).to.have.property('readerCode');
+
+    //         pm.expect(reader).to.have.property('name');
+
+    //         pm.expect(reader).to.have.property('email');
+
+    //         pm.expect(reader).to.have.property('age');
+
+    //         pm.expect(reader).to.have.property('phoneNumber');
+
+    //         pm.expect(reader).to.have.property('interests');
+
+    //         pm.expect(reader).to.have.property('gdbrconsent');
+
+    //     });
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Email is in a valid format", function () {
+
+    //     const responseData = pm.response.json();
+
+    // 
+
+    //     responseData.forEach(function (reader) {
+
+    //         pm.expect(reader.email).to.be.a('string').and.to.match(/^.+@.+\..+$/, "Email should be in a valid format");
+
+    //     });
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Phone number is a non-negative integer", function () {
+
+    //     const responseData = pm.response.json();
+
+    // 
+
+    //     responseData.forEach(function (reader) {
+
+    //         pm.expect(reader.phoneNumber).to.be.a('number').and.to.satisfy((num) => num >= 0, "Phone number must be a non-negative integer");
+
+    //     });
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Response time is less than 200ms", function () {
+
+    //     pm.expect(pm.response.responseTime).to.be.below(200);
+
+    // });
+
+    //
+%}
+
+###
+# group: Tops
+# @name Top Readers Copy
+GET http://localhost:6101/api/tops/top-readers
+Authorization: Bearer {{adminToken}}
+If-Match: 1
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.response.to.have.status(200);
+    // });
+    //
+    //
+    // pm.test("Response time is within an acceptable range", function () {
+    //     pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+    //
+    //
+    // pm.test("Response has the required fields", function () {
+    //     const responseData = pm.response.json();
+    //
+    //     pm.expect(responseData).to.be.an('array');
+    //
+    //     responseData.forEach(function (item) {
+    //         pm.expect(item).to.have.property('id');
+    //         pm.expect(item).to.have.property('readerCode');
+    //         pm.expect(item).to.have.property('name');
+    //         pm.expect(item).to.have.property('email');
+    //         pm.expect(item).to.have.property('age');
+    //         pm.expect(item).to.have.property('phoneNumber');
+    //         pm.expect(item).to.have.property('interests');
+    //         pm.expect(item).to.have.property('gdbrconsent');
+    //     });
+    // });
+    //
+    //
+    // pm.test("Email is in a valid format", function () {
+    //     const responseData = pm.response.json();
+    //
+    //     pm.expect(responseData).to.be.an('array');
+    //     responseData.forEach(function (reader) {
+    //         pm.expect(reader.email).to.be.a('string').and.to.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    //     });
+    // });
+    //
+    //
+    //
+    //
+%}
+
+###
+# group: Apresentar
+# @name Create user
+POST http://localhost:2001/api/auth/register
+Authorization: Bearer {{set_token}}
+Content-Type: application/json
+
+{
+    "username": "{{$randomEmail}}",
+    "fullName": "{{$randomUserName}}",
+    "password": "newPassword",
+    "rePassword": "newPassword",
+    "authorities": [
+        "ADMIN"
+    ]
+}
+
+###
+# group: Apresentar
+# @name Create Reader With Optional Photo
+POST http://localhost:5001/api/readers
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="reader"
+
+{
+    "name": "Daniel Ribeiro",
+    "email": "danielribeiro@gmail.com",
+    "dateOfBirth": "2000-09-20",
+    "phoneNumber": 987654321,
+    "gdbrconsent": true
+}
+--WebAppBoundary
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+    //
+%}
+
+###
+# group: Apresentar
+# @name Create Book With Optional Cover
+POST http://localhost:3001/api/books
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="book"
+
+{
+    "isbn": "9783163119604",
+    "title": "Sample Book",
+    "genre": {
+        "id": 3,
+        "name": "Mystery"
+    },
+    "description": "A sample book description",
+    "bookAuthors": [
+        {
+            "author": {
+                "name": "James Clear",
+                "shortBio": "An author and speaker focused on habits, decision-making, and continuous improvement."
+            }
+        },
+        {
+            "author": {
+                "name": "Stephen R. Covey",
+                "shortBio": "An American educator, author, businessman, and keynote speaker."
+            }
+        }
+    ]
+}
+--WebAppBoundary
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 201", function () {
+    //     pm.expect(pm.response.code).to.equal(201);
+    // });
+    //
+    //
+    // pm.test("Response time is less than 500ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(500);
+    // });
+    //
+    //
+    // pm.test("Validate the response schema for the required fields", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData.id).to.exist;
+    //     pm.expect(responseData.isbn).to.exist;
+    //     pm.expect(responseData.title).to.exist;
+    //     pm.expect(responseData.genre).to.exist;
+    //     pm.expect(responseData.description).to.exist;
+    //     pm.expect(responseData.bookAuthors).to.exist;
+    // });
+    //
+    //
+    // pm.test("Ensure that the genre name is a non-empty string", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData.genre.name).to.be.a('string').and.to.have.lengthOf.at.least(1, "Genre name should not be empty");
+    // });
+    //
+%}
+
+<> ./Library API Copy_responses/create_book_with_optional_cover_copy.201.json
+// http://localhost:3001/api/books
+
+###
+# group: Apresentar
+# @name Create Lending
+POST http://localhost:4001/api/lendings
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "readerId": 20,
+  "bookId": 1
+}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 201", function () {
+    //   pm.expect(pm.response.code).to.equal(201);
+    // });
+    //
+    //
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+    //
+    // pm.test("Validate the response schema", function () {
+    //     const responseData = pm.response.json();
+    //
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData.id).to.exist.and.to.be.a('number');
+    //     pm.expect(responseData.lendingCode).to.exist.and.to.be.a('string');
+    //     pm.expect(responseData.readerId).to.exist.and.to.be.a('number');
+    //     pm.expect(responseData.bookId).to.exist.and.to.be.a('number');
+    //     pm.expect(responseData.bookTitle).to.exist.and.to.be.a('string');
+    //     pm.expect(responseData.lendDate).to.exist.and.to.be.a('string');
+    //     pm.expect(responseData.limitDate).to.exist.and.to.be.a('string');
+    //     pm.expect(responseData.returned).to.exist.and.to.be.a('boolean');
+    // });
+%}
+
+###
+# group: Apresentar
+# @name Lending By Id
+GET http://localhost:4101/api/lendings/20
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.response.to.have.status(200);
+    // });
+    //
+    // pm.test("Response has the required fields", function () {
+    //     const responseData = pm.response.json();
+    //
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData).to.have.property('id');
+    //     pm.expect(responseData).to.have.property('lendingCode');
+    //     pm.expect(responseData).to.have.property('readerId');
+    //     pm.expect(responseData).to.have.property('bookId');
+    //     pm.expect(responseData).to.have.property('bookTitle');
+    //     pm.expect(responseData).to.have.property('lendDate');
+    //     pm.expect(responseData).to.have.property('limitDate');
+    //     pm.expect(responseData).to.have.property('returnedDate');
+    //     pm.expect(responseData).to.have.property('daysTillReturn');
+    //     pm.expect(responseData).to.have.property('daysOverdue');
+    //     pm.expect(responseData).to.have.property('fine');
+    //     pm.expect(responseData).to.have.property('returned');
+    //     pm.expect(responseData).to.have.property('comment');
+    // });
+    //
+    // pm.test("Returned date is either null or in a valid date format", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData.returnedDate).to.satisfy((date) => {
+    //         return date === null || !isNaN(Date.parse(date));
+    //     }, "Returned date should be null or in a valid date format");
+    // });
+    //
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+%}
+
+###
+# group: Apresentar
+# @name Book By ISBN
+GET http://localhost:3101/api/books/9783163119604
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+    //     pm.response.to.have.status(200);
+    // });
+    //
+    //
+    // pm.test("Response time is less than 200ms", function () {
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+    // });
+    //
+    //
+    // pm.test("Response has the required fields", function () {
+    //     const responseData = pm.response.json();
+    //     
+    //     pm.expect(responseData).to.be.an('object');
+    //     pm.expect(responseData.id).to.exist;
+    //     pm.expect(responseData.isbn).to.exist;
+    //     pm.expect(responseData.title).to.exist;
+    //     pm.expect(responseData.genre).to.exist;
+    //     pm.expect(responseData.description).to.exist;
+    //     pm.expect(responseData.bookAuthors).to.exist;
+    // });
+    //
+    //
+    // pm.test("Genre object contains the required field 'name'", function () {
+    //   const responseData = pm.response.json();
+    //   
+    //   pm.expect(responseData).to.be.an('object');
+    //   pm.expect(responseData.genre).to.exist;
+    //   pm.expect(responseData.genre.name).to.exist;
+    // });
+    //
+    //
+    // pm.test("BookAuthors array should contain 'author' and 'shortBio'", function () {
+    //     const responseData = pm.response.json();
+    //
+    //     pm.expect(responseData.bookAuthors).to.be.an('array');
+    //     responseData.bookAuthors.forEach(function(author){
+    //         pm.expect(author).to.have.property('author');
+    //         pm.expect(author).to.have.property('shortBio');
+    //     });
+    // });
+    //
+%}
+
+###
+# group: Apresentar
+# @name Top Books
+GET http://localhost:6101/api/top/top-books
+Authorization: Bearer {{adminToken}}
+
+> {%
+    // TODO: migrate to HTTP Client Response handler API
+    // pm.test("Response status code is 200", function () {
+
+    //     pm.response.to.have.status(200);
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Response time is less than 200ms", function () {
+
+    //   pm.expect(pm.response.responseTime).to.be.below(200);
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Response has the required fields", function () {
+
+    //     const responseData = pm.response.json();
+
+    //     
+
+    //     pm.expect(responseData).to.be.an('array');
+
+    //     responseData.forEach(function(book) {
+
+    //         pm.expect(book).to.have.property('lentCount');
+
+    //         pm.expect(book).to.have.property('id');
+
+    //         pm.expect(book).to.have.property('isbn');
+
+    //         pm.expect(book).to.have.property('title');
+
+    //         pm.expect(book).to.have.property('genre');
+
+    //         pm.expect(book).to.have.property('description');
+
+    //         pm.expect(book).to.have.property('bookAuthors');
+
+    //     });
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("Genre name is a non-empty string", function () {
+
+    //   const responseData = pm.response.json();
+
+    // 
+
+    //   pm.expect(responseData).to.be.an('array');
+
+    //   responseData.forEach(function(book) {
+
+    //     pm.expect(book.genre.name).to.be.a('string').and.to.have.lengthOf.at.least(1, "Genre name should not be empty");
+
+    //   });
+
+    // });
+
+    // 
+
+    // 
+
+    // pm.test("BookAuthors array should have non-empty Author and shortBio", function () {
+
+    //   const responseData = pm.response.json();
+
+    //   
+
+    //   pm.expect(responseData).to.be.an('array');
+
+    //   
+
+    //   responseData.forEach(function(book) {
+
+    //     pm.expect(book.bookAuthors).to.be.an('array');
+
+    //     
+
+    //     book.bookAuthors.forEach(function(author) {
+
+    //       pm.expect(author.author).to.be.a('string').and.to.have.lengthOf.at.least(1, "Author should not be empty");
+
+    //       pm.expect(author.shortBio).to.be.a('string').and.to.have.lengthOf.at.least(1, "ShortBio should not be empty");
+
+    //     });
+
+    //   });
+
+    // });
+
+    //
+%}

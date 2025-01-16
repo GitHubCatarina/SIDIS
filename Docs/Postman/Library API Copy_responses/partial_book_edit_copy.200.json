@@ -1,0 +1,15 @@
+{
+  "id": 4,
+  "isbn": "9780345472328",
+  "title": "joao o cavaleiro",
+  "genre": {
+    "name": "Science Fiction"
+  },
+  "description": null,
+  "bookAuthors": [
+    {
+      "author": "Frank Herbert",
+      "shortBio": "An American science fiction writer best known for the novel Dune."
+    }
+  ]
+}

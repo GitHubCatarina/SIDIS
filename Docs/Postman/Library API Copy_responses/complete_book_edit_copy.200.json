@@ -1,0 +1,15 @@
+{
+  "id": 1,
+  "isbn": "9781982137274",
+  "title": "Atokmic Habits",
+  "genre": {
+    "name": "Mystery"
+  },
+  "description": "122231",
+  "bookAuthors": [
+    {
+      "author": "James Clear",
+      "shortBio": "An author and speaker focused on habits, decision-making, and continuous improvement."
+    }
+  ]
+}
