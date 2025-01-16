@@ -12,8 +12,13 @@ participant "lendingTempService" as lendingTempService
 participant "lendingRepository" as lendingRepo
 participant "lendingService" as lendingService
 participant "lendingEventProducer" as lendingEventProducer
-participant "lendingCom[1] : lendingCom" as lending1
-
+participant "lendingService[2] : lendingService" as lendingService2
+participant "lendingRepository[2] : lendingRepository" as lendingRepo2
+participant "lendingEventConsumer[2] : lendingEventConsumer" as lendingEventConsumer2
+participant "lendingQuery[0] : lendingQuery" as lending01
+participant "lendingQuery[1] : lendingQuery" as lending11
+participant "top[0] : top" as top0
+participant "top[1] : top" as top1
 
 client o-> lending0: POST /lendings/return {returnLendingData}
 activate lending0
@@ -161,32 +166,32 @@ end
 
 
 ' Replicando dados para a outra instância (espelhamento)
-'mb -> lending1: notify(lendingReturned)
-'activate lending1
-'mb -> lending01: notify(lendingReturned)
-'activate lending01
-'mb -> lending11: notify(lendingReturned)
-'activate lending11
-'mb -> top0: notify(lendingReturned)
-'activate top0
-'mb -> top1: notify(lendingReturned)
-'deactivate mb
-'activate top1
 
-'lending1 -> lending1: save(lending)
-'lending01 -> lending01: save(lending)
-'deactivate lending1
-'lending11 -> lending11: save(lending)
-'deactivate lending01
-'top0 -> top0: save(lending)
-'deactivate lending11
-'top1 -> top1: save(lending)
-'deactivate top0
+mb -> lending01: notify(lendingReturned)
+activate lending01
+mb -> lending11: notify(lendingReturned)
+activate lending11
+mb -> top0: notify(lendingReturned)
+activate top0
+mb -> top1: notify(lendingReturned)
+deactivate mb
+activate top1
+
+lending01 -> lending01: save(lending)
+lending11 -> lending11: save(lending)
+deactivate lending01
+top0 -> top0: save(lending)
+deactivate lending11
+top1 -> top1: save(lending)
+deactivate top0
 
 ' Responder ao cliente com sucesso final após a replicação
-'lending0 -->o client: 201 Returned
-'deactivate top1
-'deactivate lending0
+lending0 -->o client: 201 Returned
+deactivate top1
+deactivate lending0
+
+
+
 else error
 
 activate recom1
