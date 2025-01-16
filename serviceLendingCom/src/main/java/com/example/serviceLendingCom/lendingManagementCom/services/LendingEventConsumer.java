@@ -50,7 +50,7 @@ public class LendingEventConsumer {
         }
     }
 
-    // Consumir eventos da fila "recom"
+
     // Consumir eventos da fila "recom"
     @RabbitListener(queues = "recom-to-lending.queue", ackMode = "AUTO")
     public void handleRecomEvent(LendingTemp lendingTemp, Message message) {
@@ -89,8 +89,8 @@ public class LendingEventConsumer {
                     // Criar um EditLendingRequest com base no LendingTemp para passar ao método returnBook
                     EditLendingRequest editLendingRequest = new EditLendingRequest();
                     editLendingRequest.setLendingCode(savedLendingTemp.getLendingCode());
-                    editLendingRequest.setComment(savedLendingTemp.getCom());  // Ajuste conforme o campo correto
-                    // Adicione outros campos necessários aqui...
+                    editLendingRequest.setComment(savedLendingTemp.getCom());
+
 
                     // Chamar o método returnBook
                     Lending lending = lendingService.returnBook(editLendingRequest);

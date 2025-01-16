@@ -1,0 +1,177 @@
+@startuml
+' Definindo os participantes
+participant "HTTP Client" as client
+participant "lendingCom[0] : lendingCom" as lending0
+participant "AuthService" as authService
+participant "LendingTempService" as lendingTempService
+participant "LendingRepository" as lendingRepository
+participant "LendingTempRepository" as lendingTempRepository
+participant "LendingDatabase" as ldb
+participant "LendingEventProducer" as lendingEventProducer
+participant "Message Broker" as mb
+participant "RecomQueue" as recomQueue
+participant "lendingCom[1] : lendingCom" as lending1
+participant "lendingQuery[0] : lendingQuery" as lending01
+participant "lendingQuery[1] : lendingQuery" as lending11
+participant "top[0] : top" as top0
+participant "top[1] : top" as top1
+participant "recom[1] : recom" as  recom1
+participant "recom[2] : recom" as  recom2
+
+
+client o-> lending0: POST /lendings/return {returnLendingData}
+activate lending0
+
+
+' Verificação de permissões
+lending0 -> lending0: Extract JWT Token
+
+lending0 -> lending0: checkPermissions(roles, ["LIBRARIAN", "ADMIN", "READER"])
+alt hasPermission
+lending0 -> authService: validateUserRoles(userId, roles)
+activate authService
+    authService --> lending0: valid
+else noPermission
+deactivate authService
+    lending0 -->o client: 403 Forbidden
+
+end
+
+' Guarda o LendingTemp
+
+lending0 -> lending0: saveLendingTemp(returnLendingData)
+
+' Busca o Lending correspondente
+    lending0 -> lendingTempService: processReturnRequest(returnLendingData)
+    activate lendingTempService
+
+    ' Busca o empréstimo original
+    lendingTempService -> lendingRepository: findById(returnLendingData.getId())
+    activate lendingRepository
+    lendingRepository --> lendingTempService: Lending
+    deactivate lendingRepository
+    ' Verifica se o livro já foi devolvido
+    lendingTempService -> lendingTempService: IsReturned(lending)
+
+    ' Criação do LendingTemp
+    lendingTempService -> lendingTempService: createLendingTemp(lending, returnLendingData)
+
+    ' Salva o LendingTemp no repositório
+    lendingTempService -> lendingTempRepository: save(lendingTemp)
+
+    activate lendingTempRepository
+
+    ' Persistência no banco de dados
+    lendingTempRepository -> ldb: INSERT INTO lending_temp (lending_code, comment, recom, com)
+    activate ldb
+    ldb --> lendingTempRepository: saved LendingTemp
+    deactivate ldb
+    lendingTempRepository --> lendingTempService: saved LendingTemp
+
+deactivate lendingTempRepository
+lendingTempService --> lending0: saved LendingTemp
+
+deactivate lendingTempService
+
+' manda o lendingTemp para o Recom
+
+   ' Envia o evento para RabbitMQ
+       lending0 -> lendingEventProducer: sendLendingTempEvent(lendingTemp)
+       activate lendingEventProducer
+
+       ' RabbitTemplate envia a mensagem para o broker
+       lendingEventProducer -> mb: publish(returnLendingData)
+       deactivate lendingEventProducer
+       activate mb
+
+
+       ' O Broker envia a mensagem para a fila de recomendação
+       mb -> recomQueue: notify(returnLendingData)
+       deactivate mb
+       activate recomQueue
+
+       recomQueue -> recom1: notify(returnLendingData)
+       deactivate recomQueue
+
+
+
+activate recom1
+recom1 -> recom1: validate(recom)
+alt success
+recom1 -> recom1: save(recom)
+
+    deactivate mb
+recom1 -> mb: publish(recomendation)
+
+
+deactivate recom1
+activate mb
+
+mb -> lending0: notify(returnLendingData)
+
+
+mb -> recom2: notify(returnLendingData)
+deactivate mb
+activate recom2
+
+lending0 -> lending0: save(lendingData)
+
+
+recom2 -> recom2: save(recom)
+
+
+
+
+lending0 -> mb: publish(lendingReturned)
+deactivate recom2
+
+activate mb
+
+' Replicando dados para a outra instância (espelhamento)
+mb -> lending1: notify(lendingReturned)
+activate lending1
+mb -> lending01: notify(lendingReturned)
+activate lending01
+mb -> lending11: notify(lendingReturned)
+activate lending11
+mb -> top0: notify(lendingReturned)
+activate top0
+mb -> top1: notify(lendingReturned)
+deactivate mb
+
+activate top1
+
+
+
+lending1 -> lending1: save(lending)
+
+lending01 -> lending01: save(lending)
+deactivate lending1
+lending11 -> lending11: save(lending)
+deactivate lending01
+top0 -> top0: save(lending)
+deactivate lending11
+top1 -> top1: save(lending)
+deactivate top0
+
+
+' Responder ao cliente com sucesso final após a replicação
+lending0 -->o client: 201 Returned
+deactivate top1
+deactivate lending0
+else error
+
+activate recom1
+recom1 -> mb: notify(recomendationFailed)
+deactivate recom1
+activate mb
+mb -> lending0: notify(lendingReturned with error)
+deactivate mb
+activate lending0
+lending0 -> lending0: deleteTemp(lendingData)
+
+
+lending0 -->o client: 500 Internal Server Error (Erro interno)
+deactivate lending0
+end
+@enduml

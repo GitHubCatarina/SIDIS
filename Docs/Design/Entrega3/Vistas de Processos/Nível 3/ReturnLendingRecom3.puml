@@ -1,0 +1,205 @@
+@startuml
+' Definindo os participantes
+participant "HTTP Client" as client
+participant "lendingCom[0] : lendingCom" as lending0
+participant "Message Broker" as mb
+participant "recom[1] : recom" as  recom1
+participant "RecomEventProducer" as recomEventProducer
+participant "RecomQueue" as recomQueue
+participant "recom[2] : recom" as  recom2
+participant "lendingEventConsumer" as lendingEventConsumer
+participant "lendingTempService" as lendingTempService
+participant "lendingRepository" as lendingRepo
+participant "lendingService" as lendingService
+participant "lendingEventProducer" as lendingEventProducer
+participant "lendingCom[1] : lendingCom" as lending1
+
+
+client o-> lending0: POST /lendings/return {returnLendingData}
+activate lending0
+
+lending0 -> lending0: Validar token JWT e permissões
+
+lending0 -> lending0: saveLendingTemp(returnLendingData)
+
+lending0 -> mb: publish(returnLendingData)
+deactivate lending0
+activate mb
+
+mb -> recom1: notify(returnLendingData)
+deactivate mb
+activate recom1
+recom1 -> recom1: validate(recom)
+alt success
+recom1 -> recom1: save(recom)
+
+
+' Enviar o evento de recomendação criada
+        recom1 -> recomEventProducer: sendRecomCreatedEvent(recomDTO)
+        activate recomEventProducer
+
+        recomEventProducer -> mb: convertAndSend(recom.exchange, "", recomDTO)
+        activate mb
+
+        recom1 -> recomEventProducer: sendLendingTempBack(recomDTO)
+       deactivate recom1
+          recomEventProducer -> mb: convertAndSend(recom-to-lending.exchange, "", recomDTO)
+
+        deactivate recomEventProducer
+
+
+        ' O broker envia a mensagem para a fila de recomendação
+        mb -> recomQueue: notify(recomDTO)
+
+        activate recomQueue
+
+
+       recomQueue -> recom2: handleRecomCreatedEvent(recomDTO)
+       deactivate recomQueue
+       activate recom2
+       recom2 --> recom2: Recom salvo
+
+deactivate recom1
+
+
+mb -> lendingEventConsumer: handleLendingTempEvent(returnLendingData)
+deactivate recom2
+activate lendingEventConsumer
+
+'Parte mais importante
+lendingEventConsumer -> lendingTempService: findByLendingCode(lendingCode)
+activate lendingTempService
+lendingTempService -> lendingRepo: findFirstByLendingCode(lendingCode)
+activate lendingRepo
+lendingRepo --> lendingTempService: SavedLendingTemp
+deactivate lendingRepo
+lendingTempService --> lendingEventConsumer: SavedLendingTemp
+deactivate lendingTempService
+lendingEventConsumer -> lendingEventConsumer: lendingTemp == SavedLendingTemp ?
+
+lendingEventConsumer -> lendingEventConsumer: toEditLendingRequest(SavedLendingTemp)
+lendingEventConsumer -> lendingService: returnBook(EditLendingRequest)
+
+
+activate lendingService
+
+alt Buscar pelo lendingCode
+    lendingService -> lendingRepo: findByLendingCode(lendingCode)
+    activate lendingRepo
+    lendingRepo --> lendingService: Optional<Lending>
+    deactivate lendingRepo
+else Buscar pelo id
+    lendingService -> lendingRepo: findById(id)
+    activate lendingRepo
+    lendingRepo --> lendingService: Optional<Lending>
+    deactivate lendingRepo
+end
+
+alt Empréstimo não encontrado
+    lendingService -> lendingService: throw NotFoundException
+end
+
+lendingService -> lendingService: Validar se já foi devolvido
+alt Livro já devolvido
+    lendingService -> lendingService: throw IllegalArgumentException
+end
+
+lendingService -> lendingService: Atualizar devolução
+lendingService -> lendingService: setReturnedDate(LocalDate.now)
+lendingService -> lendingService: calculateFine(daysOverdue)
+
+lendingService -> lendingService: setDaysOverdue(daysOverdue)
+lendingService -> lendingService: setFine(fine)
+lendingService -> lendingService: setComment(resource.comment)
+lendingService -> lendingService: setReturned(true)
+
+lendingService -> lendingRepo: save(returnedLending)
+activate lendingRepo
+lendingRepo --> lendingService: Lending
+deactivate lendingRepo
+
+lendingService --> lendingEventConsumer: Lending
+deactivate lendingService
+
+lendingEventConsumer -> lendingEventConsumer: toDTO(lending)
+lendingEventConsumer -> lendingEventProducer: sendLendingReturnedEvent(lendingDTO)
+activate lendingEventProducer
+lendingEventProducer -> mb: convertAndSend(lending.exchange, "", lendingDTO)
+deactivate lendingEventProducer
+
+
+
+
+mb -> lendingEventConsumer2: handleLendingEvent(lendingDTO)
+activate lendingEventConsumer2
+
+lendingEventConsumer2 -> lendingService2: markAsReturned(lendingDTO.getLendingCode(), lendingDTO.getComment())
+activate lendingService2
+deactivate lendingEventConsumer2
+
+alt LendingDTO indica devolução
+    lendingService2 -> lendingService2: Atualizar devolução
+    lendingService2 -> lendingService2: setReturnedDate(LocalDate.now)
+    lendingService2 -> lendingService2: calculateFine(daysOverdue)
+
+    lendingService2 -> lendingService2: setDaysOverdue(daysOverdue)
+    lendingService2 -> lendingService2: setFine(fine)
+    lendingService2 -> lendingService2: setComment(resource.comment)
+    lendingService2 -> lendingService2: setReturned(true)
+    lendingService2 -> lendingRepo2: save(returnedLending)
+    activate lendingRepo2
+    lendingRepo2 --> lendingService2: Lending
+    deactivate lendingRepo2
+
+    deactivate lendingService2
+
+end
+
+
+
+
+
+
+' Replicando dados para a outra instância (espelhamento)
+'mb -> lending1: notify(lendingReturned)
+'activate lending1
+'mb -> lending01: notify(lendingReturned)
+'activate lending01
+'mb -> lending11: notify(lendingReturned)
+'activate lending11
+'mb -> top0: notify(lendingReturned)
+'activate top0
+'mb -> top1: notify(lendingReturned)
+'deactivate mb
+'activate top1
+
+'lending1 -> lending1: save(lending)
+'lending01 -> lending01: save(lending)
+'deactivate lending1
+'lending11 -> lending11: save(lending)
+'deactivate lending01
+'top0 -> top0: save(lending)
+'deactivate lending11
+'top1 -> top1: save(lending)
+'deactivate top0
+
+' Responder ao cliente com sucesso final após a replicação
+'lending0 -->o client: 201 Returned
+'deactivate top1
+'deactivate lending0
+else error
+
+activate recom1
+recom1 -> mb: notify(recomendationFailed)
+deactivate recom1
+activate mb
+mb -> lending0: notify(lendingReturned with error)
+deactivate mb
+activate lending0
+lending0 -> lending0: deleteTemp(lendingData)
+
+
+lending0 -->o client: 500 Internal Server Error (Erro interno)
+deactivate lending0
+end
+@enduml

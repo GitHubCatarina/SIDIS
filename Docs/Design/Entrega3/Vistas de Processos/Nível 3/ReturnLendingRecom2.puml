@@ -1,0 +1,199 @@
+@startuml
+' Definindo os participantes
+participant "HTTP Client" as client
+participant "lendingCom[0] : lendingCom" as lending0
+participant "Message Broker" as mb
+
+participant "RecomLendingQueue" as recomLQueue
+participant "RecomQueue" as recomQueue
+participant "recom[1] : RecomEventConsumer" as  recom1
+participant "RecomService" as recomService
+participant "RecomRepository" as recomRepository
+participant "RecomDatabase" as rdb
+participant "RecomEventProducer" as recomEventProducer
+participant "recom[2] : recom" as  recom2
+participant "RecomRepository[2]" as recomRepository2
+participant "RecomDatabase [2]" as rdb2
+participant "lendingCom[1] : lendingCom" as lending1
+participant "lendingQuery[0] : lendingQuery" as lending01
+participant "lendingQuery[1] : lendingQuery" as lending11
+participant "top[0] : top" as top0
+participant "top[1] : top" as top1
+
+
+client o-> lending0: POST /lendings/return {returnLendingData}
+activate lending0
+
+lending0 -> lending0: Validar token JWT e permissões
+
+lending0 -> lending0: saveLendingTemp(returnLendingData)
+
+lending0 -> mb: publish(returnLendingData)
+deactivate lending0
+ activate mb
+
+       ' O Broker envia a mensagem para a fila de recomendação
+       mb -> recomLQueue: notify(returnLendingData)
+       deactivate mb
+       activate recomLQueue
+
+       recomLQueue -> recom1: notify(returnLendingData)
+       deactivate recomLQueue
+
+activate recom1
+recom1 -> recomService: existsByLendingId(lendingTemp.getLendingCode())
+activate recomService
+recomService -> recomRepository: existsByLendingId(lendingTemp.getLendingCode())
+
+    activate recomRepository
+    recomRepository --> recomService: LendingIdExists (true/false)
+    deactivate recomRepository
+    recomService --> recom1: LendingIdExists (true/false)
+alt success
+    deactivate recomService
+
+        ' Criar a recomendação
+        recom1 -> recom1: createRecomObject(lendingTemp)
+
+        ' Salvar a recomendação no banco de dados
+        recom1 -> recomService: save(recom)
+        activate recomService
+
+        recomService -> recomRepository: save(recom)
+
+        activate recomRepository
+
+
+            ' Persistência no banco de dados
+            recomRepository -> rdb: INSERT INTO lending_temp (lending_code, comment, recom, com)
+            activate rdb
+
+            rdb --> recomRepository: saved Recom
+            deactivate rdb
+
+            recomRepository --> recomService: saved Recom
+            deactivate recomRepository
+
+        recomService --> recom1: saved Recom
+        deactivate recomService
+
+        ' Converter o Recom para RecomDTO
+        recom1 -> recom1: toDTO(recom)
+
+        ' Enviar o evento de recomendação criada
+        recom1 -> recomEventProducer: sendRecomCreatedEvent(recomDTO)
+        activate recomEventProducer
+
+        recomEventProducer -> mb: convertAndSend(recom.exchange, "", recomDTO)
+        activate mb
+
+        recom1 -> recomEventProducer: sendLendingTempBack(recomDTO)
+       deactivate recom1
+          recomEventProducer -> mb: convertAndSend(recom-to-lending.exchange, "", recomDTO)
+
+        deactivate recomEventProducer
+
+
+        ' O broker envia a mensagem para a fila de recomendação
+        mb -> recomQueue: notify(recomDTO)
+
+        activate recomQueue
+
+
+       recomQueue -> recom2: handleRecomCreatedEvent(recomDTO)
+       deactivate recomQueue
+       activate recom2
+
+       ' 2. Verificar se a recomendação já existe
+       recom2 -> recomRepository2: existsById(recomDTO.getId())
+       activate recomRepository2
+       recomRepository2 --> recom2: recomExists (true/false)
+       deactivate recomRepository2
+
+       alt Recom não existe
+           ' 3. Criar a recomendação
+           recom2 -> recom2: criarRecomObject(recomDTO)
+
+           recom2 -> recomRepository2: save(recom)
+           activate recomRepository2
+           recomRepository2 -> rdb2: INSERT INTO lending_temp (lending_code, comment, recom, com)
+           activate rdb2
+           rdb2 --> recomRepository2: saved Recom
+           deactivate rdb2
+           recomRepository2 --> recom2: recomSaved
+           deactivate recomRepository2
+       else Recom existe
+           ' 5. Rejeitar a criação da recomendação
+           recom2 -> recom2: rejeitarRecomExistente(recomDTO)
+       end
+       deactivate recom2
+
+
+deactivate recom1
+
+
+mb -> lending0: notify(returnLendingData)
+activate lending0
+
+deactivate mb
+
+lending0 -> lending0: save(lendingData)
+
+
+
+
+
+
+lending0 -> mb: publish(lendingReturned)
+
+
+activate mb
+
+' Replicando dados para a outra instância (espelhamento)
+mb -> lending1: notify(lendingReturned)
+activate lending1
+mb -> lending01: notify(lendingReturned)
+activate lending01
+mb -> lending11: notify(lendingReturned)
+activate lending11
+mb -> top0: notify(lendingReturned)
+activate top0
+mb -> top1: notify(lendingReturned)
+deactivate mb
+
+activate top1
+
+
+
+lending1 -> lending1: save(lending)
+
+lending01 -> lending01: save(lending)
+deactivate lending1
+lending11 -> lending11: save(lending)
+deactivate lending01
+top0 -> top0: save(lending)
+deactivate lending11
+top1 -> top1: save(lending)
+deactivate top0
+
+
+' Responder ao cliente com sucesso final após a replicação
+lending0 -->o client: 201 Returned
+deactivate top1
+deactivate lending0
+else error
+
+activate recom1
+recom1 -> mb: notify(recomendationFailed)
+deactivate recom1
+activate mb
+mb -> lending0: notify(lendingReturned with error)
+deactivate mb
+activate lending0
+lending0 -> lending0: deleteTemp(lendingData)
+
+
+lending0 -->o client: 500 Internal Server Error (Erro interno)
+deactivate lending0
+end
+@enduml

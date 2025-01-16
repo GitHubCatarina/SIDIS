@@ -12,17 +12,18 @@ participant "recom[1] : recom" as  recom1
 participant "recom[2] : recom" as  recom2
 
 
-client o-> lending0: POST /lendings/return {lendingData}
+client o-> lending0: POST /lendings/return {returnLendingData}
 activate lending0
 
 lending0 -> lending0: Validar token JWT e permissões
 
-lending0 -> lending0: saveTemp(lendingData)
+lending0 -> lending0: saveLendingTemp(returnLendingData)
 
-lending0 -> mb: publish(lendingReturned with recomendation)
-activate mb
+lending0 -> mb: publish(returnLendingData)
 deactivate lending0
-mb -> recom1: notify(lendingReturned with recomendation)
+activate mb
+
+mb -> recom1: notify(returnLendingData)
 deactivate mb
 activate recom1
 recom1 -> recom1: validate(recom)
@@ -35,15 +36,18 @@ recom1 -> mb: publish(recomendation)
 deactivate recom1
 activate mb
 
-mb -> lending0: notify(lendingReturned with recomendation)
+mb -> lending0: notify(returnLendingData)
 activate lending0
-mb -> recom2: notify(lendingReturned with recomendation)
+
+mb -> recom2: notify(returnLendingData)
+deactivate mb
 activate recom2
+
 lending0 -> lending0: save(lendingData)
 
 
 recom2 -> recom2: save(recom)
-deactivate mb
+
 
 
 
@@ -69,6 +73,7 @@ activate top1
 
 
 lending1 -> lending1: save(lending)
+
 lending01 -> lending01: save(lending)
 deactivate lending1
 lending11 -> lending11: save(lending)
