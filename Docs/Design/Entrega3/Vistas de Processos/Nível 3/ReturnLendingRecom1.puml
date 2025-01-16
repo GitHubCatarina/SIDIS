@@ -168,8 +168,6 @@ activate mb
 mb -> lending0: notify(lendingReturned with error)
 deactivate mb
 activate lending0
-lending0 -> lending0: deleteTemp(lendingData)
-
 
 lending0 -->o client: 500 Internal Server Error (Erro interno)
 deactivate lending0

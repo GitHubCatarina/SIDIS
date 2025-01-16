@@ -164,16 +164,18 @@ end
 
 
 
+note over mb
+    Os processos de sincronização são iguais ao anterior, então foram simplificados:
+end note
 
 ' Replicando dados para a outra instância (espelhamento)
-
-mb -> lending01: notify(lendingReturned)
+mb -> lending01: handleLendingEvent(lendingDTO)
 activate lending01
-mb -> lending11: notify(lendingReturned)
+mb -> lending11: handleLendingEvent(lendingDTO)
 activate lending11
-mb -> top0: notify(lendingReturned)
+mb -> top0: handleLendingEvent(lendingDTO)
 activate top0
-mb -> top1: notify(lendingReturned)
+mb -> top1: handleLendingEvent(lendingDTO)
 deactivate mb
 activate top1
 
@@ -201,7 +203,6 @@ activate mb
 mb -> lending0: notify(lendingReturned with error)
 deactivate mb
 activate lending0
-lending0 -> lending0: deleteTemp(lendingData)
 
 
 lending0 -->o client: 500 Internal Server Error (Erro interno)
